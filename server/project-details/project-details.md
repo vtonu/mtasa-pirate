@@ -1,4 +1,4 @@
-# Project Details Guide (mtasa-pirate v1.0)
+# Project Details Guide (mtasa-pirate v1.0.0)
 
 ## Purpose
 
