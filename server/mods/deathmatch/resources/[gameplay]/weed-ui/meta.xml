@@ -1,0 +1,9 @@
+<meta>
+    <info author="Lifestyle" name="Weed Garden UI" version="1.0" type="script" description="Greenhouse-style CEF interface for the weed growing system." />
+    <script src="server.lua" type="server" />
+    <script src="client.lua" type="client" />
+    <file src="ui.html" />
+    <export function="openGardenUI" type="server" />
+    <export function="updateGardenUI" type="server" />
+    <export function="closeGardenUI" type="server" />
+</meta>

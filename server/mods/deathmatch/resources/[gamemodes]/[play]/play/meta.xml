@@ -1,0 +1,22 @@
+<meta>
+	<info author="Lifestyle" description="Launches a basic freeroam mode, together with basic map and extra handling" version="1.0" type="gamemode"/>
+	<min_mta_version server="1.6.0-0.00000"></min_mta_version>
+	
+	<include resource="freeroam"/>
+	<!-- <include resource="superman"/> -->
+	<include resource="hedit"/>
+	<include resource="mapfixes"/>
+	<include resource="chatmanager" />
+
+	<script src="play_config.lua" type="server"/>
+	<script src="play_world.lua" type="server"/>
+	<script src="play_messages.lua" type="server"/>
+	<script src="play_stats.lua" type="server"/>
+	<script src="play_players.lua" type="server"/>
+	<script src="play_vehicles.lua" type="server"/>
+	<script src="play_pickups.lua" type="server"/>
+	<script src="play_loco_mission.lua" type="server"/>
+	<script src="play.lua" type="server"/>
+	<script src="play_bootyLoot.lua" type="server"/>
+	<script src="play_weedSystem.lua" type="server"/>
+</meta>

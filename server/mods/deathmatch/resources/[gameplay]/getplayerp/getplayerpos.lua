@@ -1,0 +1,5 @@
+addCommandHandler("getplayerpos", function(playerSource)
+    local x, y, z = getElementPosition(playerSource)
+    outputChatBox(string.format("Your position -> X: %.2f, Y: %.2f, Z: %.2f", x, y, z), playerSource, 255, 255, 255)
+    outputServerLog("Position of " .. getPlayerName(playerSource) .. " -> X: " .. x .. ", Y: " .. y .. ", Z: " .. z)
+end)
