@@ -25,26 +25,6 @@ local function onPlayerLeaveGarden(leftElement, matchingDimension)
     setElementData(leftElement, "atWeedGarden", false)
 end
 
--- Simplified command that matches the F5 functionality perfectly
---[[ addCommandHandler("harvest", function(player)
-    if getElementData(player, "atWeedGarden") ~= true then
-        outputChatBox("You need to be at the Fog of War Garden to use this.", player, 255, 100, 100)
-        return
-    end
-
-    local open = not previewState[player]
-    previewState[player] = open
-
-    if not open then
-        triggerClientEvent(player, "weedGarden:closeUI", resourceRoot)
-        return
-    end
-
-    local dataPayload = getGardenPayload()
-    sendGardenUI(player, dataPayload)
-end) ]]
-
-
 addEventHandler("onResourceStart", resourceRoot, function()
     createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 127, 255, 212, 150)
     gardenCol = createColSphere(MARKER_X, MARKER_Y, MARKER_Z, SHOP_COL_RADIUS)
