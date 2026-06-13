@@ -177,7 +177,7 @@
         margin-top: 7px;
         overflow: hidden;
         color: #fff;
-        font-family: "Orbitron", sans-serif;
+        font-family: "Share Tech Mono", monospace;
         font-size: clamp(12px, 1.65vw, 20px);
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -364,8 +364,8 @@
         margin-top: 4px;
         overflow: hidden;
         color: #fff;
-        font-family: "Orbitron", sans-serif;
-        font-size: 15px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 14px;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
@@ -527,7 +527,7 @@
             </div>
             <div class="metric">
               <div class="metric-label">Stock</div>
-              <div class="metric-value" id="stock">Available</div>
+              <div class="metric-value" id="stock">AVAILABLE</div>
             </div>
           </div>
 
@@ -626,7 +626,7 @@
         heavy: "Heavy",
       };
 
-      let shopData = { weapons: [], stock: "Available" };
+      let shopData = { weapons: [], stock: "AVAILABLE" };
       let selectedCategory = "stealth";
       let selectedWeapon = null;
 
@@ -652,7 +652,7 @@
         setText("price", `$${weapon.price}`);
         setText(
           "stock",
-          weapon.available === false ? "Unavailable" : "Available",
+          weapon.available === false ? "UNAVAILABLE" : "AVAILABLE",
         );
         setText("winning-rate", `${weapon.winningRate}%`);
         document.getElementById("winning-rate").style.color =
@@ -724,7 +724,7 @@
           selectedWeapon = null;
           setText("weapon-id", "--");
           setText("price", "--");
-          setText("stock", shopData.stock || "Available");
+          setText("stock", (shopData.stock || "AVAILABLE").toUpperCase());
         }
 
         setText("title", shopData.title || "System Monitor");
@@ -732,8 +732,8 @@
         setText(
           "stock",
           selectedWeapon && selectedWeapon.available === false
-            ? "Unavailable"
-            : shopData.stock || "Available",
+            ? "UNAVAILABLE"
+            : (shopData.stock || "AVAILABLE").toUpperCase(),
         );
         setText("note", shopData.note || "SELECT A WEAPON.");
         renderCategories();

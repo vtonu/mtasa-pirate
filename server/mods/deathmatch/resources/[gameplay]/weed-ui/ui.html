@@ -174,8 +174,8 @@
 
       .metric-value {
         margin-top: 7px;
-        font-family: "Orbitron", sans-serif;
-        font-size: 20px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 18px;
         color: #fff;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -548,8 +548,8 @@
         display: block;
         margin-top: 4px;
         color: #fff;
-        font-family: "Orbitron", sans-serif;
-        font-size: 16px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 14px;
       }
 
       .notification-wrap {
@@ -697,7 +697,7 @@
             </div>
             <div class="metric">
               <div class="metric-label">Stock</div>
-              <div class="metric-value" id="stock">Available</div>
+              <div class="metric-value" id="stock">AVAILABLE</div>
             </div>
           </div>
 
@@ -803,7 +803,7 @@
         title: "System Monitor",
         zone: "Fog of War Garden",
         stage: "Seed",
-        stock: "Available",
+        stock: "AVAILABLE",
         plants: 0,
         ready: 0,
         health: 0,
@@ -1223,7 +1223,7 @@
         setText("title", data.title);
         setText("zone", data.zone);
         setText("plants", data.plants);
-        setText("stock", data.stock || "Available");
+        setText("stock", (data.stock || "AVAILABLE").toUpperCase());
         const displayedHealth =
           selectedStrain && !data.resetSelection
             ? selectedStrain.health
