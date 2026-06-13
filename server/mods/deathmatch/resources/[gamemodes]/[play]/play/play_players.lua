@@ -49,5 +49,6 @@ function onPlayerWasted(totalAmmo, killerElement)
 end
 
 function onPlayerQuit()
+    stopPlayerNotifications(source)
     destroyPlayerVehicles(source)
 end

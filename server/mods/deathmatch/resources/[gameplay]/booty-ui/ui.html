@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap");
+
+      :root {
+        --green: #00ff66;
+        --green-soft: #88ffaa;
+        --mint: #b9ffd2;
+        --amber: #ffe66d;
+        --red: #ff4b6a;
+        --stealth: #b88cff;
+        --ballistics: #ffe66d;
+        --heavy: #00ff9d;
+        --panel: rgba(0, 18, 8, 0.72);
+        --panel-deep: rgba(0, 8, 3, 0.84);
+        --line: rgba(0, 255, 102, 0.38);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        padding-bottom: 10px;
+        color: var(--green);
+        background: transparent;
+        font-family: "Share Tech Mono", monospace;
+      }
+
+      .shop-ui {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background:
+          radial-gradient(circle at 20% 10%, rgba(0, 255, 102, 0.06), transparent 32%),
+          linear-gradient(135deg, rgba(0, 20, 8, 0.9), rgba(0, 8, 4, 0.72));
+        box-shadow: inset 0 0 32px rgba(0, 255, 102, 0.05), 0 0 14px rgba(0, 255, 102, 0.08);
+      }
+
+      .shop-ui::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.5;
+        background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.025) 1px, transparent 1px, transparent 5px);
+      }
+
+      .topbar {
+        position: relative;
+        z-index: 1;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(0, 30, 10, 0.62);
+        cursor: move;
+        user-select: none;
+      }
+
+      .eyebrow, .metric-label, .buy-title {
+        color: var(--green-soft);
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin-top: 2px;
+        overflow: hidden;
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: 18px;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        text-shadow: 0 0 7px rgba(0, 255, 102, 0.36);
+        white-space: nowrap;
+      }
+
+      button {
+        font-family: "Share Tech Mono", monospace;
+      }
+
+      button:focus {
+        outline: none;
+      }
+
+      .close-btn {
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(185, 255, 210, 0.55);
+        border-radius: 6px;
+        color: var(--mint);
+        background: rgba(0, 0, 0, 0.22);
+        font-family: "Orbitron", sans-serif;
+        cursor: pointer;
+      }
+
+      .close-btn:hover, .buy-btn:hover {
+        border-color: var(--green);
+        color: #061006;
+        background: var(--green);
+        box-shadow: 0 0 16px rgba(0, 255, 102, 0.34);
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 12px;
+        height: calc(100vh - 56px);
+        padding: 12px 12px 30px;
+      }
+
+      .panel {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: inset 0 0 16px rgba(0, 255, 102, 0.04);
+        backdrop-filter: blur(4px);
+      }
+
+      .main-panel {
+        display: flex;
+        flex-direction: column;
+        padding: 14px 14px 16px;
+      }
+
+      .status-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .metric {
+        min-height: 74px;
+        padding: 10px;
+        border: 1px solid rgba(0, 255, 102, 0.22);
+        border-radius: 7px;
+        background: rgba(0, 0, 0, 0.18);
+      }
+
+      .metric-value {
+        margin-top: 7px;
+        overflow: hidden;
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: clamp(12px, 1.65vw, 20px);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .weapon-scope {
+        min-height: 0;
+        flex: 1;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 10px;
+        padding: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(0, 255, 102, 0.28);
+        border-radius: 8px;
+        background:
+          linear-gradient(rgba(0, 255, 102, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 102, 0.08) 1px, transparent 1px),
+          rgba(0, 10, 3, 0.56);
+        background-size: 28px 28px;
+      }
+
+      .data-header {
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(0, 255, 102, 0.25);
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: 13px;
+      }
+
+      .weapon-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(0, 255, 102, 0.25);
+      }
+
+      .weapon-header .data-header {
+        flex: 1;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        white-space: nowrap;
+      }
+
+      .category-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        width: min(62%, 310px);
+      }
+
+      .category-btn {
+        min-height: 27px;
+        border: 1px solid var(--category-color);
+        border-radius: 5px;
+        color: var(--category-color);
+        background: rgba(0, 8, 3, 0.76);
+        font-size: 11px;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      .category-btn.selected, .category-btn:hover {
+        color: #061006;
+        background: var(--category-color);
+        box-shadow: 0 0 9px var(--category-color);
+      }
+
+      .weapon-grid {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-auto-rows: 50px;
+        gap: 7px;
+        padding: 3px 4px 0 0;
+        overflow-y: auto;
+      }
+
+      .weapon-grid::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .weapon-grid::-webkit-scrollbar-thumb {
+        background: rgba(0, 255, 102, 0.45);
+      }
+
+      .weapon-tile {
+        position: relative;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px;
+        overflow: hidden;
+        border: 1px solid var(--weapon-color);
+        border-radius: 0;
+        color: var(--weapon-color);
+        background: rgba(0, 12, 5, 0.9);
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .weapon-tile:hover {
+        background: rgba(0, 18, 7, 0.94);
+        transform: translateY(-1px);
+      }
+
+      .weapon-tile.selected {
+        background: rgba(0, 5, 2, 0.96);
+        box-shadow: none;
+        transform: translateY(1px) scale(0.985);
+      }
+
+      .weapon-name {
+        display: -webkit-box;
+        overflow: hidden;
+        color: #fff;
+        font-size: 10px;
+        line-height: 1.05;
+        overflow-wrap: anywhere;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .side-panel {
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        gap: 10px;
+        padding: 12px 12px 20px;
+      }
+
+      .bar-row {
+        margin-bottom: 7px;
+      }
+
+      .bar-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        color: var(--green-soft);
+        font-size: 12px;
+      }
+
+      .bar {
+        height: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(0, 255, 102, 0.42);
+        background: rgba(0, 12, 4, 0.8);
+      }
+
+      .fill {
+        width: 0;
+        height: 100%;
+        transition: width 0.18s ease;
+      }
+
+      .readout-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .readout {
+        padding: 7px 9px;
+        border: 1px solid rgba(0, 255, 102, 0.2);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.16);
+      }
+
+      .readout span {
+        display: block;
+        color: var(--green-soft);
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+
+      .readout strong {
+        display: block;
+        margin-top: 4px;
+        overflow: hidden;
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: 15px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .weapon-display {
+        position: relative;
+        min-height: 118px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 1px solid rgba(0, 255, 102, 0.22);
+        border-radius: 7px;
+        background: radial-gradient(circle, rgba(0, 255, 102, 0.11), transparent 64%), rgba(0, 8, 3, 0.48);
+      }
+
+      .scope-ring {
+        position: absolute;
+        width: 108px;
+        aspect-ratio: 1;
+        border: 2px dashed rgba(0, 255, 102, 0.42);
+        border-radius: 50%;
+        animation: spin 30s linear infinite;
+      }
+
+      .scope-ring.inner {
+        width: 82px;
+        border-style: dotted;
+        animation: spin 16s linear infinite reverse;
+      }
+
+      .weapon-core {
+        position: relative;
+        z-index: 1;
+        width: 76px;
+        height: 76px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(185, 255, 210, 0.55);
+        border-radius: 50%;
+        color: #fff;
+        background: rgba(0, 30, 10, 0.5);
+        box-shadow: 0 0 34px rgba(0, 255, 102, 0.2), inset 0 0 22px rgba(0, 255, 102, 0.18);
+        text-align: center;
+      }
+
+      .weapon-core strong {
+        font-family: "Orbitron", sans-serif;
+        font-size: 17px;
+      }
+
+      .weapon-core span {
+        color: var(--green-soft);
+        font-size: 7px;
+        text-transform: uppercase;
+      }
+
+      .notification-wrap {
+        display: grid;
+        gap: 8px;
+        min-height: 0;
+      }
+
+      .note {
+        height: 72px;
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 9px;
+        align-items: start;
+        overflow: hidden;
+        padding: 10px;
+        border: 1px solid rgba(0, 255, 102, 0.2);
+        border-radius: 6px;
+        color: var(--mint);
+        background: var(--panel-deep);
+      }
+
+      .note-icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(0, 255, 102, 0.5);
+        border-radius: 50%;
+        color: #061006;
+        background: var(--green);
+        font-family: "Orbitron", sans-serif;
+      }
+
+      .note-title {
+        margin-bottom: 4px;
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: 12px;
+      }
+
+      .note-message {
+        display: -webkit-box;
+        overflow: hidden;
+        color: var(--mint);
+        font-size: 13px;
+        line-height: 1.35;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+      }
+
+      .buy-btn {
+        min-height: 36px;
+        border: 1px solid rgba(0, 255, 102, 0.45);
+        border-radius: 6px;
+        color: var(--mint);
+        background: rgba(0, 20, 8, 0.7);
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shop-ui">
+      <header class="topbar" onmousedown="startDrag(event)">
+        <div>
+          <div class="eyebrow" id="zone">Pirate Booty Shop</div>
+          <h1 id="title">System Monitor</h1>
+        </div>
+        <button class="close-btn" type="button" tabindex="-1" onmousedown="event.stopPropagation()" onclick="closeShop()">X</button>
+      </header>
+
+      <section class="content">
+        <div class="panel main-panel">
+          <div class="status-row">
+            <div class="metric"><div class="metric-label">ID</div><div class="metric-value" id="weapon-id">--</div></div>
+            <div class="metric"><div class="metric-label">Price</div><div class="metric-value" id="price">--</div></div>
+            <div class="metric"><div class="metric-label">Stock</div><div class="metric-value" id="stock">Available</div></div>
+          </div>
+
+          <div class="weapon-scope">
+            <div class="weapon-header">
+              <div class="data-header">Weapons Available</div>
+              <div class="category-tabs" id="category-tabs"></div>
+            </div>
+            <div class="weapon-grid" id="weapon-grid"></div>
+          </div>
+        </div>
+
+        <aside class="panel side-panel">
+          <div>
+            <div class="data-header">Weapon Stats</div>
+            <div class="bar-row"><div class="bar-meta"><span>Stealth</span><strong id="stealth-text">0%</strong></div><div class="bar"><div class="fill" id="stealth-fill"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Ballistics</span><strong id="ballistics-text">0%</strong></div><div class="bar"><div class="fill" id="ballistics-fill"></div></div></div>
+            <div class="bar-row"><div class="bar-meta"><span>Heavy</span><strong id="heavy-text">0%</strong></div><div class="bar"><div class="fill" id="heavy-fill"></div></div></div>
+          </div>
+
+          <div>
+            <div class="data-header">Combat Readout</div>
+            <div class="readout-grid">
+              <div class="readout"><span>Damage</span><strong id="damage">--</strong></div>
+              <div class="readout"><span>Range</span><strong id="range">--</strong></div>
+              <div class="readout"><span>Ammo</span><strong id="capacity">--</strong></div>
+              <div class="readout"><span>Handling</span><strong id="handling">--</strong></div>
+            </div>
+          </div>
+
+          <div class="weapon-display">
+            <div class="scope-ring"></div>
+            <div class="scope-ring inner"></div>
+            <div class="weapon-core">
+              <strong id="winning-rate">0%</strong>
+              <span>Winning Rate</span>
+            </div>
+          </div>
+
+          <div class="notification-wrap">
+            <div class="note">
+              <div class="note-icon">!</div>
+              <div><div class="note-title">Description</div><div class="note-message" id="note">Select a weapon.</div></div>
+            </div>
+            <button class="buy-btn" type="button" tabindex="-1" onclick="buyWeapon()">BUY SELECTED WEAPON</button>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      const colors = {
+        stealth: "#b88cff",
+        ballistics: "#ffe66d",
+        heavy: "#00ff9d",
+      };
+
+      const categoryLabels = {
+        stealth: "Stealth",
+        ballistics: "Ballistics",
+        heavy: "Heavy",
+      };
+
+      let shopData = { weapons: [], stock: "Available" };
+      let selectedCategory = "stealth";
+      let selectedWeapon = null;
+
+      function setText(id, value) {
+        document.getElementById(id).textContent = value;
+      }
+
+      function clamp(value) {
+        return Math.max(0, Math.min(100, Number(value) || 0));
+      }
+
+      function setBar(name, value) {
+        const percent = clamp(value);
+        document.getElementById(`${name}-fill`).style.width = `${percent}%`;
+        document.getElementById(`${name}-fill`).style.backgroundColor = colors[name];
+        setText(`${name}-text`, `${Math.round(percent)}%`);
+      }
+
+      function displayWeapon(weapon) {
+        selectedWeapon = weapon;
+        setText("weapon-id", weapon.weapon == null ? "N/A" : weapon.weapon);
+        setText("price", `$${weapon.price}`);
+        setText("stock", weapon.available === false ? "Unavailable" : "Available");
+        setText("winning-rate", `${weapon.winningRate}%`);
+        document.getElementById("winning-rate").style.color = colors[weapon.category];
+        setText("damage", weapon.damage);
+        setText("range", weapon.range);
+        setText("capacity", weapon.capacity);
+        setText("handling", weapon.handling);
+        setText("note", weapon.description);
+        setBar("stealth", weapon.stealth);
+        setBar("ballistics", weapon.ballistics);
+        setBar("heavy", weapon.heavy);
+      }
+
+      function renderCategories() {
+        const tabs = document.getElementById("category-tabs");
+        tabs.innerHTML = "";
+
+        Object.keys(categoryLabels).forEach((category) => {
+          const button = document.createElement("button");
+          button.className = "category-btn";
+          button.tabIndex = -1;
+          button.style.setProperty("--category-color", colors[category]);
+          button.textContent = categoryLabels[category];
+          if (category === selectedCategory) button.classList.add("selected");
+          button.onclick = () => {
+            selectedCategory = category;
+            selectedWeapon = null;
+            renderCategories();
+            renderWeapons();
+          };
+          tabs.appendChild(button);
+        });
+      }
+
+      function renderWeapons() {
+        const grid = document.getElementById("weapon-grid");
+        grid.innerHTML = "";
+
+        shopData.weapons
+          .filter((weapon) => weapon.category === selectedCategory)
+          .forEach((weapon) => {
+            const button = document.createElement("button");
+            button.className = "weapon-tile";
+            button.tabIndex = -1;
+            button.style.setProperty("--weapon-color", colors[weapon.category]);
+            button.title = weapon.name;
+            if (selectedWeapon && selectedWeapon.id === weapon.id) button.classList.add("selected");
+
+            const name = document.createElement("span");
+            name.className = "weapon-name";
+            name.textContent = weapon.name;
+            button.append(name);
+
+            button.onclick = () => {
+              displayWeapon(weapon);
+              renderWeapons();
+              triggerAction(`select:${weapon.id}`);
+            };
+            grid.appendChild(button);
+          });
+      }
+
+      window.updateBootyShop = function updateBootyShop(payload) {
+        shopData = Object.assign({}, shopData, payload || {});
+
+        if (shopData.resetSelection) {
+          selectedWeapon = null;
+          setText("weapon-id", "--");
+          setText("price", "--");
+          setText("stock", shopData.stock || "Available");
+        }
+
+        setText("title", shopData.title || "System Monitor");
+        setText("zone", shopData.zone || "Pirate Booty Shop");
+        setText(
+          "stock",
+          selectedWeapon && selectedWeapon.available === false
+            ? "Unavailable"
+            : shopData.stock || "Available",
+        );
+        setText("note", shopData.note || "SELECT A WEAPON.");
+        renderCategories();
+        renderWeapons();
+      };
+
+      function buyWeapon() {
+        if (!selectedWeapon) {
+          setText("note", "SELECT A WEAPON.");
+          return;
+        }
+        if (selectedWeapon.available === false) {
+          setText("note", `${selectedWeapon.name.toUpperCase()} IS CURRENTLY UNAVAILABLE.`);
+          return;
+        }
+        triggerAction("buy");
+      }
+
+      function closeShop() {
+        if (window.mta) mta.triggerEvent("bootyShop:closeFromBrowser");
+      }
+
+      function triggerAction(name) {
+        if (window.mta) mta.triggerEvent("bootyShop:actionFromBrowser", name);
+      }
+
+      function startDrag(event) {
+        if (event.button === 0 && window.mta) mta.triggerEvent("bootyShop:startDrag");
+      }
+
+      document.addEventListener("mouseup", () => {
+        if (window.mta) mta.triggerEvent("bootyShop:stopDrag");
+      });
+
+      document.addEventListener("keydown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+
+      window.updateBootyShop(shopData);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+<meta>
+    <info author="Lifestyle" name="Pirate Booty Shop UI" version="1.0" type="script" description="Weapon shop CEF interface for the Pirate Booty Desk." />
+    <script src="server.lua" type="server" />
+    <script src="client.lua" type="client" />
+    <file src="ui.html" />
+    <export function="openBootyUI" type="server" />
+    <export function="closeBootyUI" type="server" />
+</meta>

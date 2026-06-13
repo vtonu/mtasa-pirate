@@ -65,6 +65,14 @@ end
 -- ==========================================
 
 function destroyVehicle(vehicleElement)
+    local owner = vehicleOwners[vehicleElement]
+
+    if owner and playerVehicles[owner] then
+        playerVehicles[owner][vehicleElement] = nil
+    end
+
+    vehicleOwners[vehicleElement] = nil
+
     if isElement(vehicleElement) then
         destroyElement(vehicleElement)
     end
@@ -182,6 +190,13 @@ function onVehicleExit()
     -- Remove Existing Timer
     destroyVehicleTimer(source)
 
+    -- Keep The Vehicle While Any Seat Is Occupied
+    for seat = 0, getVehicleMaxPassengers(source) do
+        if getVehicleOccupant(source, seat) then
+            return
+        end
+    end
+
     -- Start A 60 Second Abandonment Timer
     vehicleTimers[source] = setTimer(
         destroyVehicle,
@@ -222,6 +237,12 @@ function onVehicleElementDestroy()
 
     if getElementType(source) ~= "vehicle" then
         return false
+    end
+
+    local owner = vehicleOwners[source]
+
+    if owner and playerVehicles[owner] then
+        playerVehicles[owner][source] = nil
     end
 
     destroyVehicleTimer(source)

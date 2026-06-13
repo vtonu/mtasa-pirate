@@ -138,20 +138,12 @@ end
 
 function onLocalSettingChange(setting,value)
 	if client ~= source then return end
-	
-	-- BLOCK CLIENT OVERRIDES: Stops players from changing time/weather via F1
-	if setting == "time" or setting == "weather" then return end 
-	if setting == "passive" then
-		value = value == true
-		setPassiveMode(client, value)
-	end
+	if setting ~= "passive" or type(value) ~= "boolean" then return end
+	if not g_PlayerData[client] then return end
 
-	g_PlayerData[client].settings[setting] = value
-	if setting == "passive" then
-		triggerClientEvent(root, "onClientFreeroamLocalSettingChange", client, setting, value)
-	else
-		triggerClientEvent(client, "onClientFreeroamLocalSettingChange", client, setting, value)
-	end
+	setPassiveMode(client, value)
+	g_PlayerData[client].settings.passive = value
+	triggerClientEvent(root, "onClientFreeroamLocalSettingChange", client, "passive", value)
 end
 
 function joinHandler(player)

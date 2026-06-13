@@ -72,7 +72,7 @@ function startPlayerNotifications(playerElement)
     if not playerElement then return end
     
     -- Kill any existing timer for this player
-    if playerNotificationTimers[playerElement] then
+    if playerNotificationTimers[playerElement] and isTimer(playerNotificationTimers[playerElement]) then
         killTimer(playerNotificationTimers[playerElement])
     end
     
@@ -106,10 +106,11 @@ function startPlayerNotifications(playerElement)
 end
 
 function stopPlayerNotifications(playerElement)
-    if playerNotificationTimers[playerElement] then
+    if playerNotificationTimers[playerElement] and isTimer(playerNotificationTimers[playerElement]) then
         killTimer(playerNotificationTimers[playerElement])
-        playerNotificationTimers[playerElement] = nil
     end
+
+    playerNotificationTimers[playerElement] = nil
 end
 
 function playMessage(playerElement, messageKey, ...)
