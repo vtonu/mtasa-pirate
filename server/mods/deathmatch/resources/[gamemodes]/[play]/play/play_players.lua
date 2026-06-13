@@ -25,6 +25,17 @@ function playSpawnPlayer(playerElement)
     fadeCamera(playerElement, true)
     setCameraTarget(playerElement)
     takeAllWeapons(playerElement)
+
+    -- Force furthest zoom level on spawn (3)
+    setTimer(function(targetPlayer)
+        if isElement(targetPlayer) then
+            -- Loop twice to cycle past bumper/close views to the furthest view
+            for i = 1, 2 do
+                setControlState(targetPlayer, "change_camera", true)
+                setControlState(targetPlayer, "change_camera", false)
+            end
+        end
+    end, 50, 1, playerElement)
 end
 
 -- ==========================================
