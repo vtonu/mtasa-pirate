@@ -182,7 +182,7 @@ local function handleShopToggle()
         if getElementData(localPlayer, "atBootyShop") == true then
             outputChatBox("Don't spam key.", 127, 255, 212)
         else
-            outputChatBox("You need to be at the Booty Desk to use this key. Don't spam.", 255, 100, 100)
+            outputChatBox("You need to be at the Booty Desk to use this key. Don't spam.", 127, 255, 212)
         end
         lockoutUntilTick = currentTick + SPAM_LOCKOUT
         lastKeyTick = nil
@@ -198,7 +198,7 @@ local function handleShopToggle()
     if getElementData(localPlayer, "atBootyShop") == true then
         triggerServerEvent("bootyShop:requestOpen", resourceRoot)
     else
-        outputChatBox("You need to be at the Booty Desk to use this key.", 255, 100, 100)
+        outputChatBox("You need to be at the Booty Desk to use this key.", 127, 255, 212)
     end
 end
 
