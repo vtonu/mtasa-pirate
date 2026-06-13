@@ -134,11 +134,6 @@ The gamemode remains server authoritative. The main `play` resource owns gamepla
 - Custom client-side nametag system
 - Uses a separate config file for display settings
 
-### Vehicle Shader Panel
-
-- Client-side vehicle shader selection panel
-- Includes the shader effect files used by the panel
-
 ### Freeroam
 
 - Supporting freeroam resource used by the `play` gamemode
@@ -165,11 +160,10 @@ This client script is needed because some map objects are used as visual or repl
 
 ## Coding Standards
 
-- Prefer local variables
-- Split large systems into modules
+- Prefer local variables & splitting large systems into modules
 - Reuse UI elements instead of recreating them
 - Keep onClientRender lightweight
-- Don't come up with new colors or words for text, unless specifcied, use the colors from the notifications & messages file
+- Don't come up with new colors for text, unless specified, or words, use the colors from the notifications & messages file
 
 ## Utility Functions
 
@@ -215,10 +209,8 @@ This client script is needed because some map objects are used as visual or repl
 
 ## Client Responsibilities
 
-- Rendering
-- UI
-- Input handling
-- Local text processing
+- Rendering & UI
+- Input handling & Local text processing
 - Sending requests to server
 
 ## Server Responsibilities
