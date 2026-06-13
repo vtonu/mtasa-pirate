@@ -1,4 +1,4 @@
-# Project Details Guide (mtasa-pirate v1.0.3)
+# Project Details (mtasa-pirate v1.0.4)
 
 ## Purpose
 
@@ -52,7 +52,6 @@ resources/
 |-- [gameplay]/booty-ui/
 |-- [gameplay]/weed-ui/
 |-- [gameplay]/nametags/
-|-- [gameplay]/vehicleshaderpanel/
 |-- [gameplay]/freeroam/
 `-- pirate-map/
 ```
