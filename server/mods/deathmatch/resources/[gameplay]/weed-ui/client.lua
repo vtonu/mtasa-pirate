@@ -12,12 +12,12 @@ local UI_HEIGHT = math.floor(screenH * 0.66)
 local uiX = math.floor((screenW - UI_WIDTH) / 2)
 local uiY = math.floor((screenH - UI_HEIGHT) / 2)
 
-local SATIVA_RUN_SPEED_LIMIT = 1.35 -- Run speed limit for sativa strain (MP5)
-local SATIVA_RUN_ACCELERATION = 1.80 -- Run acceleration speed for sativa strain (MP5)
-local SATIVA_SWIM_SPEED_LIMIT = 0.29 -- Swim speed limit for sativa strain (MP5)
-local SATIVA_SWIM_ACCELERATION = 1.08 -- Swim acceleration speed for sativa strain (MP5)
-local INDICA_MOVEMENT_SPEED_LIMIT = 0.010 -- Limit all ground movement for indica strain (combat shotgun)
-local HYBRID_WALK_SPEED_LIMIT = 0.008 -- Limit the hybrid strain walk speed (deagle)
+-- STRAIN MOVEMENT PERKS
+local SATIVA_RUN_SPEED_LIMIT = 1.35
+local SATIVA_RUN_ACCELERATION = 1.80
+local SATIVA_SWIM_SPEED_LIMIT = 0.29
+local SATIVA_SWIM_ACCELERATION = 1.08
+local INDICA_MOVEMENT_SPEED_LIMIT = 0.010
 
 local function encodeValue(value)
     local valueType = type(value)
@@ -174,16 +174,6 @@ local function updateWeedMovement(timeSlice)
         return
     end
 
-    if activePerk == "hybrid"
-        and isPedOnGround(localPlayer)
-        and not isElementInWater(localPlayer)
-        and (getPedControlState(localPlayer, "forwards")
-            or getPedControlState(localPlayer, "backwards")
-            or getPedControlState(localPlayer, "left")
-            or getPedControlState(localPlayer, "right")) then
-        limitHorizontalVelocity(HYBRID_WALK_SPEED_LIMIT)
-    end
-
     if activePerk == "sativa"
         and isElementInWater(localPlayer)
         and (getPedControlState(localPlayer, "forwards") or getPedControlState(localPlayer, "backwards")) then
@@ -247,25 +237,49 @@ addEventHandler("onClientResourceStop", resourceRoot, closeGardenUI)
 -- ==========================================
 -- KEY BIND INTEGRATION (WITH MARKER CHECK)
 -- ==========================================
-local HARVEST_KEY = "f5" -- "F5" key to toggle the UI
+local HARVEST_KEY = "f5" -- "F5" key to open the UI
+local SPAM_THRESHOLD = 1000
+local SPAM_LOCKOUT = 10000
+local lastKeyTick = nil
+local lockoutUntilTick = 0
 
 local function handleHarvestToggle()
-    -- Check if the UI browser element currently exists on screen
-    if isElement(uiBrowserElement) then
-        -- Closing the UI is always allowed anywhere so they don't get trapped
-        closeGardenUI()
-        triggerServerEvent("weedGarden:uiClosed", resourceRoot)
-    else
-        -- ONLY allow opening if the element data from play_weedSystem.lua is true
+    local currentTick = getTickCount()
+
+    if currentTick < lockoutUntilTick then
+        return
+    end
+
+    if lastKeyTick and currentTick - lastKeyTick < SPAM_THRESHOLD then
         if getElementData(localPlayer, "atWeedGarden") == true then
-            triggerServerEvent("weedGarden:requestOpen", resourceRoot)
+            outputChatBox("Don't spam key.", 127, 255, 212)
         else
-            outputChatBox("You need to be at the Fog of War Garden to use this key.", 127, 255, 212)
+            outputChatBox("You need to be at the Fog of War Garden to use this key. Don't spam.", 127, 255, 212)
         end
+        lockoutUntilTick = currentTick + SPAM_LOCKOUT
+        lastKeyTick = nil
+        return
+    end
+
+    lastKeyTick = currentTick
+
+    if isElement(uiBrowserElement) then
+        return
+    end
+
+    if getElementData(localPlayer, "atWeedGarden") == true then
+        triggerServerEvent("weedGarden:requestOpen", resourceRoot)
+    else
+        outputChatBox("You need to be at the Fog of War Garden to use this key.", 127, 255, 212)
     end
 end
 
--- Bind the key automatically as soon as this script resource starts
+addEventHandler("onClientKey", root, function(button)
+    if isElement(uiBrowserElement) and not button:find("^mouse") then
+        cancelEvent()
+    end
+end)
+
 addEventHandler("onClientResourceStart", resourceRoot, function()
     bindKey(HARVEST_KEY, "down", handleHarvestToggle)
 end)

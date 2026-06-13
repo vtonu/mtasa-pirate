@@ -7,7 +7,7 @@ local playerShopState = {}
 local WEAPONS = {
     fists = { name = "Fists", symbol = "FST", category = "stealth", price = 100, weapon = 0, ammo = 0, winningRate = 42, stealth = 96, ballistics = 0, heavy = 4, damage = "LOW", range = "CLOSE", capacity = "N/A", handling = "FAST", description = "Unarmed close-quarter combat with no ammunition requirement." },
     brass_knuckles = { name = "Brass Knuckles", symbol = "BK", category = "stealth", price = 750, weapon = 1, ammo = 1, winningRate = 49, stealth = 90, ballistics = 0, heavy = 12, damage = "LOW", range = "CLOSE", capacity = "N/A", handling = "FAST", description = "A compact hand-to-hand upgrade for stronger physical strikes." },
-    flowers = { name = "Flowers", symbol = "FLR", category = "stealth", price = 350, weapon = 14, ammo = 1, winningRate = 31, stealth = 98, ballistics = 0, heavy = 1, damage = "LOW", range = "CLOSE", capacity = "N/A", handling = "LIGHT", description = "A harmless-looking gift that can still be used at close range." },
+    flowers = { name = "Flowers", symbol = "FLR", category = "stealth", price = 350, weapon = 14, ammo = 1, available = false, winningRate = 31, stealth = 98, ballistics = 0, heavy = 1, damage = "LOW", range = "CLOSE", capacity = "N/A", handling = "LIGHT", description = "A harmless-looking gift that can still be used at close range." },
     cane = { name = "Cane", symbol = "CNE", category = "stealth", price = 500, weapon = 15, ammo = 1, winningRate = 38, stealth = 86, ballistics = 0, heavy = 8, damage = "LOW", range = "CLOSE", capacity = "N/A", handling = "LIGHT", description = "A discreet blunt weapon with quick close-range handling." },
     dildo = { name = "Dildo", symbol = "DLD", category = "heavy", price = 450, weapon = 10, ammo = 1, winningRate = 34, stealth = 18, ballistics = 0, heavy = 82, damage = "LOW", range = "CLOSE", capacity = "N/A", handling = "LIGHT", description = "An unconventional close-quarter weapon for chaotic encounters." },
     vibrator = { name = "Vibrator", symbol = "VBR", category = "heavy", price = 450, weapon = 12, ammo = 1, winningRate = 34, stealth = 18, ballistics = 0, heavy = 82, damage = "LOW", range = "CLOSE", capacity = "N/A", handling = "LIGHT", description = "A compact novelty weapon with close-range utility." },
@@ -24,7 +24,7 @@ local WEAPONS = {
     silenced_9mm = { name = "Silenced 9mm", symbol = "S9", category = "stealth", price = 6500, weapon = 23, ammo = 75, winningRate = 69, stealth = 96, ballistics = 64, heavy = 8, damage = "MEDIUM", range = "MEDIUM", capacity = "75", handling = "PRECISE", description = "A suppressed pistol combining stealth with accurate direct fire." },
     desert_eagle = { name = "Desert Eagle", symbol = "DE", category = "ballistics", price = 10000, weapon = 24, ammo = 50, winningRate = 79, stealth = 18, ballistics = 92, heavy = 32, damage = "HIGH", range = "MEDIUM", capacity = "50", handling = "HEAVY", description = "A powerful handgun with high damage and substantial recoil." },
     tec_9 = { name = "Tec-9", symbol = "T9", category = "ballistics", price = 7000, weapon = 32, ammo = 180, winningRate = 70, stealth = 16, ballistics = 80, heavy = 22, damage = "MEDIUM", range = "SHORT", capacity = "180", handling = "RAPID", description = "A compact automatic weapon favoring mobility and volume of fire." },
-    micro_smg = { name = "Micro SMG", symbol = "UZI", category = "ballistics", price = 7500, weapon = 28, ammo = 180, winningRate = 72, stealth = 14, ballistics = 83, heavy = 24, damage = "MEDIUM", range = "SHORT", capacity = "180", handling = "RAPID", description = "A lightweight automatic sidearm effective in close gunfights." },
+    micro_smg = { name = "Double UZI", symbol = "UZI", category = "ballistics", price = 7500, weapon = 28, ammo = 180, stat = 75, statValue = 1000, winningRate = 72, stealth = 14, ballistics = 83, heavy = 24, damage = "MEDIUM", range = "SHORT", capacity = "180", handling = "RAPID", description = "Dual compact automatic sidearms effective in close gunfights." },
     mp5 = { name = "MP5", symbol = "MP5", category = "stealth", price = 11000, weapon = 29, ammo = 180, winningRate = 78, stealth = 90, ballistics = 78, heavy = 27, damage = "MEDIUM", range = "MEDIUM", capacity = "180", handling = "STABLE", description = "A controlled submachine gun with strong accuracy and fire rate." },
     shotgun = { name = "Shotgun", symbol = "SG", category = "ballistics", price = 9000, weapon = 25, ammo = 45, winningRate = 73, stealth = 8, ballistics = 76, heavy = 48, damage = "HIGH", range = "SHORT", capacity = "45", handling = "PUMP", description = "A reliable pump shotgun delivering heavy close-range damage." },
     sawn_off = { name = "Sawn-off Shotgun", symbol = "SOS", category = "ballistics", price = 12500, weapon = 26, ammo = 40, winningRate = 81, stealth = 6, ballistics = 80, heavy = 58, damage = "EXTREME", range = "SHORT", capacity = "40", handling = "FAST", description = "A compact shotgun with devastating close-range burst damage." },
@@ -108,6 +108,11 @@ function closeBootyUI(player)
     playerShopState[player] = nil
 end
 
+addEvent("bootyShop:requestOpen", true)
+addEventHandler("bootyShop:requestOpen", resourceRoot, function()
+    openBootyUI(client)
+end)
+
 local function purchaseWeapon(player, weaponId)
     local weapon = WEAPONS[weaponId]
 
@@ -138,6 +143,10 @@ local function purchaseWeapon(player, weaponId)
     if not granted then
         updateShop(player, "PURCHASE FAILED. EQUIPMENT COULD NOT BE ISSUED.")
         return
+    end
+
+    if weapon.stat and weapon.statValue then
+        setPedStat(player, weapon.stat, weapon.statValue)
     end
 
     takePlayerMoney(player, weapon.price)

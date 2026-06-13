@@ -160,9 +160,54 @@ addEventHandler("onClientClick", root, function(button, state)
 end)
 
 addEventHandler("onClientCursorMove", root, updateDragPosition)
+addEventHandler("onClientResourceStop", resourceRoot, closeBootyUI)
+
+-- ==========================================
+-- KEY BIND INTEGRATION (WITH MARKER CHECK)
+-- ==========================================
+local SHOP_KEY = "f6" -- "F6" key to open the UI
+local SPAM_THRESHOLD = 1000
+local SPAM_LOCKOUT = 10000
+local lastKeyTick = nil
+local lockoutUntilTick = 0
+
+local function handleShopToggle()
+    local currentTick = getTickCount()
+
+    if currentTick < lockoutUntilTick then
+        return
+    end
+
+    if lastKeyTick and currentTick - lastKeyTick < SPAM_THRESHOLD then
+        if getElementData(localPlayer, "atBootyShop") == true then
+            outputChatBox("Don't spam key.", 127, 255, 212)
+        else
+            outputChatBox("You need to be at the Booty Desk to use this key. Don't spam.", 255, 100, 100)
+        end
+        lockoutUntilTick = currentTick + SPAM_LOCKOUT
+        lastKeyTick = nil
+        return
+    end
+
+    lastKeyTick = currentTick
+
+    if isElement(uiBrowserElement) then
+        return
+    end
+
+    if getElementData(localPlayer, "atBootyShop") == true then
+        triggerServerEvent("bootyShop:requestOpen", resourceRoot)
+    else
+        outputChatBox("You need to be at the Booty Desk to use this key.", 255, 100, 100)
+    end
+end
+
 addEventHandler("onClientKey", root, function(button)
     if isElement(uiBrowserElement) and not button:find("^mouse") then
         cancelEvent()
     end
 end)
-addEventHandler("onClientResourceStop", resourceRoot, closeBootyUI)
+
+addEventHandler("onClientResourceStart", resourceRoot, function()
+    bindKey(SHOP_KEY, "down", handleShopToggle)
+end)

@@ -105,6 +105,10 @@
         text-overflow: ellipsis;
       }
 
+      button:focus {
+        outline: none;
+      }
+
       .close-btn {
         width: 34px;
         height: 34px;
@@ -672,6 +676,7 @@
         <button
           class="close-btn"
           type="button"
+          tabindex="-1"
           onmousedown="event.stopPropagation()"
           onclick="closeGarden()"
         >
@@ -741,19 +746,19 @@
           </div>
 
           <div>
-            <div class="data-header">Greenhouse Readout</div>
+            <div class="data-header">Stats</div>
             <div class="readout-grid">
               <div class="readout">
-                <span>Temperature</span><strong id="temperature">0 C</strong>
+                <span>Gravity</span><strong id="gravity">Normal</strong>
               </div>
               <div class="readout">
-                <span>Humidity</span><strong id="humidity">0%</strong>
+                <span>Speed</span><strong id="speed">Normal</strong>
               </div>
               <div class="readout">
-                <span>Stage</span><strong id="stage">Seed</strong>
+                <span>Health Regen</span><strong id="health-regen">0%</strong>
               </div>
               <div class="readout">
-                <span>Cycle</span><strong id="cycle">Live</strong>
+                <span>Armor Regen</span><strong id="armor-regen">0%</strong>
               </div>
             </div>
           </div>
@@ -810,6 +815,10 @@
         hybrid: null,
         temperature: 0,
         humidity: 0,
+        gravity: "Normal",
+        speed: "Normal",
+        healthRegen: 0,
+        armorRegen: 0,
         status: "Idle",
         cycle: "Live",
         note: "No garden data loaded.",
@@ -1009,6 +1018,27 @@
         hybrid: "#00ff9d",
       };
 
+      const strainStats = {
+        indica: {
+          gravity: "High",
+          speed: "Slow",
+          healthRegen: 2,
+          armorRegen: 2,
+        },
+        sativa: {
+          gravity: "Normal",
+          speed: "Fast",
+          healthRegen: 4,
+          armorRegen: 4,
+        },
+        hybrid: {
+          gravity: "Low",
+          speed: "Normal",
+          healthRegen: 6,
+          armorRegen: 6,
+        },
+      };
+
       let selectedStrainValue = null;
       let selectedStrain = null;
       let selectedBuySizeValue = null;
@@ -1060,6 +1090,7 @@
           const button = document.createElement("button");
           button.className = "action-btn";
           button.type = "button";
+          button.tabIndex = -1;
           button.textContent = name;
           const isCart = String(name).toUpperCase() === "CART";
           if (isCart && selectedBuySizeValue === "cart") {
@@ -1101,6 +1132,7 @@
           const button = document.createElement("button");
           button.className = "buy-btn";
           button.type = "button";
+          button.tabIndex = -1;
           button.textContent = label;
           if (value === selectedBuySizeValue) {
             button.classList.add("selected");
@@ -1129,6 +1161,7 @@
           const button = document.createElement("button");
           button.className = "strain-tile";
           button.type = "button";
+          button.tabIndex = -1;
           button.style.setProperty("--strain-color", color);
           button.title = `${strain.name} - ${type}`;
 
@@ -1156,6 +1189,11 @@
             selectedStrainValue = value;
             selectedStrain = strain;
             setText("plants", String(index + 1).padStart(2, "0"));
+            const selectedStats = strainStats[type] || strainStats.hybrid;
+            setText("gravity", selectedStats.gravity);
+            setText("speed", selectedStats.speed);
+            setText("health-regen", `${selectedStats.healthRegen}%`);
+            setText("armor-regen", `${selectedStats.armorRegen}%`);
             updatePrice();
             if (strain.health != null) {
               setText("health-core", `${Math.round(clamp(strain.health))}%`);
@@ -1185,16 +1223,16 @@
         setText("title", data.title);
         setText("zone", data.zone);
         setText("plants", data.plants);
-        setText("stage", data.stage);
         setText("stock", data.stock || "Available");
         const displayedHealth =
           selectedStrain && !data.resetSelection
             ? selectedStrain.health
             : data.health;
         setText("health-core", `${Math.round(clamp(displayedHealth))}%`);
-        setText("temperature", `${data.temperature} C`);
-        setText("humidity", `${data.humidity}%`);
-        setText("cycle", data.cycle || "Live");
+        setText("gravity", data.gravity || "Normal");
+        setText("speed", data.speed || "Normal");
+        setText("health-regen", `${data.healthRegen || 0}%`);
+        setText("armor-regen", `${data.armorRegen || 0}%`);
         setText("note", data.note);
 
         setBar(

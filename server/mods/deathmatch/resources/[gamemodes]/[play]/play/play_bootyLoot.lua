@@ -14,7 +14,7 @@ local function onPlayerEnterShop(hitElement, matchingDimension)
     if getElementType(hitElement) ~= "player" then return end
 
     setElementData(hitElement, "atBootyShop", true)
-    outputChatBox("You're at the Booty Desk. Type /buybooty", hitElement, 127, 255, 212)
+    outputChatBox("You're at the Booty Desk. Press F6 to show/hide controls.", hitElement, 127, 255, 212)
 end
 
 local function onPlayerLeaveShop(leftElement)
@@ -26,21 +26,6 @@ local function onPlayerLeaveShop(leftElement)
         exports["booty-ui"]:closeBootyUI(leftElement)
     end
 end
-
-addCommandHandler("buybooty", function(player)
-    if getElementData(player, "atBootyShop") ~= true then
-        outputChatBox("You need to be at the Booty Desk to use this command.", player, 255, 100, 100)
-        return
-    end
-
-    local bootyResource = getResourceFromName("booty-ui")
-    if not bootyResource or getResourceState(bootyResource) ~= "running" then
-        outputChatBox("The Pirate Booty Shop is currently unavailable.", player, 255, 100, 100)
-        return
-    end
-
-    exports["booty-ui"]:openBootyUI(player)
-end)
 
 addEventHandler("onResourceStart", resourceRoot, function()
     createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 127, 255, 212, 150)

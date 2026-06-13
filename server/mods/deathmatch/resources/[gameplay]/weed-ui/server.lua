@@ -3,10 +3,10 @@ local playerShopState = {}
 local playerPerks = {}
 
 local PACKAGE_SETTINGS = {
-    cart = { label = "CART", duration = 5 * 60 * 1000, ammo = 60 },
-    eighth = { label = "1/8", duration = 10 * 60 * 1000, ammo = 120 },
-    ounce = { label = "OUNCE", duration = 20 * 60 * 1000, ammo = 250 },
-    qp = { label = "QP", duration = 30 * 60 * 1000, ammo = 500 }
+    cart = { label = "CART", duration = 5 * 60 * 1000, flowerAmmo = 60 },
+    eighth = { label = "1/8", duration = 10 * 60 * 1000, flowerAmmo = 120 },
+    ounce = { label = "OUNCE", duration = 20 * 60 * 1000, flowerAmmo = 250 },
+    qp = { label = "QP", duration = 30 * 60 * 1000, flowerAmmo = 500 }
 }
 
 local STRAINS = {
@@ -27,39 +27,49 @@ local STRAINS = {
     ["Blue Zushi"] = { type = "hybrid", prices = { eighth = 100, ounce = 220, qp = 400, cart = 50 } }
 }
 
+local FLOWER_WEAPON = 14
+
 local PERK_SETTINGS = {
     indica = {
-        weapon = 27, 
+        weapon = FLOWER_WEAPON,
         armor = 100,
-        regen = 2,
+        healthRegen = 2,
+        armorRegen = 2,
         startingHealth = 100,
-        walkingStyle = 120, -- Old Fatman
-        stats = { [74] = 1000, [23] = 1000 } -- 74: WEAPONTYPE_SPAS12_SHOTGUN_SKILL & MUSCLE
+        gravity = 0.012,
+        gravityLabel = "High",
+        speedLabel = "Slow",
+        walkingStyle = 120, -- OLD FATMAN
+        stats = { [23] = 1000 } -- MUSCLE
     },
     sativa = {
-        weapon = 29, 
+        weapon = FLOWER_WEAPON,
         armor = 90,
-        regen = 4,
+        healthRegen = 4,
+        armorRegen = 4,
         startingHealth = 90,
-        walkingStyle = 0, -- Default
-        stats = { [22] = 1000, [76] = 1000 } -- 76: WEAPONTYPE_MP5_SKILL & 22: STAMINA
+        gravityLabel = "Normal",
+        speedLabel = "Fast",
+        walkingStyle = 0, -- DEFAULT
+        stats = { [22] = 1000 } -- STAMINA
     },
     hybrid = {
-        weapon = 28, 
+        weapon = FLOWER_WEAPON,
         armor = 80,
-        regen = 6,
+        healthRegen = 6,
+        armorRegen = 6,
         startingHealth = 80,
-        gravity = 0.0015, -- Nice jump
-        walkingStyle = 125, -- Jogger
-        stats = { [75] = 1000} -- 75: DOUBLE UZI
+        gravity = 0.0015, -- LOW GRAVITY JUMP
+        gravityLabel = "Low",
+        speedLabel = "Normal",
+        walkingStyle = 125, -- JOGGER
+        stats = {}
     }
 }
 
 local INDICA_DAMAGE_REDUCTION = 0.55 -- 55% Damage reduction.
-local INDICA_SHOTGUN_DAMAGE_BONUS = 0.55 -- 55% Damage increase.
 local HYBRID_FALL_DAMAGE_REDUCTION = 0.15 -- 15% Damage reduction.
 local FALL_DAMAGE_WEAPON = 28 -- Internal ID for fall damage, used for checking hybrid perk.
-local COMBAT_SHOTGUN_WEAPON = 27 -- Internal ID for combat shotgun, used for checking indica perk.
 
 local function sendGardenUI(player, payload)
     if not isElement(player) then
@@ -98,6 +108,10 @@ local function getGardenPayload(note, resetSelection)
         light = 11,
         temperature = 28,
         humidity = 58,
+        gravity = "Normal",
+        speed = "Normal",
+        healthRegen = 0,
+        armorRegen = 0,
         status = "Stable",
         note = note or "SELECT A STRAIN.",
         resetSelection = resetSelection == true,
@@ -213,7 +227,7 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
         setPedStat(player, statId, statValue)
     end
 
-    giveWeapon(player, perks.weapon, package.ammo, true)
+    giveWeapon(player, perks.weapon, package.flowerAmmo, true)
 
     if perks.walkingStyle then
         setPedWalkingStyle(player, perks.walkingStyle)
@@ -222,7 +236,7 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
     setElementData(player, "weed.perk", strainType)
     setElementData(player, "weed.strain", strainName)
 
-    if perks.regen > 0 then
+    if perks.healthRegen > 0 or perks.armorRegen > 0 then
         active.regenTimer = setTimer(function(targetPlayer)
             if not isElement(targetPlayer) or playerPerks[targetPlayer] ~= active then
                 return
@@ -230,12 +244,12 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
 
             local health = getElementHealth(targetPlayer)
             if health > 0 and health < 100 then
-                setElementHealth(targetPlayer, math.min(100, health + perks.regen))
+                setElementHealth(targetPlayer, math.min(100, health + perks.healthRegen))
             end
 
             local armor = getPedArmor(targetPlayer)
             if armor < perks.armor then
-                setPedArmor(targetPlayer, math.min(perks.armor, armor + perks.regen))
+                setPedArmor(targetPlayer, math.min(perks.armor, armor + perks.armorRegen))
             end
         end, 5000, 0, player)
     end
@@ -432,14 +446,6 @@ addEventHandler("onPlayerDamage", root, function(attacker, weapon, bodypart, los
         damageMultiplier = damageMultiplier * (1 - INDICA_DAMAGE_REDUCTION)
     elseif activePerk == "hybrid" and weapon == FALL_DAMAGE_WEAPON then
         damageMultiplier = damageMultiplier * (1 - HYBRID_FALL_DAMAGE_REDUCTION)
-    end
-
-    if isElement(attacker)
-        and getElementType(attacker) == "player"
-        and attacker ~= source
-        and weapon == COMBAT_SHOTGUN_WEAPON
-        and getElementData(attacker, "weed.perk") == "indica" then
-        damageMultiplier = damageMultiplier * (1 + INDICA_SHOTGUN_DAMAGE_BONUS)
     end
 
     if damageMultiplier == 1 then
