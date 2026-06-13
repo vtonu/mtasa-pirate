@@ -236,16 +236,19 @@
 
       .strain-tile {
         position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         min-width: 0;
         min-height: 0;
         padding: 7px;
         overflow: hidden;
         border: 1px solid var(--strain-color);
-        border-radius: 6px;
+        border-radius: 0;
         color: var(--strain-color);
         background: rgba(0, 12, 5, 0.9);
         font-family: "Share Tech Mono", monospace;
-        text-align: left;
+        text-align: center;
         cursor: pointer;
         box-shadow: inset 0 0 9px rgba(0, 255, 102, 0.025);
         transition:
@@ -304,8 +307,7 @@
 
       .strain-symbol {
         display: block;
-        margin-top: 5px;
-        color: #fff;
+        color: var(--strain-color);
         font-family: "Orbitron", sans-serif;
         font-size: clamp(15px, 2.4vw, 24px);
         line-height: 1;
@@ -1153,6 +1155,7 @@
             button.classList.add("selected");
             selectedStrainValue = value;
             selectedStrain = strain;
+            setText("plants", String(index + 1).padStart(2, "0"));
             updatePrice();
             if (strain.health != null) {
               setText("health-core", `${Math.round(clamp(strain.health))}%`);
@@ -1256,6 +1259,15 @@
           mta.triggerEvent("weedGarden:stopDrag");
         }
       });
+
+      document.addEventListener(
+        "keydown",
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+        },
+        true,
+      );
 
       document.addEventListener("copy", (event) => {
         event.preventDefault();

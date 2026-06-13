@@ -5,6 +5,7 @@ local currentPayload = {}
 local isDragging = false
 local dragOffsetX = 0
 local dragOffsetY = 0
+local previousInputMode = nil
 
 local UI_WIDTH = math.floor(screenW * 0.52)
 local UI_HEIGHT = math.floor(screenH * 0.66)
@@ -88,6 +89,8 @@ local function createGardenUI(payload)
         sendPayloadToBrowser(currentPayload)
     end)
 
+    previousInputMode = guiGetInputMode()
+    guiSetInputMode("no_binds")
     showCursor(true)
 end
 
@@ -99,6 +102,12 @@ local function closeGardenUI()
     uiBrowserElement = nil
     uiBrowser = nil
     isDragging = false
+
+    if previousInputMode then
+        guiSetInputMode(previousInputMode)
+        previousInputMode = nil
+    end
+
     showCursor(false)
 end
 
