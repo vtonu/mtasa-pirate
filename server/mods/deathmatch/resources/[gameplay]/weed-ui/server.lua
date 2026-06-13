@@ -32,10 +32,8 @@ local FLOWER_WEAPON = 14
 local PERK_SETTINGS = {
     indica = {
         weapon = FLOWER_WEAPON,
-        armor = 100,
-        healthRegen = 2,
-        armorRegen = 2,
-        startingHealth = 100,
+        healthRegen = 4,
+        armorRegen = 12,
         gravity = 0.012,
         gravityLabel = "High",
         speedLabel = "Slow",
@@ -44,10 +42,8 @@ local PERK_SETTINGS = {
     },
     sativa = {
         weapon = FLOWER_WEAPON,
-        armor = 90,
-        healthRegen = 4,
-        armorRegen = 4,
-        startingHealth = 90,
+        healthRegen = 8,
+        armorRegen = 8,
         gravityLabel = "Normal",
         speedLabel = "Fast",
         walkingStyle = 0, -- DEFAULT
@@ -55,10 +51,8 @@ local PERK_SETTINGS = {
     },
     hybrid = {
         weapon = FLOWER_WEAPON,
-        armor = 80,
-        healthRegen = 6,
-        armorRegen = 6,
-        startingHealth = 80,
+        healthRegen = 12,
+        armorRegen = 4,
         gravity = 0.0015, -- LOW GRAVITY JUMP
         gravityLabel = "Low",
         speedLabel = "Normal",
@@ -67,9 +61,9 @@ local PERK_SETTINGS = {
     }
 }
 
-local INDICA_DAMAGE_REDUCTION = 0.55 -- 55% Damage reduction.
-local HYBRID_FALL_DAMAGE_REDUCTION = 0.15 -- 15% Damage reduction.
-local FALL_DAMAGE_WEAPON = 28 -- Internal ID for fall damage, used for checking hybrid perk.
+local INDICA_DAMAGE_REDUCTION = 0.15 -- 15% Damage reduction for indica.
+local HYBRID_DAMAGE_REDUCTION = 0.15 -- 15% Damage reduction for hybrid.
+local SATIVA_DAMAGE_INCREASE = 0.15 -- 15% Damage increase for sativa.
 
 local function sendGardenUI(player, payload)
     if not isElement(player) then
@@ -151,7 +145,6 @@ local function restorePlayerPerks(player)
             takeWeapon(player, active.weapon)
         end
 
-        setPedArmor(player, active.baseArmor or 0)
         setPedGravity(player, active.baseGravity or 0.008)
         setPedWalkingStyle(player, active.baseWalkingStyle or 0)
 
@@ -174,7 +167,6 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
     end
 
     local previous = playerPerks[player]
-    local baseArmor = previous and previous.baseArmor or getPedArmor(player)
     local baseGravity = previous and previous.baseGravity or getPedGravity(player)
     local baseStats = previous and previous.baseStats or {}
 
@@ -191,7 +183,6 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
             takeWeapon(player, previous.weapon)
         end
 
-        setPedArmor(player, baseArmor)
         setPedGravity(player, baseGravity)
         for statId, statValue in pairs(baseStats) do
             setPedStat(player, statId, statValue)
@@ -208,7 +199,6 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
 
     local active = {
         weapon = perks.weapon,
-        baseArmor = baseArmor,
         baseGravity = baseGravity,
         baseWalkingStyle = baseWalkingStyle,
         baseStats = baseStats
@@ -216,12 +206,7 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
 
     playerPerks[player] = active
 
-    setPedArmor(player, math.max(baseArmor, perks.armor))
     setPedGravity(player, perks.gravity or baseGravity)
-
-    if perks.startingHealth then
-        setElementHealth(player, perks.startingHealth)
-    end
 
     for statId, statValue in pairs(perks.stats) do
         setPedStat(player, statId, statValue)
@@ -248,8 +233,8 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
             end
 
             local armor = getPedArmor(targetPlayer)
-            if armor < perks.armor then
-                setPedArmor(targetPlayer, math.min(perks.armor, armor + perks.armorRegen))
+            if armor < 100 then
+                setPedArmor(targetPlayer, math.min(100, armor + perks.armorRegen))
             end
         end, 5000, 0, player)
     end
@@ -444,8 +429,10 @@ addEventHandler("onPlayerDamage", root, function(attacker, weapon, bodypart, los
 
     if activePerk == "indica" then
         damageMultiplier = damageMultiplier * (1 - INDICA_DAMAGE_REDUCTION)
-    elseif activePerk == "hybrid" and weapon == FALL_DAMAGE_WEAPON then
-        damageMultiplier = damageMultiplier * (1 - HYBRID_FALL_DAMAGE_REDUCTION)
+    elseif activePerk == "hybrid" then
+        damageMultiplier = damageMultiplier * (1 - HYBRID_DAMAGE_REDUCTION)
+    elseif activePerk == "sativa" then
+        damageMultiplier = damageMultiplier * (1 + SATIVA_DAMAGE_INCREASE)
     end
 
     if damageMultiplier == 1 then

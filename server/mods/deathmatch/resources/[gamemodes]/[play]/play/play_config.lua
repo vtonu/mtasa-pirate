@@ -27,7 +27,7 @@ playerSpawn = {
     y = 1682.55,
     z = 10.82,
     rotation = 90,
-    skin = 33 -- Undertaker
+    skin = 303 -- Andre
 }
 
 playWorldSettings = {
