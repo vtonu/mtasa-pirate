@@ -31,6 +31,8 @@
         color: var(--green);
         background: transparent;
         padding-bottom: 10px;
+        user-select: none;
+        -webkit-user-select: none;
       }
 
       .garden-ui {
@@ -1253,6 +1255,10 @@
         if (window.mta) {
           mta.triggerEvent("weedGarden:stopDrag");
         }
+      });
+
+      document.addEventListener("copy", (event) => {
+        event.preventDefault();
       });
 
       window.updateGarden(defaults);
