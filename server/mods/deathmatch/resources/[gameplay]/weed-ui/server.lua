@@ -91,7 +91,7 @@ end
 
 local function getGardenPayload(note, resetSelection)
     return {
-        title = "System Monitor",
+        title = "Monitor System",
         zone = "Fog of War Garden",
         stage = "Vegetative",
         plants = "N/A",

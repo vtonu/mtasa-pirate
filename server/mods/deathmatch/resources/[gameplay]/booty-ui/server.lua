@@ -74,8 +74,8 @@ end
 
 local function getShopPayload(note, resetSelection)
     return {
-        title = "System Monitor",
-        zone = "Pirate Booty Shop",
+        title = "Shop System",
+        zone = "Pirate in Men's Pants",
         stock = "Available",
         note = note or "SELECT A WEAPON.",
         resetSelection = resetSelection == true,
