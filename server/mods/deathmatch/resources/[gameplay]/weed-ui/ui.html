@@ -459,27 +459,34 @@
       }
 
       .health-scope .leaf {
-        width: 17px;
-        height: 27px;
+        top: 50%;
+        left: 50%;
+        width: 10px;
+        height: 24px;
+        margin-top: -18px;
+        margin-left: -5px;
+        border-radius: 50% 50% 35% 35%;
+        clip-path: polygon(50% 0, 88% 34%, 72% 100%, 50% 82%, 28% 100%, 12% 34%);
+        transform-origin: 50% 92%;
       }
 
       .health-scope .leaf:nth-child(1) {
-        transform: rotate(0deg) translateY(-8px);
+        transform: rotate(-62deg) translateY(-9px);
       }
       .health-scope .leaf:nth-child(2) {
-        transform: rotate(60deg) translateY(-8px);
+        transform: rotate(-38deg) translateY(-11px);
       }
       .health-scope .leaf:nth-child(3) {
-        transform: rotate(120deg) translateY(-8px);
+        transform: rotate(-14deg) translateY(-13px);
       }
       .health-scope .leaf:nth-child(4) {
-        transform: rotate(180deg) translateY(-8px);
+        transform: rotate(14deg) translateY(-13px);
       }
       .health-scope .leaf:nth-child(5) {
-        transform: rotate(240deg) translateY(-8px);
+        transform: rotate(38deg) translateY(-11px);
       }
       .health-scope .leaf:nth-child(6) {
-        transform: rotate(300deg) translateY(-8px);
+        transform: rotate(62deg) translateY(-9px);
       }
 
       .health-scope .core-text strong {
@@ -632,7 +639,7 @@
         min-height: 34px;
         padding: 7px 8px;
         border: 1px solid rgba(0, 255, 102, 0.45);
-        border-radius: 6px;
+        border-radius: 0;
         color: var(--green);
         background: rgba(0, 35, 12, 0.56);
         font-family: "Share Tech Mono", monospace;
@@ -1050,20 +1057,20 @@
         indica: {
           gravity: "High",
           speed: "Slow",
-          healthRegen: 4,
-          armorRegen: 12,
+          healthRegen: 5,
+          armorRegen: 15,
         },
         sativa: {
           gravity: "Normal",
           speed: "Fast",
-          healthRegen: 8,
-          armorRegen: 8,
+          healthRegen: 10,
+          armorRegen: 10,
         },
         hybrid: {
           gravity: "Low",
           speed: "Normal",
-          healthRegen: 12,
-          armorRegen: 4,
+          healthRegen: 20,
+          armorRegen: 5,
         },
       };
 

@@ -13,10 +13,10 @@ local uiX = math.floor((screenW - UI_WIDTH) / 2)
 local uiY = math.floor((screenH - UI_HEIGHT) / 2)
 
 -- STRAIN MOVEMENT PERKS
-local SATIVA_RUN_SPEED_LIMIT = 1.35
-local SATIVA_RUN_ACCELERATION = 1.80
-local SATIVA_SWIM_SPEED_LIMIT = 0.29
-local SATIVA_SWIM_ACCELERATION = 1.08
+local SATIVA_RUN_SPEED_LIMIT = 1.65
+local SATIVA_RUN_ACCELERATION = 2.10
+local SATIVA_SWIM_SPEED_LIMIT = 0.36
+local SATIVA_SWIM_ACCELERATION = 1.25
 local INDICA_MOVEMENT_SPEED_LIMIT = 0.010
 
 local function encodeValue(value)
@@ -168,8 +168,10 @@ local function updateWeedMovement(timeSlice)
 
     if activePerk == "sativa"
         and isPedOnGround(localPlayer)
-        and getPedControlState(localPlayer, "sprint")
-        and (getPedControlState(localPlayer, "forwards") or getPedControlState(localPlayer, "backwards")) then
+        and (getPedControlState(localPlayer, "forwards")
+            or getPedControlState(localPlayer, "backwards")
+            or getPedControlState(localPlayer, "left")
+            or getPedControlState(localPlayer, "right")) then
         boostHorizontalVelocity(SATIVA_RUN_SPEED_LIMIT, SATIVA_RUN_ACCELERATION, timeSlice)
         return
     end
