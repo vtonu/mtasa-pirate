@@ -445,8 +445,11 @@
       }
 
       .health-scope .scope-ring.inner {
-        width: 65px;
+        width: 88px;
         max-width: none;
+        border-style: dashed;
+        animation-duration: 60s;
+        animation-direction: normal;
       }
 
       .health-scope .plant-core {
@@ -479,6 +482,7 @@
       }
 
       .health-scope .core-text strong {
+        color: var(--green-soft);
         font-size: 13px;
       }
 
@@ -660,7 +664,7 @@
       .action-btn:hover,
       .buy-btn:hover {
         filter: brightness(0.82);
-        box-shadow: 0 0 10px rgba(0, 255, 102, 0.18);
+        box-shadow: 0 0 3px rgba(0, 255, 102, 0.2);
       }
 
       .action-btn.purchase-click {
@@ -787,7 +791,6 @@
           </div>
 
           <div class="health-scope">
-            <div class="scope-ring"></div>
             <div class="scope-ring inner"></div>
             <div class="plant-core">
               <div class="leaf"></div>
@@ -1230,6 +1233,8 @@
             if (strain.health != null) {
               setText("health-core", `${Math.round(clamp(strain.health))}%`);
             }
+            document.getElementById("health-core").style.color =
+              strainColors[type] || strainColors.hybrid;
             setBar("indica", strain.indica, strainColors.indica);
             setBar("sativa", strain.sativa, strainColors.sativa);
             setBar("hybrid", strain.hybrid, strainColors.hybrid);
@@ -1273,6 +1278,11 @@
             ? selectedStrain.health
             : data.health;
         setText("health-core", `${Math.round(clamp(displayedHealth))}%`);
+        document.getElementById("health-core").style.color = selectedStrain
+          ? strainColors[
+              String(selectedStrain.type || "hybrid").toLowerCase()
+            ] || strainColors.hybrid
+          : "var(--green-soft)";
         const selectedStats = selectedStrain
           ? strainStats[String(selectedStrain.type || "hybrid").toLowerCase()]
           : null;
