@@ -127,7 +127,13 @@ local function purchaseWeapon(player, weaponId)
     end
 
     if getPlayerMoney(player) < weapon.price then
-        updateShop(player, "SORRY, INSUFFICIENT FUNDS.")
+        local state = playerShopState[player] or {}
+        state.insufficientFunds = (state.insufficientFunds or 0) + 1
+        playerShopState[player] = state
+        local message = state.insufficientFunds > 3
+            and "YO, GET SOME MONEY DAWG!"
+            or "SORRY, INSUFFICIENT FUNDS."
+        updateShop(player, message)
         return
     end
 
@@ -150,6 +156,10 @@ local function purchaseWeapon(player, weaponId)
     end
 
     takePlayerMoney(player, weapon.price)
+    local state = playerShopState[player]
+    if state then
+        state.insufficientFunds = 0
+    end
     updateShop(player, "PURCHASE COMPLETE: " .. string.upper(weapon.name) .. " FOR $" .. weapon.price .. ".")
     outputChatBox("[NOTIFICATION] Aye-aye! " .. weapon.name .. " purchased.", player, 255, 250, 80)
 end
@@ -162,7 +172,7 @@ addEventHandler("bootyShop:uiAction", resourceRoot, function(actionName)
 
     local weaponId = actionName:match("^select:(.+)$")
     if weaponId and WEAPONS[weaponId] then
-        playerShopState[client] = { weaponId = weaponId }
+        playerShopState[client] = { weaponId = weaponId, insufficientFunds = 0 }
         return
     end
 

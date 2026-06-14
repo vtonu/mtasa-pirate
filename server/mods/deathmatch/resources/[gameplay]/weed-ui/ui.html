@@ -634,6 +634,11 @@
         font-size: 12px;
         cursor: pointer;
         overflow-wrap: anywhere;
+        transition:
+          filter 0.14s ease,
+          transform 0.14s ease,
+          box-shadow 0.14s ease,
+          background-color 0.14s ease;
       }
 
       .buy-btn {
@@ -654,14 +659,32 @@
 
       .action-btn:hover,
       .buy-btn:hover {
-        color: #061006;
-        background: var(--green);
-        box-shadow: 0 0 16px rgba(0, 255, 102, 0.34);
+        filter: brightness(0.82);
+        box-shadow: 0 0 10px rgba(0, 255, 102, 0.18);
+      }
+
+      .action-btn.purchase-click {
+        animation: purchase-click 0.32s ease;
       }
 
       @keyframes spin {
         to {
           transform: rotate(360deg);
+        }
+      }
+
+      @keyframes purchase-click {
+        0% {
+          transform: scale(1);
+        }
+        45% {
+          transform: translateY(2px) scale(0.94);
+          box-shadow:
+            0 0 5px rgba(0, 255, 102, 0.18),
+            inset 0 3px 8px rgba(0, 0, 0, 0.72);
+        }
+        100% {
+          transform: scale(1);
         }
       }
     </style>
@@ -689,7 +712,7 @@
           <div class="status-row">
             <div class="metric">
               <div class="metric-label">Flower</div>
-              <div class="metric-value" id="plants">0</div>
+              <div class="metric-value" id="plants">N/A</div>
             </div>
             <div class="metric">
               <div class="metric-label">Price</div>
@@ -804,7 +827,7 @@
         zone: "Fog of War Garden",
         stage: "Seed",
         stock: "AVAILABLE",
-        plants: 0,
+        plants: "N/A",
         ready: 0,
         health: 0,
         water: 0,
@@ -1043,6 +1066,12 @@
       let selectedStrain = null;
       let selectedBuySizeValue = null;
 
+      function animatePurchase(button) {
+        button.classList.remove("purchase-click");
+        void button.offsetWidth;
+        button.classList.add("purchase-click");
+      }
+
       function updatePrice() {
         if (!selectedStrain || !selectedBuySizeValue) {
           setText("price", "--");
@@ -1102,6 +1131,9 @@
               button.classList.add("cart-selected");
               selectedBuySizeValue = "cart";
               updatePrice();
+            }
+            if (String(name).toUpperCase() === "BUY") {
+              animatePurchase(button);
             }
             triggerAction(name);
           };
@@ -1222,17 +1254,38 @@
 
         setText("title", data.title);
         setText("zone", data.zone);
-        setText("plants", data.plants);
+        const selectedStrainIndex = selectedStrain
+          ? defaults.strains.findIndex(
+              (strain) =>
+                (strain.value || strain.id || strain.name || strain.symbol) ===
+                selectedStrainValue,
+            )
+          : -1;
+        setText(
+          "plants",
+          selectedStrainIndex >= 0
+            ? String(selectedStrainIndex + 1).padStart(2, "0")
+            : "N/A",
+        );
         setText("stock", (data.stock || "AVAILABLE").toUpperCase());
         const displayedHealth =
           selectedStrain && !data.resetSelection
             ? selectedStrain.health
             : data.health;
         setText("health-core", `${Math.round(clamp(displayedHealth))}%`);
-        setText("gravity", data.gravity || "Normal");
-        setText("speed", data.speed || "Normal");
-        setText("health-regen", `${data.healthRegen || 0}%`);
-        setText("armor-regen", `${data.armorRegen || 0}%`);
+        const selectedStats = selectedStrain
+          ? strainStats[String(selectedStrain.type || "hybrid").toLowerCase()]
+          : null;
+        setText("gravity", selectedStats ? selectedStats.gravity : data.gravity || "Normal");
+        setText("speed", selectedStats ? selectedStats.speed : data.speed || "Normal");
+        setText(
+          "health-regen",
+          `${selectedStats ? selectedStats.healthRegen : data.healthRegen || 0}%`,
+        );
+        setText(
+          "armor-regen",
+          `${selectedStats ? selectedStats.armorRegen : data.armorRegen || 0}%`,
+        );
         setText("note", data.note);
 
         setBar(

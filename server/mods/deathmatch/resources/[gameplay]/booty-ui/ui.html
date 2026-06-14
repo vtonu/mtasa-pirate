@@ -125,12 +125,17 @@
         cursor: pointer;
       }
 
-      .close-btn:hover,
-      .buy-btn:hover {
+      .close-btn:hover {
         border-color: var(--green);
         color: #061006;
         background: var(--green);
         box-shadow: 0 0 16px rgba(0, 255, 102, 0.34);
+      }
+
+      .buy-btn:hover {
+        border-color: var(--green);
+        filter: brightness(0.82);
+        box-shadow: 0 0 10px rgba(0, 255, 102, 0.18);
       }
 
       .content {
@@ -487,11 +492,35 @@
         background: rgba(0, 20, 8, 0.7);
         font-size: 12px;
         cursor: pointer;
+        transition:
+          filter 0.14s ease,
+          transform 0.14s ease,
+          box-shadow 0.14s ease,
+          background-color 0.14s ease;
+      }
+
+      .buy-btn.purchase-click {
+        animation: purchase-click 0.32s ease;
       }
 
       @keyframes spin {
         to {
           transform: rotate(360deg);
+        }
+      }
+
+      @keyframes purchase-click {
+        0% {
+          transform: scale(1);
+        }
+        45% {
+          transform: translateY(2px) scale(0.96);
+          box-shadow:
+            0 0 5px rgba(0, 255, 102, 0.18),
+            inset 0 3px 8px rgba(0, 0, 0, 0.72);
+        }
+        100% {
+          transform: scale(1);
         }
       }
     </style>
@@ -604,7 +633,7 @@
               class="buy-btn"
               type="button"
               tabindex="-1"
-              onclick="buyWeapon()"
+              onclick="buyWeapon(this)"
             >
               BUY SELECTED WEAPON
             </button>
@@ -740,7 +769,11 @@
         renderWeapons();
       };
 
-      function buyWeapon() {
+      function buyWeapon(button) {
+        button.classList.remove("purchase-click");
+        void button.offsetWidth;
+        button.classList.add("purchase-click");
+
         if (!selectedWeapon) {
           setText("note", "SELECT A WEAPON.");
           return;

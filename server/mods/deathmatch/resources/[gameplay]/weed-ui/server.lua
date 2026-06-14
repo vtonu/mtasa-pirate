@@ -94,7 +94,7 @@ local function getGardenPayload(note, resetSelection)
         title = "System Monitor",
         zone = "Fog of War Garden",
         stage = "Vegetative",
-        plants = 28,
+        plants = "N/A",
         ready = 22,
         health = 87,
         water = 64,
@@ -302,11 +302,15 @@ local function handlePurchase(player, state)
     local price = strain.prices[state.package]
 
     if not price or getPlayerMoney(player) < price then
-        sendShopMessage(player, "SORRY, INSUFFICIENT FUNDS.")
-        scheduleIdleReset(player, state)
+        state.insufficientFunds = (state.insufficientFunds or 0) + 1
+        local message = state.insufficientFunds > 3
+            and "YO, GET SOME MONEY DAWG!"
+            or "SORRY, INSUFFICIENT FUNDS."
+        sendShopMessage(player, message)
         return
     end
 
+    state.insufficientFunds = 0
     takePlayerMoney(player, price)
     equipPlayerPerks(player, state.strain, strain.type, state.package)
 
@@ -338,6 +342,7 @@ local function handleShopAction(player, actionName)
         end
 
         state.package = "cart"
+        state.insufficientFunds = 0
         return
     end
 
@@ -350,6 +355,7 @@ local function handleShopAction(player, actionName)
 
         state.strain = strainName
         state.package = nil
+        state.insufficientFunds = 0
         return
     end
 
@@ -366,6 +372,7 @@ local function handleShopAction(player, actionName)
         end
 
         state.package = packageName
+        state.insufficientFunds = 0
         return
     end
 end
