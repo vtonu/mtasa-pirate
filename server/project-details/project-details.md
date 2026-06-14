@@ -18,7 +18,7 @@
 - Lua 5.1 & XML
 - HTML/CSS/JS (CEF when needed)
 - Preferably no database required to play
-- DX UI preferred (althought the weed-ui GUI is using CEF & HTML & works fine)
+- DX UI preferred (although the shop UIs use CEF & HTML and work fine)
 
 ## Resource Structure
 
@@ -114,19 +114,11 @@ The gamemode remains server authoritative. The main `play` resource owns gamepla
 
 ## Custom Gameplay Resources
 
-### Booty UI
+### Shop UIs
 
-- CEF and HTML weapon shop interface for the Pirate Booty Desk
-- Uses `server.lua`, `client.lua`, and `ui.html`
-- Exposes server functions for opening and closing the UI
-- Works with `play_bootyLoot.lua` for shop access and purchasing
-
-### Weed UI
-
-- CEF and HTML greenhouse interface for the weed growing system
-- Uses `server.lua`, `client.lua`, and `ui.html`
-- Exposes server functions for opening, updating, and closing the UI
-- Works with `play_weedSystem.lua` for garden access
+- `booty-ui` provides the Pirate Booty Desk weapon shop and works with `play_bootyLoot.lua`
+- `weed-ui` provides strain purchases and timed health, armor, gravity, and movement perks through `play_weedSystem.lua`
+- Both use separate server, client, and CEF interface files
 
 ### Nametags
 
