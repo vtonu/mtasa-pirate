@@ -2238,8 +2238,7 @@ addCommandHandler('kill', killLocalPlayer)
 wndMain = {
 	'wnd',
 	text = 'PLAYER OPTIONS (F1 TO TOGGLE)',
-	x = 10,
-	y = 150,
+	x = 0.35,
 	width = 280, 
 	controls = {
 		-- PLAYER
