@@ -1,7 +1,6 @@
 -- ==========================================
 -- PICKUP MANAGEMENT
 -- ==========================================
-
 local pickupTimers = {}
 local pickupsToSpawn = {}
 
@@ -32,7 +31,7 @@ local function createPlayPickup(pickupData)
         blipIcon = 21
         red, green, blue = 255, 0, 0
 
-    -- Armor Pickup
+        -- Armor Pickup
     elseif pickupType == "armor" then
 
         pickupElement = createPickup(posX, posY, posZ, 1, 100, 0)
@@ -40,7 +39,7 @@ local function createPlayPickup(pickupData)
         blipIcon = 45
         red, green, blue = 0, 120, 255
 
-    -- Loco Skull Pickup
+        -- Loco Skull Pickup
     elseif pickupType == "loco" then
 
         pickupElement = createPickup(posX, posY, posZ, 3, 1254, 0)
@@ -53,27 +52,17 @@ local function createPlayPickup(pickupData)
 
     if pickupElement then
 
-    local blip
+        local blip
 
-    if createMapBlip then
-        blip = createBlipAttachedTo(
-            pickupElement,
-            blipIcon,
-            2,
-            red,
-            green,
-            blue,
-            255,
-            0,
-            99999
-        )
-    end
+        if createMapBlip then
+            blip = createBlipAttachedTo(pickupElement, blipIcon, 2, red, green, blue, 255, 0, 99999)
+        end
 
-    pickupsToSpawn[pickupElement] = {
-        type = pickupType,
-        spawnData = pickupData,
-        blip = blip
-    }
+        pickupsToSpawn[pickupElement] = {
+            type = pickupType,
+            spawnData = pickupData,
+            blip = blip
+        }
     end
 
     return pickupElement
@@ -133,20 +122,17 @@ local function onPickupHit(playerElement)
     -- Health Pickup
     if pickupInfo.type == "health" then
 
-        setElementHealth(
-            playerElement,
-            math.min(100, getElementHealth(playerElement) + 50)
-        )
+        setElementHealth(playerElement, math.min(100, getElementHealth(playerElement) + 50))
 
-    -- Armor Pickup
+        -- Armor Pickup
     elseif pickupInfo.type == "armor" then
 
         setPedArmor(playerElement, 100)
 
-    -- Loco Skull Pickup
+        -- Loco Skull Pickup
     elseif pickupInfo.type == "loco" then
 
-        giveWeapon(playerElement, 18, 10, true)
+        giveWeapon(playerElement, 18, 20, true)
 
         playMessage(playerElement, "locoPickup")
 
@@ -167,14 +153,10 @@ local function onPickupHit(playerElement)
         killTimer(existingTimer)
     end
 
-    pickupTimers[spawnData] = setTimer(
-        function()
-            createPlayPickup(spawnData)
-            pickupTimers[spawnData] = nil
-        end,
-        RESPAWN_MS,
-        1
-    )
+    pickupTimers[spawnData] = setTimer(function()
+        createPlayPickup(spawnData)
+        pickupTimers[spawnData] = nil
+    end, RESPAWN_MS, 1)
 end
 
 addEventHandler("onPickupHit", root, onPickupHit)

@@ -3,7 +3,7 @@
 -- ==========================================
 
 -- REWARD SETTINGS
-local REWARD_MONEY = 1000
+local REWARD_MONEY = 10000
 local REWARD_POINTS = 1
 
 -- MARKER POSITION
@@ -24,10 +24,10 @@ local MOLOTOV_MATCH_TIME_MS = 30000
 
 -- VEHICLE MODELS
 local MISSION_VEHICLE_MODELS = {
-    427, -- Enforcer
-    433, -- Barracks
-    528, -- FBI Truck
-    601  -- SWAT Tank
+    579, -- Huntley
+    400, -- Landstalker
+    404, -- Perenial
+    489  -- Rancher
 }
 
 -- STATE

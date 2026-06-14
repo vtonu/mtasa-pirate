@@ -304,7 +304,7 @@ local function handlePurchase(player, state)
     if not price or getPlayerMoney(player) < price then
         state.insufficientFunds = (state.insufficientFunds or 0) + 1
         local message = state.insufficientFunds > 3
-            and "YO, GET SOME MONEY DAWG!!!"
+            and "YO, GET SOME MONEY DAWG!"
             or "SORRY, INSUFFICIENT FUNDS."
         sendShopMessage(player, message)
         return
