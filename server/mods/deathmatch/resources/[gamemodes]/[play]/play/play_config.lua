@@ -28,7 +28,7 @@ playerSpawn = {
 
 playWorldSettings = {
     gameType = "Custom",
-    mapName = "Las Venturas Freeroam",
+    mapName = "4AM in Las Venturas",
     time = {4, 0}, -- 4AM in Las Venturas
     minuteDuration = 999999999,
     weather = 17, -- (Sunny, Scorching Hot)
