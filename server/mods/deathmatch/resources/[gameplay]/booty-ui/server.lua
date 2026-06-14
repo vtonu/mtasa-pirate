@@ -131,7 +131,7 @@ local function purchaseWeapon(player, weaponId)
         state.insufficientFunds = (state.insufficientFunds or 0) + 1
         playerShopState[player] = state
         local message = state.insufficientFunds > 3
-            and "YO, GET SOME MONEY DAWG!"
+            and "YO, GET SOME MONEY DAWG!!!"
             or "SORRY, INSUFFICIENT FUNDS."
         updateShop(player, message)
         return
