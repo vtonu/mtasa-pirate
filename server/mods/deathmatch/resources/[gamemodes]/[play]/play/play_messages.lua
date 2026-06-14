@@ -42,14 +42,6 @@ local MESSAGE_DEFINITIONS = {
         text = "TARGET SPAWNED. DESTROY IT.",
         color = PLAY_COLOR
     },
-    minigunPickup = {
-        text = "You found the ship deck Peppergun.",
-        color = NOTIFICATION_COLOR
-    },
-    cannonPickup = {
-        text = "You found the ship cannons.",
-        color = NOTIFICATION_COLOR
-    },
     captainNotification = {
         text = "[NOTIFICATION] Aye Captain, you can always come to us! xD",
         color = NOTIFICATION_COLOR

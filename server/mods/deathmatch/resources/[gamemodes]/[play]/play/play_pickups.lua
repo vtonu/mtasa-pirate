@@ -47,23 +47,6 @@ local function createPlayPickup(pickupData)
 
         blipIcon = 23
         red, green, blue = 127, 255, 212
-    -- Minigun Pickup
-    elseif pickupType == "minigun" then
-
-        pickupElement = createPickup(posX, posY, posZ, 2, 36, 0) -- 36 Rocket Launcher
-
-         blipIcon = 23
-
-        createMapBlip = false
-        red, green, blue = 255, 220, 80
-
-    -- Cannon Pickup
-    elseif pickupType == "cannon" then
-
-        pickupElement = createPickup(posX, posY, posZ, 2, 35, 0)
-
-        createMapBlip = false
-        red, green, blue = 255, 170, 60
     else
         return false
     end
@@ -172,17 +155,6 @@ local function onPickupHit(playerElement)
         if refreshLocoMissionAccess then
             refreshLocoMissionAccess(playerElement)
         end
-    -- Minigun Pickup
-    elseif pickupInfo.type == "minigun" then
-
-        giveWeapon(playerElement, 36, 1000, true) -- 36 Rocket Launcher
-        playMessage(playerElement, "minigunPickup")
-
-    -- Cannon Pickup
-    elseif pickupInfo.type == "cannon" then
-
-        giveWeapon(playerElement, 35, 10, true)
-        playMessage(playerElement, "cannonPickup")
     end
 
     local spawnData = pickupInfo.spawnData

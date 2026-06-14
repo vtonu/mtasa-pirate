@@ -14,10 +14,6 @@ pickupSpawns = {
     {"armor", 2089.38, 1684.12, 11.35},
     -- loco skull icon
     {"loco", 2029.12, 1554.12, 11.12},
-     -- pirate ship rock launcher
-    {"minigun", 2000.08, 1521.74, 17.07},
-    -- pirate ship rpg
-    {"cannon", 2000.39, 1552.91, 14.10},
 }
 
 -- PLAYER SPAWN
