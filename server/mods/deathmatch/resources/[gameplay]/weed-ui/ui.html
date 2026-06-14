@@ -466,7 +466,14 @@
         margin-top: -18px;
         margin-left: -5px;
         border-radius: 50% 50% 35% 35%;
-        clip-path: polygon(50% 0, 88% 34%, 72% 100%, 50% 82%, 28% 100%, 12% 34%);
+        clip-path: polygon(
+          50% 0,
+          88% 34%,
+          72% 100%,
+          50% 82%,
+          28% 100%,
+          12% 34%
+        );
         transform-origin: 50% 92%;
       }
 
@@ -835,7 +842,7 @@
 
     <script>
       const defaults = {
-        title: "System Monitor",
+        title: "Shop System",
         zone: "Fog of War Garden",
         stage: "Seed",
         stock: "AVAILABLE",
@@ -1295,8 +1302,14 @@
         const selectedStats = selectedStrain
           ? strainStats[String(selectedStrain.type || "hybrid").toLowerCase()]
           : null;
-        setText("gravity", selectedStats ? selectedStats.gravity : data.gravity || "Normal");
-        setText("speed", selectedStats ? selectedStats.speed : data.speed || "Normal");
+        setText(
+          "gravity",
+          selectedStats ? selectedStats.gravity : data.gravity || "Normal",
+        );
+        setText(
+          "speed",
+          selectedStats ? selectedStats.speed : data.speed || "Normal",
+        );
         setText(
           "health-regen",
           `${selectedStats ? selectedStats.healthRegen : data.healthRegen || 0}%`,
