@@ -2,9 +2,10 @@
 -- PLAY MODE CONFIGURATION
 -- ==========================================
 
--- Infernus spawn in front of player
+-- VEHICLE SPAWNS
 vehicleSpawns = {
-    {411, 2149.95, 1677.33, 10.55, 0}
+    {411, 2149.95, 1677.33, 10.55, 0},
+    {539, 2023.4000244141, 1560.5, 10.60000038147, 0}
 }
 
 pickupSpawns = {
