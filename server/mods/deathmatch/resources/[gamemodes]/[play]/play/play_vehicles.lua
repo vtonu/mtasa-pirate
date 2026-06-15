@@ -39,8 +39,8 @@ function createPlayVehicle(vehicleData)
     setVehicleDamageProof(vehicleElement, true)
     setElementFrozen(vehicleElement, true)
 
-    -- Custom Vehicle Color
-    if modelID == 411 or modelID == 539 then
+    -- Vehicle Color (Aquamarine)
+    if modelID == 411 or modelID == 539  or modelID == 457 then
         setVehicleColor(
             vehicleElement,
             127, 255, 212,
@@ -50,10 +50,9 @@ function createPlayVehicle(vehicleData)
         )
     end
 
-    -- Custom Infernus Setup
-    if modelID == 411 then
-        setVehicleHeadLightColor(vehicleElement, 127, 255, 212)
-
+    -- Vehicle Settings
+    if modelID == 411 or modelID == 457 then
+        setVehicleHeadLightColor(vehicleElement, 127, 255, 212) -- Headlights
         addVehicleUpgrade(vehicleElement, 1010) -- Nitro
         addVehicleUpgrade(vehicleElement, 1080) -- Wheels
     end
