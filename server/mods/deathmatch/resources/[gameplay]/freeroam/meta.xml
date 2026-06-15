@@ -77,7 +77,7 @@
 		<setting name="*paintjob" value="true" />
 		<setting name="*hidecolortext" value="true" />            <!-- Hide player colorcode *text* in F1 warp menu & map? -->
 		<setting name="*repair" value="true" />
-		<setting name="*setskin" value="true" />
+		<setting name="*setskin" value="false" />
 		<setting name="*setstyle" value="true" />
 		<setting name="*stats" value="true" />
 		<setting name="*walks" value="true" />

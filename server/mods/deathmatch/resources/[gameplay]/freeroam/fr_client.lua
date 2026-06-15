@@ -712,22 +712,26 @@ local function warpMe(targetPlayer)
 		return
 	end
 
+	if getPedOccupiedVehicle(localPlayer) then
+		errMsg("Get out of your vehicle before warping.")
+		return
+	end
+
 	local vehicle = getPedOccupiedVehicle(targetPlayer)
 	local interior = getElementInterior(targetPlayer)
 
-	if not vehicle then
-		-- target player is not in a vehicle - just warp next to him
-		local vec = targetPlayer.position + targetPlayer.matrix.right*2
-		local x, y, z = vec.x,vec.y,vec.z
-		if localPlayer.interior ~= interior then
-			fadeCamera(false,1)
-			setTimer(setPlayerInterior,1000,1,x,y,z,interior)
-		else
-			setPlayerPosition(x,y,z)
-		end
+	if vehicle then
+		errMsg("You can only warp to players who are on foot.")
+		return
+	end
+
+	local vec = targetPlayer.position + targetPlayer.matrix.right*2
+	local x, y, z = vec.x,vec.y,vec.z
+	if localPlayer.interior ~= interior then
+		fadeCamera(false,1)
+		setTimer(setPlayerInterior,1000,1,x,y,z,interior)
 	else
-		-- target player is in a vehicle - warp into it if there's space left
-		server.warpMeIntoVehicle(vehicle)
+		setPlayerPosition(x,y,z)
 	end
 
 end

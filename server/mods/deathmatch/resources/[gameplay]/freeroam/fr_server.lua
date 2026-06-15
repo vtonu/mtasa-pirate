@@ -389,29 +389,10 @@ end
 
 function warpMeIntoVehicle(vehicle)
 	if not isElement(vehicle) then return end
-
-	if isPedDead(client) then
-		return
+	if isElement(client) then
+		outputChatBox('Vehicle warping is disabled.', client, 255, 0, 0)
 	end
-
-	if getPedOccupiedVehicle(client) then
-		outputChatBox('Get out of your vehicle first.', client, 255, 0, 0)
-		return
-	end
-	local interior = getElementInterior(vehicle)
-	local numseats = getVehicleMaxPassengers(vehicle)
-	local driver = getVehicleController(vehicle)
-	for i=0,numseats do
-		if not getVehicleOccupant(vehicle, i) then
-			setElementInterior(client, interior)
-			setCameraInterior(client, interior)
-			warpPedIntoVehicle(client, vehicle, i)
-			return
-		end
-	end
-	if isElement(driver) then
-		outputChatBox('No free seats left in ' .. getPlayerName(driver) .. '\'s vehicle.', client, 255, 0, 0)
-	end
+	return false
 end
 
 local sawnoffAntiAbuse = {}

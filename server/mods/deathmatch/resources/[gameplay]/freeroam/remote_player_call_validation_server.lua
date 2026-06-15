@@ -147,9 +147,6 @@ g_RPCFunctionsValidation = {
         return true
     end,
     warpMeIntoVehicle = function(theVehicle, ...)
-        if not isElement(theVehicle) then return false end
-        if getElementType(theVehicle) ~= "vehicle" then return false end
-        if (#{ ... } > 0) then return false end
-        return true
+        return false
     end
 }
