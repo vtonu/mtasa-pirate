@@ -1,5 +1,0 @@
-<meta>
-    <info author="Lifestyle" version="1.0" type="script" name="AutoLogin" />
-    <script src="autologin.lua" type="server" />
-    <min_mta_version server="1.6.0-0.00000"></min_mta_version>
-</meta>
