@@ -33,12 +33,11 @@ local PERK_SETTINGS = {
     indica = {
         weapon = FLOWER_WEAPON,
         healthRegen = 5,
-        armorRegen = 15,
+        armorRegen = 25,
         gravity = 0.020,
         gravityLabel = "High",
         speedLabel = "Slow",
-        walkingStyle = 120, -- OLD FATMAN
-        stats = { [23] = 1000 } -- MUSCLE
+        walkingStyle = 120 -- OLD FATMAN
     },
     sativa = {
         weapon = FLOWER_WEAPON,
@@ -46,18 +45,16 @@ local PERK_SETTINGS = {
         armorRegen = 10,
         gravityLabel = "Normal",
         speedLabel = "Fast",
-        walkingStyle = 0, -- DEFAULT
-        stats = { [22] = 1000 } -- STAMINA
+        walkingStyle = 0 -- DEFAULT
     },
     hybrid = {
         weapon = FLOWER_WEAPON,
-        healthRegen = 20,
+        healthRegen = 25,
         armorRegen = 5,
         gravity = 0.0008, -- LOW GRAVITY JUMP
         gravityLabel = "Low",
         speedLabel = "Normal",
-        walkingStyle = 125, -- JOGGER
-        stats = {}
+        walkingStyle = 125 -- JOGGER
     }
 }
 
@@ -93,15 +90,9 @@ local function getGardenPayload(note, resetSelection)
     return {
         title = "Monitor System",
         zone = "Fog of War Garden",
-        stage = "Vegetative",
-        plants = "N/A",
         ready = 22,
         health = 87,
         water = 64,
-        nutrients = 72,
-        light = 11,
-        temperature = 28,
-        humidity = 58,
         gravity = "Normal",
         speed = "Normal",
         healthRegen = 0,
@@ -148,10 +139,6 @@ local function restorePlayerPerks(player)
         setPedGravity(player, active.baseGravity or 0.008)
         setPedWalkingStyle(player, active.baseWalkingStyle or 0)
 
-        for statId, statValue in pairs(active.baseStats or {}) do
-            setPedStat(player, statId, statValue)
-        end
-
         setElementData(player, "weed.perk", false)
         setElementData(player, "weed.strain", false)
     end
@@ -168,7 +155,6 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
 
     local previous = playerPerks[player]
     local baseGravity = previous and previous.baseGravity or getPedGravity(player)
-    local baseStats = previous and previous.baseStats or {}
 
     if previous then
         if previous.expireTimer and isTimer(previous.expireTimer) then
@@ -184,15 +170,6 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
         end
 
         setPedGravity(player, baseGravity)
-        for statId, statValue in pairs(baseStats) do
-            setPedStat(player, statId, statValue)
-        end
-    end
-
-    for statId in pairs(perks.stats) do
-        if baseStats[statId] == nil then
-            baseStats[statId] = getPedStat(player, statId)
-        end
     end
 
     local baseWalkingStyle = previous and previous.baseWalkingStyle or getPedWalkingStyle(player)
@@ -200,17 +177,12 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
     local active = {
         weapon = perks.weapon,
         baseGravity = baseGravity,
-        baseWalkingStyle = baseWalkingStyle,
-        baseStats = baseStats
+        baseWalkingStyle = baseWalkingStyle
     }
 
     playerPerks[player] = active
 
     setPedGravity(player, perks.gravity or baseGravity)
-
-    for statId, statValue in pairs(perks.stats) do
-        setPedStat(player, statId, statValue)
-    end
 
     giveWeapon(player, perks.weapon, package.flowerAmmo, true)
 

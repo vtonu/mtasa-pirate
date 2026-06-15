@@ -844,19 +844,13 @@
       const defaults = {
         title: "Monitor System",
         zone: "Fog of War Garden",
-        stage: "Seed",
         stock: "AVAILABLE",
-        plants: "N/A",
         ready: 0,
         health: 0,
         water: 0,
-        nutrients: 0,
-        light: 0,
         indica: null,
         sativa: null,
         hybrid: null,
-        temperature: 0,
-        humidity: 0,
         gravity: "Normal",
         speed: "Normal",
         healthRegen: 0,
@@ -1065,7 +1059,7 @@
           gravity: "High",
           speed: "Slow",
           healthRegen: 5,
-          armorRegen: 15,
+          armorRegen: 25,
         },
         sativa: {
           gravity: "Normal",
@@ -1076,7 +1070,7 @@
         hybrid: {
           gravity: "Low",
           speed: "Normal",
-          healthRegen: 20,
+          healthRegen: 25,
           armorRegen: 5,
         },
       };
@@ -1084,6 +1078,7 @@
       let selectedStrainValue = null;
       let selectedStrain = null;
       let selectedBuySizeValue = null;
+      let displayedStrains = [];
 
       function animatePurchase(button) {
         button.classList.remove("purchase-click");
@@ -1128,6 +1123,18 @@
               : "var(--green)");
         fill.style.backgroundColor = color;
         fill.style.boxShadow = "none";
+      }
+
+      function shuffleStrains(strains) {
+        const shuffled = strains.slice();
+        for (let index = shuffled.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          [shuffled[index], shuffled[swapIndex]] = [
+            shuffled[swapIndex],
+            shuffled[index],
+          ];
+        }
+        return shuffled;
       }
 
       function setActions(actions) {
@@ -1266,6 +1273,9 @@
 
       window.updateGarden = function updateGarden(payload) {
         const data = Object.assign({}, defaults, payload || {});
+        const sourceStrains = Array.isArray(data.strains)
+          ? data.strains
+          : defaults.strains;
 
         if (data.resetSelection) {
           selectedStrainValue = null;
@@ -1273,10 +1283,14 @@
           clearPurchaseSelection();
         }
 
+        if (data.resetSelection || displayedStrains.length === 0) {
+          displayedStrains = shuffleStrains(sourceStrains);
+        }
+
         setText("title", data.title);
         setText("zone", data.zone);
         const selectedStrainIndex = selectedStrain
-          ? defaults.strains.findIndex(
+          ? displayedStrains.findIndex(
               (strain) =>
                 (strain.value || strain.id || strain.name || strain.symbol) ===
                 selectedStrainValue,
@@ -1334,7 +1348,7 @@
           selectedStrain && !data.resetSelection
             ? selectedStrain.sativa
             : data.sativa == null
-              ? data.nutrients
+              ? 0
               : data.sativa,
           strainColors.sativa,
         );
@@ -1343,7 +1357,7 @@
           selectedStrain && !data.resetSelection
             ? selectedStrain.hybrid
             : data.hybrid == null
-              ? data.light
+              ? 0
               : data.hybrid,
           strainColors.hybrid,
         );
@@ -1351,9 +1365,7 @@
         setBuySizes(
           Array.isArray(data.buySizes) ? data.buySizes : defaults.buySizes,
         );
-        setStrains(
-          Array.isArray(data.strains) ? data.strains : defaults.strains,
-        );
+        setStrains(displayedStrains);
         updatePrice();
       };
 
