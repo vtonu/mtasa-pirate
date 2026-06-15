@@ -128,12 +128,21 @@ local function isPassive(player)
 	return isElement(player) and g_PlayerData[player] and g_PlayerData[player].settings.passive == true
 end
 
-local function setPassiveMode(player, state)
+function setPlayerPassiveMode(player, state)
+	if not isElement(player) or not g_PlayerData[player] then
+		return false
+	end
+
+	state = state == true
+	g_PlayerData[player].settings.passive = state
 	setElementAlpha(player, state and PASSIVE_ALPHA or 255)
 
 	for _, control in ipairs(passiveControls) do
 		toggleControl(player, control, not state)
 	end
+
+	triggerClientEvent(root, "onClientFreeroamLocalSettingChange", player, "passive", state)
+	return true
 end
 
 function onLocalSettingChange(setting,value)
@@ -141,9 +150,7 @@ function onLocalSettingChange(setting,value)
 	if setting ~= "passive" or type(value) ~= "boolean" then return end
 	if not g_PlayerData[client] then return end
 
-	setPassiveMode(client, value)
-	g_PlayerData[client].settings.passive = value
-	triggerClientEvent(root, "onClientFreeroamLocalSettingChange", client, "passive", value)
+	setPlayerPassiveMode(client, value)
 end
 
 function joinHandler(player)
@@ -194,7 +201,7 @@ addEventHandler("onVehicleDamage", root,
 addEventHandler("onPlayerSpawn", root,
 	function()
 		if isPassive(source) then
-			setPassiveMode(source, true)
+			setPlayerPassiveMode(source, true)
 		end
 	end
 )
@@ -203,7 +210,7 @@ addEventHandler("onResourceStop", resourceRoot,
 	function()
 		for player in pairs(g_PlayerData) do
 			if isElement(player) then
-				setPassiveMode(player, false)
+				setPlayerPassiveMode(player, false)
 			end
 		end
 	end
@@ -357,36 +364,24 @@ function setMySkin(skinid)
 	if not isElement(client) then return end
 	if getElementModel(client) == skinid then return end
 	if isPedDead(client) then
-		local x, y, z = getElementPosition(client)
-
-		if isPedTerminated(client) then
-			x = 0
-			y = 0
-			z = 3
-		end
-
-		local r = getPedRotation(client)
-		local interior = getElementInterior(client)
-		spawnPlayer(client, x, y, z, r, skinid)
-		setElementInterior(client, interior)
-		setCameraInterior(client, interior)
-	else
-		setElementModel(client, skinid)
+		return
 	end
+
+	setElementModel(client, skinid)
 	setCameraTarget(client, client)
 	setCameraInterior(client, getElementInterior(client))
 end
 
 function spawnMe(x, y, z)
+	if isPedDead(client) then
+		return
+	end
+
 	if not x then
 		x, y, z = getElementPosition(client)
 	end
 
-	if isPedTerminated(client) then
-		repeat until spawnPlayer(client, x, y, z, 0, math.random(9, 288))
-	else
-		spawnPlayer(client, x, y, z, 0, getPedSkin(client))
-	end
+	spawnPlayer(client, x, y, z, 0, getPedSkin(client))
 
 	setCameraTarget(client, client)
 	setCameraInterior(client, getElementInterior(client))
@@ -396,7 +391,7 @@ function warpMeIntoVehicle(vehicle)
 	if not isElement(vehicle) then return end
 
 	if isPedDead(client) then
-		spawnMe()
+		return
 	end
 
 	if getPedOccupiedVehicle(client) then
@@ -408,11 +403,6 @@ function warpMeIntoVehicle(vehicle)
 	local driver = getVehicleController(vehicle)
 	for i=0,numseats do
 		if not getVehicleOccupant(vehicle, i) then
-			if isPedDead(client) then
-				local x, y, z = getElementPosition(vehicle)
-				spawnMe(x + 4, y, z + 1)
-			end
-
 			setElementInterior(client, interior)
 			setCameraInterior(client, interior)
 			warpPedIntoVehicle(client, vehicle, i)

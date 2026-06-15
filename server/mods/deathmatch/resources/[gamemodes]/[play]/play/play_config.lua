@@ -18,8 +18,16 @@ pickupSpawns = {
     {"loco", 2029.12, 1554.12, 11.12},
 }
 
--- PLAYER SPAWN
--- Caligula's Palace, Las Venturas
+-- PLAYER SPAWNS
+playerSpawns = {
+    {x = 1970.145, y = 1623.144, z = 12.863, rotation = 0, name = "Pirate in Men's Pants Casino Entrance"},
+    {x = 2222.357, y = 1838.855, z = 10.820, rotation = 0, name = "The Clown's Pocket"},
+    {x = 2027.691, y = 1916.023, z = 12.328, rotation = 0, name = "The Visage"},
+    {x = 2236.576, y = 1285.966, z = 10.820, rotation = 0, name = "The Camel's Toe"},
+    {x = 1957.339, y = 1343.005, z = 15.375, rotation = 0, name = "The High Roller"}
+}
+
+-- PLAYER SPAWN FALLBACK
 playerSpawn = {
     x = 2163.10,
     y = 1682.55,
