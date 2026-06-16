@@ -1,7 +1,6 @@
 -- ==========================================
 -- PLAY VEHICLE MANAGEMENT
 -- ==========================================
-
 local vehicleTimers = {}
 local playerVehicles = {}
 local vehicleOwners = {}
@@ -22,15 +21,7 @@ end
 function createPlayVehicle(vehicleData)
     local modelID, posX, posY, posZ, rotZ = unpack(vehicleData)
 
-    local vehicleElement = createVehicle(
-        modelID,
-        posX,
-        posY,
-        posZ,
-        0,
-        0,
-        rotZ
-    )
+    local vehicleElement = createVehicle(modelID, posX, posY, posZ, 0, 0, rotZ)
 
     if not vehicleElement then
         return false
@@ -40,14 +31,8 @@ function createPlayVehicle(vehicleData)
     setElementFrozen(vehicleElement, true)
 
     -- Vehicle Color (Aquamarine)
-    if modelID == 411 or modelID == 539  or modelID == 457 then
-        setVehicleColor(
-            vehicleElement,
-            127, 255, 212,
-            127, 255, 212,
-            127, 255, 212,
-            127, 255, 212
-        )
+    if modelID == 411 or modelID == 539 or modelID == 457 then
+        setVehicleColor(vehicleElement, 127, 255, 212, 127, 255, 212, 127, 255, 212, 127, 255, 212)
     end
 
     -- Vehicle Settings
@@ -167,14 +152,7 @@ function onVehicleEnter(playerElement)
 
         local currentX, currentY, currentZ = getElementPosition(vehicleElement)
 
-        local distance = getDistanceBetweenPoints3D(
-            spawnX,
-            spawnY,
-            spawnZ,
-            currentX,
-            currentY,
-            currentZ
-        )
+        local distance = getDistanceBetweenPoints3D(spawnX, spawnY, spawnZ, currentX, currentY, currentZ)
 
         if distance > 6 then
             createPlayVehicle(vehicleData)
@@ -200,12 +178,7 @@ function onVehicleExit()
     end
 
     -- Start A 60 Second Abandonment Timer
-    vehicleTimers[source] = setTimer(
-        destroyVehicle,
-        60000,
-        1,
-        source
-    )
+    vehicleTimers[source] = setTimer(destroyVehicle, 60000, 1, source)
 end
 
 function onVehicleExplode()

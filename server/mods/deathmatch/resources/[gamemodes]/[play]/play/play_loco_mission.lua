@@ -1,7 +1,6 @@
 -- ==========================================
 -- LOCO SKULL MISSION SYSTEM
 -- ==========================================
-
 -- REWARD SETTINGS
 local REWARD_MONEY = 10000
 local REWARD_POINTS = 1
@@ -23,11 +22,10 @@ local MOLOTOV_MATCH_RADIUS = 30
 local MOLOTOV_MATCH_TIME_MS = 30000
 
 -- VEHICLE MODELS THAT SPAWN
-local MISSION_VEHICLE_MODELS = {
-    579, -- Huntley
-    400, -- Landstalker
-    404, -- Perenial
-    489  -- Rancher
+local MISSION_VEHICLE_MODELS = {579, -- Huntley
+400, -- Landstalker
+404, -- Perenial
+489 -- Rancher
 }
 
 -- STATE
@@ -88,7 +86,9 @@ end
 local function destroyMissionVehicle(player)
 
     local data = activeMissionVehicles[player]
-    if not data then return end
+    if not data then
+        return
+    end
 
     local vehicle = data.vehicle
     local blip = data.blip
@@ -97,7 +97,9 @@ local function destroyMissionVehicle(player)
     missionCompleted[player] = nil
     missionState[player] = nil
 
-    if isElement(blip) then destroyElement(blip) end
+    if isElement(blip) then
+        destroyElement(blip)
+    end
 
     if vehicleTimers[vehicle] and isTimer(vehicleTimers[vehicle]) then
         killTimer(vehicleTimers[vehicle])
@@ -106,7 +108,9 @@ local function destroyMissionVehicle(player)
     vehicleTimers[vehicle] = nil
     missionVehicleMolotovUntil[vehicle] = nil
 
-    if isElement(vehicle) then destroyElement(vehicle) end
+    if isElement(vehicle) then
+        destroyElement(vehicle)
+    end
 end
 
 local function failMission(player)
@@ -124,7 +128,9 @@ end
 -- COMPLETE
 local function completeMission(player, vehicle, reason, keepAccess)
 
-    if missionCompleted[player] then return end
+    if missionCompleted[player] then
+        return
+    end
     missionCompleted[player] = true
 
     rewardPlayer(player)
@@ -146,7 +152,9 @@ end
 -- SPAWN (HARD GATE INSIDE)
 local function spawnMissionVehicle(player)
 
-    if not isElement(player) then return end
+    if not isElement(player) then
+        return
+    end
 
     -- CHECK COOLDOWN
     if missionCooldown[player] and getTickCount() < missionCooldown[player] then
@@ -175,7 +183,9 @@ local function spawnMissionVehicle(player)
     local z = MISSION_TARGET_Z
 
     local vehicle = createVehicle(model, x, y, z)
-    if not vehicle then return end
+    if not vehicle then
+        return
+    end
 
     setVehicleColor(vehicle, 0, 0, 0)
 
@@ -202,8 +212,12 @@ end
 -- COL TRIGGER (NO LOGIC, ONLY CALL)
 local function onColHit(hitElement, matchingDimension)
 
-    if not matchingDimension then return end
-    if getElementType(hitElement) ~= "player" then return end
+    if not matchingDimension then
+        return
+    end
+    if getElementType(hitElement) ~= "player" then
+        return
+    end
 
     spawnMissionVehicle(hitElement)
 end
@@ -230,14 +244,8 @@ addEventHandler("onExplosion", root, function(explosionX, explosionY, explosionZ
 
         if isElement(vehicle) then
             local vehicleX, vehicleY, vehicleZ = getElementPosition(vehicle)
-            local distance = getDistanceBetweenPoints3D(
-                explosionX,
-                explosionY,
-                explosionZ,
-                vehicleX,
-                vehicleY,
-                vehicleZ
-            )
+            local distance =
+                getDistanceBetweenPoints3D(explosionX, explosionY, explosionZ, vehicleX, vehicleY, vehicleZ)
 
             if distance <= MOLOTOV_MATCH_RADIUS then
                 missionVehicleMolotovUntil[vehicle] = getTickCount() + MOLOTOV_MATCH_TIME_MS
@@ -256,17 +264,9 @@ end)
 -- START
 addEventHandler("onResourceStart", resourceRoot, function()
 
-    createMarker(
-        MARKER_X, MARKER_Y, MARKER_Z,
-        "cylinder",
-        MARKER_RADIUS,
-        127, 255, 212, 150
-    )
+    createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 127, 255, 212, 150)
 
-    missionCol = createColSphere(
-        MARKER_X, MARKER_Y, MARKER_Z,
-        MISSION_COL_RADIUS
-    )
+    missionCol = createColSphere(MARKER_X, MARKER_Y, MARKER_Z, MISSION_COL_RADIUS)
 
     addEventHandler("onColShapeHit", missionCol, onColHit)
 end)

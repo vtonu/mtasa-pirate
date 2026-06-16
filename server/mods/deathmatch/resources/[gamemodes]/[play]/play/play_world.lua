@@ -1,7 +1,6 @@
 -- ==========================================
 -- PLAY WORLD SETTINGS
 -- ==========================================
-
 local DEFAULT_WORLD_SETTINGS = {
     gameType = "Custom",
     mapName = "Las Venturas Freeroam",

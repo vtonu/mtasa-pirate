@@ -1,7 +1,6 @@
 -- ==========================================
 -- PLAY MODE & RESOURCE MANAGEMENT
 -- ==========================================
-
 local function onResourceStartPlay()
 
     -- INITIALIZE PLAY MODE

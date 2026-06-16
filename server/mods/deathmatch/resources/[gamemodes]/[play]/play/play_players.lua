@@ -55,17 +55,8 @@ function playSpawnPlayer(playerElement, spawnData)
     spawnData = spawnData or getRandomPlayerSpawn()
 
     -- SPAWN POSITION
-    spawnPlayer(
-        playerElement,
-        spawnData.x,
-        spawnData.y,
-        spawnData.z,
-        spawnData.rotation or playerSpawn.rotation,
-        spawnData.skin or playerSpawn.skin,
-        0,
-        0,
-        nil
-    )
+    spawnPlayer(playerElement, spawnData.x, spawnData.y, spawnData.z, spawnData.rotation or playerSpawn.rotation,
+        spawnData.skin or playerSpawn.skin, 0, 0, nil)
 
     startPlayerNotifications(playerElement)
     setCameraTarget(playerElement)

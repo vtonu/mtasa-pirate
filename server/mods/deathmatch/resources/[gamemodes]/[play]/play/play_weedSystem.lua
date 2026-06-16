@@ -1,7 +1,6 @@
 -- ==========================================
 -- LOCO SKULL WEED SYSTEM
 -- ==========================================
-
 -- MARKER POSITION
 local MARKER_X, MARKER_Y, MARKER_Z = 2018.58, 1537.11, 9.82
 local MARKER_RADIUS = 0.8
@@ -13,15 +12,21 @@ local GARDEN_REWARD_POINTS = 1
 local gardenCol = nil
 
 local function onPlayerEnterGarden(hitElement, matchingDimension)
-    if not matchingDimension then return end
-    if getElementType(hitElement) ~= "player" then return end
+    if not matchingDimension then
+        return
+    end
+    if getElementType(hitElement) ~= "player" then
+        return
+    end
 
     setElementData(hitElement, "atWeedGarden", true)
     outputChatBox("Welcome to the Fog of War Garden. Press F5 to show/hide controls.", hitElement, 127, 255, 212)
 end
 
 local function onPlayerLeaveGarden(leftElement, matchingDimension)
-    if getElementType(leftElement) ~= "player" then return end
+    if getElementType(leftElement) ~= "player" then
+        return
+    end
     setElementData(leftElement, "atWeedGarden", false)
 end
 

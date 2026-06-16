@@ -1,7 +1,6 @@
 -- ==========================================
 -- LOCO SKULL SHOP SYSTEM
 -- ==========================================
-
 -- MARKER POSITION
 local MARKER_X, MARKER_Y, MARKER_Z = 2000.70, 1539.16, 12.65
 local MARKER_RADIUS = 0.8
@@ -10,15 +9,21 @@ local SHOP_COL_RADIUS = 1.1
 local shopCol = nil
 
 local function onPlayerEnterShop(hitElement, matchingDimension)
-    if not matchingDimension then return end
-    if getElementType(hitElement) ~= "player" then return end
+    if not matchingDimension then
+        return
+    end
+    if getElementType(hitElement) ~= "player" then
+        return
+    end
 
     setElementData(hitElement, "atBootyShop", true)
     outputChatBox("You're at the Booty Desk. Press F6 to show/hide controls.", hitElement, 127, 255, 212)
 end
 
 local function onPlayerLeaveShop(leftElement)
-    if getElementType(leftElement) ~= "player" then return end
+    if getElementType(leftElement) ~= "player" then
+        return
+    end
 
     setElementData(leftElement, "atBootyShop", false)
 
