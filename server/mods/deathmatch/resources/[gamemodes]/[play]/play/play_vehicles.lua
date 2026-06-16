@@ -31,7 +31,7 @@ function createPlayVehicle(vehicleData)
     setElementFrozen(vehicleElement, true)
 
     -- Vehicle Color (Aquamarine)
-    if modelID == 411 or modelID == 539 or modelID == 457 then
+    if modelID == 411 or modelID == 539 or modelID == 457 or modelID == 476 then
         setVehicleColor(vehicleElement, 127, 255, 212, 127, 255, 212, 127, 255, 212, 127, 255, 212)
     end
 
