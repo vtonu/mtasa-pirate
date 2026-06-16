@@ -22,13 +22,15 @@
 
 ## Resource Structure
 
+```text
 resource_name/
-├── meta.xml
-├── server/
-├── client/
-├── shared/
-├── assets/
-└── config/
+|-- meta.xml
+|-- server/
+|-- client/
+|-- shared/
+|-- assets/
+`-- config/
+```
 
 ## Main Project Structure
 
@@ -53,6 +55,9 @@ resources/
 |-- [gameplay]/weed-ui/
 |-- [gameplay]/nametags/
 |-- [gameplay]/freeroam/
+|-- [gameplay]/blur/
+|-- [gameplay]/deathpickups/
+|-- [gameplay]/rustlerbombs/
 `-- pirate-map/
 ```
 
@@ -63,7 +68,7 @@ The `pirate-map` resource also contains the full map and its object files. Those
 ## Architecture Rules
 
 - Every resource must have a valid meta.xml
-- Require minimum MTA version 1.6.0
+- New custom resources should target MTA 1.6.0+
 - Keep resources decoupled
 - Use exports instead of globals
 - Resource names must be lowercase with no spaces
@@ -130,6 +135,12 @@ The gamemode remains server authoritative. The main `play` resource owns gamepla
 - Supporting freeroam resource used by the `play` gamemode
 - Mostly based on the existing MTA resource and only changed where needed, including the F1 GUI
 
+### Extra Gameplay Resources
+
+- `blur` disables unwanted screen blur
+- `deathpickups` handles pickup drops after player deaths
+- `rustlerbombs` adds Rustler bomb controls
+
 ## Pirate Map
 
 - `pirate-map.map` contains the main pirate-themed map and its placed objects
@@ -147,7 +158,7 @@ This client script is needed because some map objects are used as visual or repl
 - Add rate limiting to remote events
 - Use Luac and cache protection where appropriate
 - Enable native anti cheat protections
-- cache="false" for meta.xml files
+- Use `cache="false"` for sensitive downloadable client scripts or files
 
 ## Coding Standards
 
@@ -156,31 +167,29 @@ This client script is needed because some map objects are used as visual or repl
 - Keep onClientRender lightweight
 - Don't come up with new colors for text, unless specified, or words, use the colors from the notifications & messages file
 
-## Utility Functions
+## Common Utility Functions
 
 ### Table
 
 - table.copy
+- table.find
+- table.findall
 - table.merge
-- table.deepmerge
-- table.random
-- table.size
+- table.map
+- table.flatten
+- table.removevalue
 
 ### Math
 
-- math.clamp
-- math.lerp
-- math.round
+- Add shared math helpers only when needed
 
 ### UI
 
-- centerWindow
-- isMouseOnGuiElement
+- Reuse existing GUI and CEF helpers instead of duplicating UI logic
 
 ### Execution
 
-- debounce
-- isEventHandlerAdded
+- Add event throttling and debounce helpers only when needed
 
 ## Important Server and Client Events
 
@@ -208,7 +217,6 @@ This client script is needed because some map objects are used as visual or repl
 
 - Single source of truth
 - Player state management
-- Database operations
 - Permission validation
 - Event throttling
-- Secure persistence
+- Secure state handling
