@@ -176,7 +176,8 @@ spawnMissionVehicle = function(player)
 
         missionState[player] = {
             active = true,
-            expiresAt = getTickCount() + MISSION_VEHICLE_LIFE_MS
+            expiresAt = getTickCount() + MISSION_VEHICLE_LIFE_MS,
+            targetCount = 0
         }
 
         missionTimers[player] = setTimer(function(p)
@@ -201,6 +202,8 @@ spawnMissionVehicle = function(player)
         return
     end
 
+    setElementFrozen(vehicle, false)
+    setElementVelocity(vehicle, 0, 0, -0.04)
     setVehicleColor(vehicle, 0, 0, 0)
 
     local blip = createBlipAttachedTo(vehicle, 0, 1, 127, 255, 212, 255)
@@ -210,7 +213,14 @@ spawnMissionVehicle = function(player)
         blip = blip
     }
 
-    playMessage(player, "locoTargetSpawned")
+    local state = missionState[player]
+    state.targetCount = (state.targetCount or 0) + 1
+
+    if state.targetCount == 1 then
+        playMessage(player, "locoTargetSpawned")
+    else
+        playMessage(player, "locoNewTargetSpawned")
+    end
 end
 
 -- COL TRIGGER (NO LOGIC, ONLY CALL)

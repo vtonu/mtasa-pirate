@@ -41,6 +41,10 @@ local MESSAGE_DEFINITIONS = {
         text = "TARGET SPAWNED. DESTROY IT.",
         color = PLAY_COLOR
     },
+    locoNewTargetSpawned = {
+        text = "NEW TARGET SPAWNED. DESTROY IT!",
+        color = PLAY_COLOR
+    },
     captainNotification = {
         text = "[NOTIFICATION] Aye Captain, you can always come to us! xD",
         color = NOTIFICATION_COLOR
