@@ -181,6 +181,7 @@ spawnMissionVehicle = function(player)
 
         missionTimers[player] = setTimer(function(p)
             if isElement(p) then
+                playMessage(p, "locoCooldown")
                 failMission(p)
             end
         end, MISSION_VEHICLE_LIFE_MS, 1, player)

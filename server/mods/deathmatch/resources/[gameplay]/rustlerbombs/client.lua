@@ -11,114 +11,117 @@ local hudColor = tocolor(127, 255, 212)
 local hudFont = "default-bold"
 
 function drawHud()
-	if reloading then
-		dxDrawText("Reloading...", screenW - 250, screenH - 100, _, _, hudColor, 2, hudFont)
-	else
-		dxDrawText("Bombs: " .. tostring(rounds - shotsFired) .. "/" .. tostring(rounds), screenW - 250, screenH - 100, _, _, hudColor, 2, hudFont)
-	end
+    if reloading then
+        dxDrawText("Reloading...", screenW - 250, screenH - 100, _, _, hudColor, 2, hudFont)
+    else
+        dxDrawText("Bombs: " .. tostring(rounds - shotsFired) .. "/" .. tostring(rounds), screenW - 250, screenH - 100,
+            _, _, hudColor, 2, hudFont)
+    end
 end
 
 function dropGliderBomb()
-	if not isElement(rustler) then
-		return
-	end
-	local nowTick = getTickCount()
+    if not isElement(rustler) then
+        return
+    end
+    local nowTick = getTickCount()
 
-	if nowTick - lastShotTick < delayBetweenShots then
-		return
-	end
+    if nowTick - lastShotTick < delayBetweenShots then
+        return
+    end
 
-	local matrix = getElementMatrix(rustler)
-	local _, forward, up, position = unpack(matrix)
-	local x, y, z = unpack(position)
+    local matrix = getElementMatrix(rustler)
+    local _, forward, up, position = unpack(matrix)
+    local x, y, z = unpack(position)
 
-	if getVehicleLandingGearDown(rustler) then
-		return
-	end
+    if getVehicleLandingGearDown(rustler) then
+        return
+    end
 
-	local uX, uY, uZ = unpack(up)
-	local fX, fY, fZ = unpack(forward)
-	local vX, vY, vZ = getElementVelocity(rustler)
+    local uX, uY, uZ = unpack(up)
+    local fX, fY, fZ = unpack(forward)
+    local vX, vY, vZ = getElementVelocity(rustler)
 
-	if reloading then
-		playSoundFrontEnd(41)
-		return
-	end
+    if reloading then
+        playSoundFrontEnd(20)
+        return
+    end
 
-	local projectile = createProjectile(rustler, 21, x - uX * 2, y - uY * 2, z - uZ * 2, 1, nil, 0, 0, 0, vX + fX * 0.01, vY + fY * 0.01, vZ + fZ * 0.01 - uZ * 0.1)
+    local projectile = createProjectile(rustler, 21, x - uX * 2, y - uY * 2, z - uZ * 2, 1, nil, 0, 0, 0,
+        vX + fX * 0.01, vY + fY * 0.01, vZ + fZ * 0.01 - uZ * 0.1)
 
-	if not projectile then
-		return
-	end
+    if not projectile then
+        return
+    end
 
-	setProjectileMatrix(projectile, Vector3(vX, vY, vZ))
+    setProjectileMatrix(projectile, Vector3(vX, vY, vZ))
 
-	setElementCollisionsEnabled(projectile, false)
-	playSoundFrontEnd(30)
+    setElementCollisionsEnabled(projectile, false)
+    playSoundFrontEnd(42)
 
-	shotsFired = shotsFired + 1
+    shotsFired = shotsFired + 1
 
-	if shotsFired >= 10 then
-		setTimer(function()
-				reloading = false
-				shotsFired = 0
-			end, delayBetweenReloads, 1)
-		reloading = true
-	end
+    if shotsFired >= 10 then
+        setTimer(function()
+            reloading = false
+            shotsFired = 0
+        end, delayBetweenReloads, 1)
+        reloading = true
+        playSoundFrontEnd(46)
+    end
 
-	lastShotTick = nowTick
+    lastShotTick = nowTick
 end
 
 function gliderBomb()
-	dropGliderBomb()
+    dropGliderBomb()
 end
 
 function exitMode()
-	unbindKey("vehicle_fire", "down", gliderBomb)
-	removeEventHandler("onClientPlayerWasted", localPlayer, exitMode)
+    unbindKey("vehicle_fire", "down", gliderBomb)
+    removeEventHandler("onClientPlayerWasted", localPlayer, exitMode)
 
-	if isElement(rustler) then
-		removeEventHandler("onClientVehicleExit", rustler, exitMode)
-		removeEventHandler("onClientElementModelChange", rustler, exitMode)
-		removeEventHandler("onClientElementDestroy", rustler, exitMode)
-		removeEventHandler("onClientVehicleExplode", rustler, exitMode)
-	end
+    if isElement(rustler) then
+        removeEventHandler("onClientVehicleExit", rustler, exitMode)
+        removeEventHandler("onClientElementModelChange", rustler, exitMode)
+        removeEventHandler("onClientElementDestroy", rustler, exitMode)
+        removeEventHandler("onClientVehicleExplode", rustler, exitMode)
+    end
 
-	removeEventHandler("onClientRender", root, drawHud)
+    removeEventHandler("onClientRender", root, drawHud)
 
-	rustler = false
-	reloading = false
-	lastShotTick = 0
-	rounds = 10
-	shotsFired = 0
-	delayBetweenShots = 625
-	delayBetweenReloads = 5000
+    rustler = false
+    reloading = false
+    lastShotTick = 0
+    rounds = 10
+    shotsFired = 0
+    delayBetweenShots = 625
+    delayBetweenReloads = 5000
 end
 addEventHandler("onClientResourceStop", resourceRoot, exitMode)
 
 function enterMode(vehicle)
-	if not isElement(vehicle) or getElementModel(vehicle) ~= 476 then
-		return
-	end
+    if not isElement(vehicle) or getElementModel(vehicle) ~= 476 then
+        return
+    end
 
-	rustler = vehicle
+    rustler = vehicle
 
-	bindKey("vehicle_fire", "down", gliderBomb)
-	addEventHandler("onClientPlayerWasted", localPlayer, exitMode)
-	addEventHandler("onClientVehicleExit", vehicle, exitMode)
-	addEventHandler("onClientElementModelChange", vehicle, exitMode)
-	addEventHandler("onClientElementDestroy", vehicle, exitMode)
-	addEventHandler("onClientVehicleExplode", vehicle, exitMode)
-	addEventHandler("onClientRender", root, drawHud)
+    bindKey("vehicle_fire", "down", gliderBomb)
+    addEventHandler("onClientPlayerWasted", localPlayer, exitMode)
+    addEventHandler("onClientVehicleExit", vehicle, exitMode)
+    addEventHandler("onClientElementModelChange", vehicle, exitMode)
+    addEventHandler("onClientElementDestroy", vehicle, exitMode)
+    addEventHandler("onClientVehicleExplode", vehicle, exitMode)
+    addEventHandler("onClientRender", root, drawHud)
 end
 addEventHandler("onClientPlayerVehicleEnter", localPlayer, enterMode)
 
 function checkStart()
-	local vehicle = getPedOccupiedVehicle(localPlayer)
+    local vehicle = getPedOccupiedVehicle(localPlayer)
 
-	if vehicle and getElementModel(vehicle) == 476 then
-		enterMode(vehicle)
-	end
+    if vehicle and getElementModel(vehicle) == 476 then
+        enterMode(vehicle)
+    end
 end
 addEventHandler("onClientResourceStart", resourceRoot, checkStart)
 
