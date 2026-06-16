@@ -30,11 +30,11 @@ local MESSAGE_DEFINITIONS = {
         end
     },
     locoCooldown = {
-        text = "The Loco run failed. Wait 30 seconds, then grab the skull again.",
+        text = "TIMER HAS EXPIRED. GRAB THE LOCO SKULL AGAIN.",
         color = PLAY_COLOR
     },
     locoRequired = {
-        text = "TIMER HAS EXPIRED. LOCO SKULL REQUIRED TO START MISSION IN 10s.",
+        text = "TIMER HAS EXPIRED. LOCO SKULL REQUIRED TO START.",
         color = PLAY_COLOR
     },
     locoTargetSpawned = {

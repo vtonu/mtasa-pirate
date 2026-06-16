@@ -17,9 +17,6 @@ local MISSION_TARGET_RADIUS = 15
 -- VEHICLE LIFETIME
 local MISSION_VEHICLE_LIFE_MS = 180000 -- 3 min
 local MISSION_ACCESS_TIMEOUT_MS = 10000 -- 10 sec
-local MOLOTOV_EXPLOSION_TYPE = 1
-local MOLOTOV_MATCH_RADIUS = 30
-local MOLOTOV_MATCH_TIME_MS = 30000
 
 -- VEHICLE MODELS THAT SPAWN
 local MISSION_VEHICLE_MODELS = {579, -- Huntley
@@ -30,12 +27,12 @@ local MISSION_VEHICLE_MODELS = {579, -- Huntley
 
 -- STATE
 local activeMissionVehicles = {}
-local missionCompleted = {}
-local vehicleTimers = {}
+local missionTimers = {}
 local missionState = {}
 local missionCooldown = {}
 local accessTimers = {}
-local missionVehicleMolotovUntil = {}
+
+local spawnMissionVehicle
 
 function refreshLocoMissionAccess(player)
     if not isElement(player) then
@@ -94,23 +91,25 @@ local function destroyMissionVehicle(player)
     local blip = data.blip
 
     activeMissionVehicles[player] = nil
-    missionCompleted[player] = nil
-    missionState[player] = nil
 
     if isElement(blip) then
         destroyElement(blip)
     end
 
-    if vehicleTimers[vehicle] and isTimer(vehicleTimers[vehicle]) then
-        killTimer(vehicleTimers[vehicle])
-    end
-
-    vehicleTimers[vehicle] = nil
-    missionVehicleMolotovUntil[vehicle] = nil
-
     if isElement(vehicle) then
         destroyElement(vehicle)
     end
+end
+
+local function clearMission(player)
+    destroyMissionVehicle(player)
+
+    if missionTimers[player] and isTimer(missionTimers[player]) then
+        killTimer(missionTimers[player])
+    end
+
+    missionTimers[player] = nil
+    missionState[player] = nil
 end
 
 local function failMission(player)
@@ -120,37 +119,38 @@ local function failMission(player)
 
     clearLocoMissionAccess(player)
     missionCooldown[player] = getTickCount() + 30000
-    destroyMissionVehicle(player)
+    clearMission(player)
 
     return true
 end
 
--- COMPLETE
-local function completeMission(player, vehicle, reason, keepAccess)
+-- COMPLETE TARGET
+local function completeMissionTarget(player)
+    local state = missionState[player]
 
-    if missionCompleted[player] then
+    if not state or not state.active then
         return
     end
-    missionCompleted[player] = true
 
     rewardPlayer(player)
     playMessage(player, "locoReward", REWARD_MONEY)
+    destroyMissionVehicle(player)
 
-    if keepAccess then
-        refreshLocoMissionAccess(player)
-    else
+    if getTickCount() >= state.expiresAt then
+        clearMission(player)
         clearLocoMissionAccess(player)
+        return
     end
 
-    missionCooldown[player] = nil
-
     setTimer(function()
-        destroyMissionVehicle(player)
+        if isElement(player) and missionState[player] and missionState[player].active then
+            spawnMissionVehicle(player)
+        end
     end, 2000, 1)
 end
 
 -- SPAWN (HARD GATE INSIDE)
-local function spawnMissionVehicle(player)
+spawnMissionVehicle = function(player)
 
     if not isElement(player) then
         return
@@ -162,15 +162,28 @@ local function spawnMissionVehicle(player)
         return
     end
 
-    if getElementData(player, "locoMissionActive") ~= true then
-        playMessage(player, "locoRequired")
-        return
-    end
-
-    refreshLocoMissionAccess(player)
-
     if missionState[player] and missionState[player].active then
-        return
+        if activeMissionVehicles[player] then
+            return
+        end
+    else
+        if getElementData(player, "locoMissionActive") ~= true then
+            playMessage(player, "locoRequired")
+            return
+        end
+
+        refreshLocoMissionAccess(player)
+
+        missionState[player] = {
+            active = true,
+            expiresAt = getTickCount() + MISSION_VEHICLE_LIFE_MS
+        }
+
+        missionTimers[player] = setTimer(function(p)
+            if isElement(p) then
+                failMission(p)
+            end
+        end, MISSION_VEHICLE_LIFE_MS, 1, player)
     end
 
     local model = MISSION_VEHICLE_MODELS[math.random(#MISSION_VEHICLE_MODELS)]
@@ -196,17 +209,7 @@ local function spawnMissionVehicle(player)
         blip = blip
     }
 
-    missionState[player] = {
-        active = true
-    }
-
     playMessage(player, "locoTargetSpawned")
-
-    vehicleTimers[vehicle] = setTimer(function(p)
-        if isElement(p) then
-            failMission(p)
-        end
-    end, MISSION_VEHICLE_LIFE_MS, 1, player)
 end
 
 -- COL TRIGGER (NO LOGIC, ONLY CALL)
@@ -226,30 +229,7 @@ end
 addEventHandler("onVehicleExplode", root, function()
     for player, data in pairs(activeMissionVehicles) do
         if data.vehicle == source then
-            local molotovUntil = missionVehicleMolotovUntil[source]
-            local keepAccess = molotovUntil and getTickCount() <= molotovUntil
-
-            completeMission(player, source, "explosion", keepAccess)
-        end
-    end
-end)
-
-addEventHandler("onExplosion", root, function(explosionX, explosionY, explosionZ, explosionType)
-    if explosionType ~= MOLOTOV_EXPLOSION_TYPE then
-        return
-    end
-
-    for _, data in pairs(activeMissionVehicles) do
-        local vehicle = data.vehicle
-
-        if isElement(vehicle) then
-            local vehicleX, vehicleY, vehicleZ = getElementPosition(vehicle)
-            local distance =
-                getDistanceBetweenPoints3D(explosionX, explosionY, explosionZ, vehicleX, vehicleY, vehicleZ)
-
-            if distance <= MOLOTOV_MATCH_RADIUS then
-                missionVehicleMolotovUntil[vehicle] = getTickCount() + MOLOTOV_MATCH_TIME_MS
-            end
+            completeMissionTarget(player)
         end
     end
 end)
@@ -258,7 +238,7 @@ end)
 addEventHandler("onPlayerQuit", root, function()
     missionCooldown[source] = nil
     clearLocoMissionAccess(source)
-    destroyMissionVehicle(source)
+    clearMission(source)
 end)
 
 -- START

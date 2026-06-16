@@ -132,7 +132,7 @@ local function onPickupHit(playerElement)
         -- Loco Skull Pickup
     elseif pickupInfo.type == "loco" then
 
-        giveWeapon(playerElement, 18, 20, true)
+        giveWeapon(playerElement, 18, 10, true)
 
         playMessage(playerElement, "locoPickup")
 
