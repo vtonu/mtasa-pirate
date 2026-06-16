@@ -1,15 +1,6 @@
 local g_PlayerData = {}
 local g_VehicleData = {}
 local PASSIVE_ALPHA = 160
-local passiveControls = {
-	"fire",
-	"aim_weapon",
-	"next_weapon",
-	"previous_weapon",
-	"action",
-	"vehicle_fire",
-	"vehicle_secondary_fire"
-}
 
 g_ArmedVehicles = {
 	[425] = true,
@@ -136,10 +127,6 @@ function setPlayerPassiveMode(player, state)
 	state = state == true
 	g_PlayerData[player].settings.passive = state
 	setElementAlpha(player, state and PASSIVE_ALPHA or 255)
-
-	for _, control in ipairs(passiveControls) do
-		toggleControl(player, control, not state)
-	end
 
 	triggerClientEvent(root, "onClientFreeroamLocalSettingChange", player, "passive", state)
 	return true
