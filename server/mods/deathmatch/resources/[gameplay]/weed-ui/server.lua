@@ -3,28 +3,164 @@ local playerShopState = {}
 local playerPerks = {}
 
 local PACKAGE_SETTINGS = {
-    cart = { label = "CART", duration = 5 * 60 * 1000, flowerAmmo = 60 },
-    eighth = { label = "1/8", duration = 10 * 60 * 1000, flowerAmmo = 120 },
-    ounce = { label = "OUNCE", duration = 20 * 60 * 1000, flowerAmmo = 250 },
-    qp = { label = "QP", duration = 30 * 60 * 1000, flowerAmmo = 500 }
+    cart = {
+        label = "CART",
+        duration = 5 * 60 * 1000,
+        flowerAmmo = 60
+    },
+    eighth = {
+        label = "1/8",
+        duration = 10 * 60 * 1000,
+        flowerAmmo = 120
+    },
+    ounce = {
+        label = "OUNCE",
+        duration = 20 * 60 * 1000,
+        flowerAmmo = 250
+    },
+    qp = {
+        label = "QP",
+        duration = 30 * 60 * 1000,
+        flowerAmmo = 500
+    }
 }
 
 local STRAINS = {
-    ["Granddaddy Purple"] = { type = "indica", prices = { eighth = 90, ounce = 190, qp = 340, cart = 45 } },
-    ["Northern Lights"] = { type = "indica", prices = { eighth = 80, ounce = 175, qp = 315, cart = 40 } },
-    ["Bubba Kush"] = { type = "indica", prices = { eighth = 75, ounce = 165, qp = 295, cart = 35 } },
-    ["Purple Kush"] = { type = "indica", prices = { eighth = 85, ounce = 185, qp = 330, cart = 45 } },
-    ["Hindu Kush"] = { type = "indica", prices = { eighth = 70, ounce = 155, qp = 275, cart = 30 } },
-    ["Sour Diesel"] = { type = "sativa", prices = { eighth = 100, ounce = 220, qp = 390, cart = 50 } },
-    ["Durban Poison"] = { type = "sativa", prices = { eighth = 90, ounce = 200, qp = 350, cart = 45 } },
-    ["Jack Herer"] = { type = "sativa", prices = { eighth = 85, ounce = 180, qp = 325, cart = 40 } },
-    ["Green Crack"] = { type = "sativa", prices = { eighth = 95, ounce = 210, qp = 375, cart = 50 } },
-    ["Super Lemon Haze"] = { type = "sativa", prices = { eighth = 80, ounce = 175, qp = 310, cart = 40 } },
-    ["Gorilla Glue"] = { type = "hybrid", prices = { eighth = 100, ounce = 215, qp = 385, cart = 50 } },
-    ["Girl Scout Cookies"] = { type = "hybrid", prices = { eighth = 95, ounce = 205, qp = 365, cart = 45 } },
-    ["OG Kush"] = { type = "hybrid", prices = { eighth = 85, ounce = 190, qp = 335, cart = 40 } },
-    ["White Widow"] = { type = "hybrid", prices = { eighth = 80, ounce = 180, qp = 320, cart = 35 } },
-    ["Blue Zushi"] = { type = "hybrid", prices = { eighth = 100, ounce = 220, qp = 400, cart = 50 } }
+    ["Granddaddy Purple"] = {
+        type = "indica",
+        prices = {
+            eighth = 90,
+            ounce = 190,
+            qp = 340,
+            cart = 45
+        }
+    },
+    ["Northern Lights"] = {
+        type = "indica",
+        prices = {
+            eighth = 80,
+            ounce = 175,
+            qp = 315,
+            cart = 40
+        }
+    },
+    ["Bubba Kush"] = {
+        type = "indica",
+        prices = {
+            eighth = 75,
+            ounce = 165,
+            qp = 295,
+            cart = 35
+        }
+    },
+    ["Purple Kush"] = {
+        type = "indica",
+        prices = {
+            eighth = 85,
+            ounce = 185,
+            qp = 330,
+            cart = 45
+        }
+    },
+    ["Hindu Kush"] = {
+        type = "indica",
+        prices = {
+            eighth = 70,
+            ounce = 155,
+            qp = 275,
+            cart = 30
+        }
+    },
+    ["Sour Diesel"] = {
+        type = "sativa",
+        prices = {
+            eighth = 100,
+            ounce = 220,
+            qp = 390,
+            cart = 50
+        }
+    },
+    ["Durban Poison"] = {
+        type = "sativa",
+        prices = {
+            eighth = 90,
+            ounce = 200,
+            qp = 350,
+            cart = 45
+        }
+    },
+    ["Jack Herer"] = {
+        type = "sativa",
+        prices = {
+            eighth = 85,
+            ounce = 180,
+            qp = 325,
+            cart = 40
+        }
+    },
+    ["Green Crack"] = {
+        type = "sativa",
+        prices = {
+            eighth = 95,
+            ounce = 210,
+            qp = 375,
+            cart = 50
+        }
+    },
+    ["Super Lemon Haze"] = {
+        type = "sativa",
+        prices = {
+            eighth = 80,
+            ounce = 175,
+            qp = 310,
+            cart = 40
+        }
+    },
+    ["Gorilla Glue"] = {
+        type = "hybrid",
+        prices = {
+            eighth = 100,
+            ounce = 215,
+            qp = 385,
+            cart = 50
+        }
+    },
+    ["Girl Scout Cookies"] = {
+        type = "hybrid",
+        prices = {
+            eighth = 95,
+            ounce = 205,
+            qp = 365,
+            cart = 45
+        }
+    },
+    ["OG Kush"] = {
+        type = "hybrid",
+        prices = {
+            eighth = 85,
+            ounce = 190,
+            qp = 335,
+            cart = 40
+        }
+    },
+    ["White Widow"] = {
+        type = "hybrid",
+        prices = {
+            eighth = 80,
+            ounce = 180,
+            qp = 320,
+            cart = 35
+        }
+    },
+    ["Blue Zushi"] = {
+        type = "hybrid",
+        prices = {
+            eighth = 100,
+            ounce = 220,
+            qp = 400,
+            cart = 50
+        }
+    }
 }
 
 local FLOWER_WEAPON = 14
@@ -100,16 +236,17 @@ local function getGardenPayload(note, resetSelection)
         status = "Stable",
         note = note or "SELECT A STRAIN.",
         resetSelection = resetSelection == true,
-        actions = {
-            "BUY",
-            "HARVEST",
-            "CART"
-        },
-        buySizes = {
-            { label = "1/8", value = "eighth" },
-            { label = "OUNCE", value = "ounce" },
-            { label = "QP", value = "qp" }
-        }
+        actions = {"BUY", "HARVEST", "CART"},
+        buySizes = {{
+            label = "1/8",
+            value = "eighth"
+        }, {
+            label = "OUNCE",
+            value = "ounce"
+        }, {
+            label = "QP",
+            value = "qp"
+        }}
     }
 end
 
@@ -189,7 +326,7 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
     if perks.walkingStyle then
         setPedWalkingStyle(player, perks.walkingStyle)
     end
-    
+
     setElementData(player, "weed.perk", strainType)
     setElementData(player, "weed.strain", strainName)
 
@@ -275,9 +412,7 @@ local function handlePurchase(player, state)
 
     if not price or getPlayerMoney(player) < price then
         state.insufficientFunds = (state.insufficientFunds or 0) + 1
-        local message = state.insufficientFunds > 3
-            and "YO, GET SOME MONEY DAWG!"
-            or "SORRY, INSUFFICIENT FUNDS."
+        local message = state.insufficientFunds > 3 and "YO, GET SOME MONEY DAWG!" or "SORRY, INSUFFICIENT FUNDS."
         sendShopMessage(player, message)
         return
     end
@@ -286,10 +421,8 @@ local function handlePurchase(player, state)
     takePlayerMoney(player, price)
     equipPlayerPerks(player, state.strain, strain.type, state.package)
 
-    sendShopMessage(
-        player,
-        "PURCHASE COMPLETE: " .. package.label .. " " .. string.upper(state.strain) .. " FOR $" .. price .. "."
-    )
+    sendShopMessage(player, "PURCHASE COMPLETE: " .. package.label .. " " .. string.upper(state.strain) .. " FOR $" ..
+        price .. ".")
     outputChatBox("[NOTIFICATION] Aye-aye, great choice! Perks equipped.", player, 255, 250, 80)
     scheduleIdleReset(player, state)
 end
@@ -353,7 +486,9 @@ addEvent("weedGarden:requestOpen", true)
 addEventHandler("weedGarden:requestOpen", resourceRoot, function()
     if getElementData(client, "atWeedGarden") == true then
         previewState[client] = true
-        playerShopState[client] = { revision = 0 }
+        playerShopState[client] = {
+            revision = 0
+        }
         sendGardenUI(client, getGardenPayload("SELECT A STRAIN.", true))
     else
         outputChatBox("Error: You must be at the garden.", client, 127, 255, 212)

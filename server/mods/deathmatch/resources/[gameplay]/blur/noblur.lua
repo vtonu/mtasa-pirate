@@ -2,7 +2,7 @@
 function toggleBlurCommand(playerSource, commandName, argument)
     -- In server-side, we must check the specific player's current blur level
     local currentBlur = getPlayerBlurLevel(playerSource)
-    
+
     -- Argument handling: /blurry on or /blurry off
     if argument == "on" then
         setPlayerBlurLevel(playerSource, 0)

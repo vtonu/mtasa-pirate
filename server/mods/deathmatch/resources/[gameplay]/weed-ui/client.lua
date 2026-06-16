@@ -155,30 +155,22 @@ local function updateWeedMovement(timeSlice)
 
     local activePerk = getElementData(localPlayer, "weed.perk")
 
-    if activePerk == "indica"
-        and isPedOnGround(localPlayer)
-        and not isElementInWater(localPlayer)
-        and (getPedControlState(localPlayer, "forwards")
-            or getPedControlState(localPlayer, "backwards")
-            or getPedControlState(localPlayer, "left")
-            or getPedControlState(localPlayer, "right")) then
+    if activePerk == "indica" and isPedOnGround(localPlayer) and not isElementInWater(localPlayer) and
+        (getPedControlState(localPlayer, "forwards") or getPedControlState(localPlayer, "backwards") or
+            getPedControlState(localPlayer, "left") or getPedControlState(localPlayer, "right")) then
         limitHorizontalVelocity(INDICA_MOVEMENT_SPEED_LIMIT)
         return
     end
 
-    if activePerk == "sativa"
-        and isPedOnGround(localPlayer)
-        and (getPedControlState(localPlayer, "forwards")
-            or getPedControlState(localPlayer, "backwards")
-            or getPedControlState(localPlayer, "left")
-            or getPedControlState(localPlayer, "right")) then
+    if activePerk == "sativa" and isPedOnGround(localPlayer) and
+        (getPedControlState(localPlayer, "forwards") or getPedControlState(localPlayer, "backwards") or
+            getPedControlState(localPlayer, "left") or getPedControlState(localPlayer, "right")) then
         boostHorizontalVelocity(SATIVA_RUN_SPEED_LIMIT, SATIVA_RUN_ACCELERATION, timeSlice)
         return
     end
 
-    if activePerk == "sativa"
-        and isElementInWater(localPlayer)
-        and (getPedControlState(localPlayer, "forwards") or getPedControlState(localPlayer, "backwards")) then
+    if activePerk == "sativa" and isElementInWater(localPlayer) and
+        (getPedControlState(localPlayer, "forwards") or getPedControlState(localPlayer, "backwards")) then
         boostHorizontalVelocity(SATIVA_SWIM_SPEED_LIMIT, SATIVA_SWIM_ACCELERATION, timeSlice)
     end
 end
