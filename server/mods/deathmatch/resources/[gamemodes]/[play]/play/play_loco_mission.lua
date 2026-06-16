@@ -10,9 +10,28 @@ local MARKER_X, MARKER_Y, MARKER_Z = 1996.3, 1543.7, 14.3
 local MARKER_RADIUS = 0.8
 local MISSION_COL_RADIUS = 1.1
 
--- TARGET AREA (Middle of lagoon)
-local MISSION_TARGET_X, MISSION_TARGET_Y, MISSION_TARGET_Z = 1943.6999511719, 1528.0999755859, 28.5
-local MISSION_TARGET_RADIUS = 15
+-- TARGET SPAWNS
+local MISSION_TARGET_SPAWNS = {{
+    x = 1972.6999511719,
+    y = 1558.4000244141,
+    z = 10.5,
+    rotation = 270
+}, {
+    x = 1969.8000488281,
+    y = 1567.9000244141,
+    z = 25.799999237061,
+    rotation = 0
+}, {
+    x = 1908,
+    y = 1514.3000488281,
+    z = 14.10000038147,
+    rotation = 0
+}, {
+    x = 1971.4000244141,
+    y = 1440.0999755859,
+    z = 16.89999961853,
+    rotation = 0
+}}
 
 -- VEHICLE LIFETIME
 local MISSION_VEHICLE_LIFE_MS = 180000 -- 3 min
@@ -189,15 +208,9 @@ spawnMissionVehicle = function(player)
     end
 
     local model = MISSION_VEHICLE_MODELS[math.random(#MISSION_VEHICLE_MODELS)]
+    local spawnData = MISSION_TARGET_SPAWNS[math.random(#MISSION_TARGET_SPAWNS)]
 
-    local angle = math.rad(math.random(0, 360))
-    local dist = math.random(4, MISSION_TARGET_RADIUS)
-
-    local x = MISSION_TARGET_X + math.cos(angle) * dist
-    local y = MISSION_TARGET_Y + math.sin(angle) * dist
-    local z = MISSION_TARGET_Z
-
-    local vehicle = createVehicle(model, x, y, z)
+    local vehicle = createVehicle(model, spawnData.x, spawnData.y, spawnData.z, 0, 0, spawnData.rotation)
     if not vehicle then
         return
     end
