@@ -1,6 +1,13 @@
 local g_PlayerData = {}
 local g_VehicleData = {}
 local PASSIVE_ALPHA = 160
+local passiveControls = {
+	"fire",
+	"aim_weapon",
+	"next_weapon",
+	"previous_weapon",
+	"action"
+}
 
 g_ArmedVehicles = {
 	[425] = true,
@@ -128,6 +135,10 @@ function setPlayerPassiveMode(player, state)
 	g_PlayerData[player].settings.passive = state
 	setElementAlpha(player, state and PASSIVE_ALPHA or 255)
 
+	for _, control in ipairs(passiveControls) do
+		toggleControl(player, control, not state)
+	end
+
 	triggerClientEvent(root, "onClientFreeroamLocalSettingChange", player, "passive", state)
 	return true
 end
@@ -145,6 +156,7 @@ function joinHandler(player)
 	setPlayerNametagColor(player, r, g, b)
 	g_PlayerData[player] = { vehicles = {}, settings={} }
 	addEventHandler("onFreeroamLocalSettingChange",player,onLocalSettingChange)
+	setPlayerPassiveMode(player, false)
 
 	if getOption('welcometextonstart') then
 		outputChatBox('Welcome to Lifestyle Gaming!', player, 255, 105, 180)
@@ -163,8 +175,22 @@ end
 
 addEventHandler("onPlayerDamage", root,
 	function(attacker)
+		local health = getElementHealth(source)
+		local armor = getPedArmor(source)
+
 		if isPassive(source) or isPassive(getResponsiblePlayer(attacker)) then
 			cancelEvent()
+			setTimer(function(player, restoredHealth, restoredArmor)
+				if not isElement(player) or isPedDead(player) then return end
+
+				if getElementHealth(player) < restoredHealth then
+					setElementHealth(player, restoredHealth)
+				end
+
+				if getPedArmor(player) < restoredArmor then
+					setPedArmor(player, restoredArmor)
+				end
+			end, 50, 1, source, health, armor)
 		end
 	end
 )
@@ -179,7 +205,12 @@ addEventHandler("onPedDamage", root,
 
 addEventHandler("onVehicleDamage", root,
 	function(_, attacker)
-		if isPassive(getVehicleController(source)) or isPassive(getResponsiblePlayer(attacker)) then
+		if isPassive(getVehicleController(source)) then
+			cancelEvent()
+			return
+		end
+
+		if isPassive(getResponsiblePlayer(attacker)) then
 			cancelEvent()
 		end
 	end
@@ -594,6 +625,7 @@ function quitHandler(player)
 	end
 
 	table.each(g_PlayerData[source].vehicles, unloadVehicle)
+	setPlayerPassiveMode(source, false)
 	removeEventHandler("onFreeroamLocalSettingChange",source,onLocalSettingChange)
 	g_PlayerData[source] = nil
 end

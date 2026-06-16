@@ -107,7 +107,7 @@ local function getGardenPayload(note, resetSelection)
         },
         buySizes = {
             { label = "1/8", value = "eighth" },
-            { label = "Ounce", value = "ounce" },
+            { label = "OUNCE", value = "ounce" },
             { label = "QP", value = "qp" }
         }
     }

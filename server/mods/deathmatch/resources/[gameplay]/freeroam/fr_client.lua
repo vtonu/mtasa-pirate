@@ -2070,11 +2070,24 @@ local cityAbbreviations = {
 	["San Fierro"] = "SF",
 	["Las Venturas"] = "LV"
 }
+local passiveControls = {
+	"fire",
+	"aim_weapon",
+	"next_weapon",
+	"previous_weapon",
+	"action"
+}
 local perkDisplay = {
 	indica = { text = "Indica", color = { 184, 140, 255 } },
 	sativa = { text = "Sativa", color = { 255, 230, 109 } },
 	hybrid = { text = "Hybrid", color = { 0, 255, 157 } }
 }
+
+local function setPassiveControls(state)
+	for _, control in ipairs(passiveControls) do
+		toggleControl(control, not state)
+	end
+end
 
 local function updateModeDisplay(state)
 	setControlText(wndMain, "mode", state and "Protected" or "Unprotected")
@@ -2132,6 +2145,7 @@ end
 
 function togglePassiveMode()
 	local state = guiCheckBoxGetSelected(getControl(wndMain, 'passive'))
+	setPassiveControls(state)
 	triggerServerEvent("onFreeroamLocalSettingChange", localPlayer, "passive", state)
 	outputChatBox("Passive mode " .. (state and "enabled" or "disabled") .. ".", 255, 255, 0)
 end
@@ -2415,6 +2429,7 @@ addEventHandler('onClientResourceStop', resourceRoot,
 	function()
 		showCursor(false)
 		setPedAnimation(localPlayer, false)
+		setPassiveControls(false)
 		updatePassiveCollisions(true)
 	end
 )
@@ -2433,6 +2448,7 @@ local function onLocalSettingChange(key,value)
 	g_PlayerData[source][key] = value
 
 	if key == "passive" and source == localPlayer then
+		setPassiveControls(value)
 		updateModeDisplay(value)
 		local checkbox = getControl(wndMain, 'passive')
 		if checkbox and isElement(checkbox) then
@@ -2459,6 +2475,14 @@ addEventHandler("onClientElementDataChange", localPlayer,
 	function(dataName)
 		if dataName == "weed.perk" then
 			updatePerkDisplay()
+		end
+	end
+)
+
+addEventHandler("onClientPlayerDamage", localPlayer,
+	function()
+		if g_PlayerData[localPlayer] and g_PlayerData[localPlayer].passive == true then
+			cancelEvent()
 		end
 	end
 )
