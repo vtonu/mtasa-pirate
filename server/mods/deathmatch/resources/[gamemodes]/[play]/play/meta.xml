@@ -4,7 +4,7 @@
 	
 	<include resource="freeroam"/>
 	<!-- <include resource="superman"/> -->
-	<include resource="hedit"/>
+	<!-- <include resource="hedit"/> -->
 	<include resource="mapfixes"/>
 	<include resource="chatmanager" />
 
