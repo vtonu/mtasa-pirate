@@ -42,7 +42,7 @@ function dropGliderBomb()
     local vX, vY, vZ = getElementVelocity(rustler)
 
     if reloading then
-        playSoundFrontEnd(20)
+        playSoundFrontEnd(20) -- Selection sounds
         return
     end
 
@@ -56,7 +56,7 @@ function dropGliderBomb()
     setProjectileMatrix(projectile, Vector3(vX, vY, vZ))
 
     setElementCollisionsEnabled(projectile, false)
-    playSoundFrontEnd(42)
+    playSoundFrontEnd(42) -- Tick (no ammo)
 
     shotsFired = shotsFired + 1
 
@@ -66,7 +66,7 @@ function dropGliderBomb()
             shotsFired = 0
         end, delayBetweenReloads, 1)
         reloading = true
-        playSoundFrontEnd(46)
+        playSoundFrontEnd(101) -- Countdown/selection
     end
 
     lastShotTick = nowTick

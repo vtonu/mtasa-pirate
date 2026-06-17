@@ -254,6 +254,7 @@ addEventHandler("onVehicleExplode", root, function()
     for player, data in pairs(activeMissionVehicles) do
         if data.vehicle == source then
             completeMissionTarget(player)
+            playSoundFrontEnd(player, 46)
         end
     end
 end)
