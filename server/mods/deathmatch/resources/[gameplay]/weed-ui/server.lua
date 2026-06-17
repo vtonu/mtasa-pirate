@@ -166,6 +166,8 @@ local STRAINS = {
 local FLOWER_WEAPON = 14
 local SPRAYCAN_WEAPON = 41
 local HARVEST_SPRAYCAN_AMMO = 1000
+local HARVEST_SPRAYCAN_AMMO_LIMIT = 3000
+local WEED_NOTIFICATION_COLOR = {127, 255, 212}
 
 local PERK_SETTINGS = {
     indica = {
@@ -254,6 +256,11 @@ end
 
 local function sendShopMessage(player, message, resetSelection)
     updateGardenUI(player, getGardenPayload(message, resetSelection))
+end
+
+local function sendWeedNotification(player, message)
+    outputChatBox("[NOTIFICATION] " .. message, player, WEED_NOTIFICATION_COLOR[1], WEED_NOTIFICATION_COLOR[2],
+        WEED_NOTIFICATION_COLOR[3])
 end
 
 local function restorePlayerPerks(player)
@@ -356,7 +363,7 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
         end
 
         restorePlayerPerks(targetPlayer)
-        outputChatBox("[NOTIFICATION] Your equipped weed perks have worn off.", targetPlayer, 255, 250, 80)
+        sendWeedNotification(targetPlayer, "Your equipped weed perks have worn off.")
     end, package.duration, 1, player)
 
     return true
@@ -425,7 +432,7 @@ local function handlePurchase(player, state)
 
     sendShopMessage(player, "PURCHASE COMPLETE: " .. package.label .. " " .. string.upper(state.strain) .. " FOR $" ..
         price .. ".")
-    outputChatBox("[NOTIFICATION] Aye-aye, great choice! Perks equipped.", player, 255, 250, 80)
+    sendWeedNotification(player, "Aye-aye, great choice! Perks equipped.")
     scheduleIdleReset(player, state)
 end
 
@@ -448,8 +455,19 @@ local function handleShopAction(player, actionName)
             return
         end
 
-        if giveWeapon(player, SPRAYCAN_WEAPON, HARVEST_SPRAYCAN_AMMO, true) then
-            sendShopMessage(player, "HARVEST COMPLETE: SPRAYCAN AMMO READY.")
+        local spraycanSlot = getSlotFromWeapon(SPRAYCAN_WEAPON)
+        local currentAmmo = getPedTotalAmmo(player, spraycanSlot)
+
+        if currentAmmo >= HARVEST_SPRAYCAN_AMMO_LIMIT then
+            sendShopMessage(player, "YOU'VE REACHED THE AMMO LIMIT.")
+            return
+        end
+
+        local ammoToGive = math.min(HARVEST_SPRAYCAN_AMMO, HARVEST_SPRAYCAN_AMMO_LIMIT - currentAmmo)
+
+        if giveWeapon(player, SPRAYCAN_WEAPON, ammoToGive, true) then
+            sendShopMessage(player, "Harvest Tool Available.")
+            sendWeedNotification(player, "Tools equipped.")
         else
             sendShopMessage(player, "HARVEST FAILED. EQUIPMENT COULD NOT BE ISSUED.")
         end
