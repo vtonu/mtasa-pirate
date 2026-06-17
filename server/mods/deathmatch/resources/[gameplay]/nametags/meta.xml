@@ -1,5 +1,6 @@
 <meta>
     <info author="Lifestyle" name="Nametags System" type="script" version="1.0" />
-    <script src="client.lua" type="client" />
     <script src="config.lua" type="client" />
+    <script src="client.lua" type="client" />
+    <file src="brokenSkull.png" />
 </meta>

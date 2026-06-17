@@ -1,12 +1,4 @@
-local nametagconfig = {
-    maxdistance = 30,
-    font = "default-bold",
-    width = 100,
-    height = 20,
-    colors = {
-        name = {255, 255, 255}
-    }
-}
+local nametagconfig = NametagConfig
 
 local screenW, screenH = guiGetScreenSize()
 
@@ -23,7 +15,7 @@ local function renderNameTags()
             local x, y, z = getElementPosition(player)
             local dist = getDistanceBetweenPoints3D(lx, ly, lz, x, y, z)
 
-            if dist < nametagconfig.maxdistance then
+            if dist < nametagconfig.maxDistance then
                 local sx, sy = getScreenFromWorldPosition(x, y, z + 1)
 
                 if sx and sy then
@@ -37,6 +29,15 @@ local function renderNameTags()
                     dxDrawText(name, sx - 50, sy - 20, sx + 50, sy, tocolor(unpack(nametagconfig.colors.name)), 1,
                         nametagconfig.font, "center", "bottom", false, false, false, true -- The 4th boolean here enables hex color codes!
                     )
+
+                    if isPedDead(player) or health <= 0 then
+                        local nameWidth = dxGetTextWidth(name, 1, nametagconfig.font, true)
+                        local iconX = sx + (nameWidth / 2) + nametagconfig.brokenSkullGap
+                        local iconY = sy - 17
+
+                        dxDrawImage(iconX, iconY, nametagconfig.brokenSkullSize, nametagconfig.brokenSkullSize,
+                            nametagconfig.brokenSkullIcon)
+                    end
 
                     -- Background Bar
                     dxDrawRectangle(sx - halfWidth, sy, nametagconfig.width, 6, tocolor(0, 0, 0, 150))
