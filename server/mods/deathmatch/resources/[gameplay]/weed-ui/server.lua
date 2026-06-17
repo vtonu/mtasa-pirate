@@ -164,6 +164,8 @@ local STRAINS = {
 }
 
 local FLOWER_WEAPON = 14
+local SPRAYCAN_WEAPON = 41
+local HARVEST_SPRAYCAN_AMMO = 1000
 
 local PERK_SETTINGS = {
     indica = {
@@ -437,6 +439,21 @@ local function handleShopAction(player, actionName)
 
     if actionName == "BUY" then
         handlePurchase(player, state)
+        return
+    end
+
+    if actionName == "HARVEST" then
+        if getElementData(player, "atWeedGarden") ~= true then
+            sendShopMessage(player, "YOU MUST REMAIN AT THE GARDEN.")
+            return
+        end
+
+        if giveWeapon(player, SPRAYCAN_WEAPON, HARVEST_SPRAYCAN_AMMO, true) then
+            sendShopMessage(player, "HARVEST COMPLETE: SPRAYCAN AMMO READY.")
+        else
+            sendShopMessage(player, "HARVEST FAILED. EQUIPMENT COULD NOT BE ISSUED.")
+        end
+
         return
     end
 

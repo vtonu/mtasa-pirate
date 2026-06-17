@@ -613,6 +613,7 @@ local WEAPONS = {
         price = 500,
         weapon = 41,
         ammo = 1000,
+        available = false,
         winningRate = 40,
         stealth = 78,
         ballistics = 2,
