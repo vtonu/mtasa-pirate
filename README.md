@@ -1,4 +1,5 @@
 # Project Details (mtasa-pirate v1.1.7)
+<img width="867" height="468" alt="image" src="https://github.com/user-attachments/assets/2fec872c-98ac-4032-95a9-b9d1e2824c78" />
 
 ## Purpose
 
