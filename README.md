@@ -1,6 +1,6 @@
-# Project Details (mtasa-pirate v1.1.9)
+# Project Details (mtasa-pirate v1.2.0)
 
-<img width="867" height="468" alt="image" src="https://github.com/user-attachments/assets/2fec872c-98ac-4032-95a9-b9d1e2824c78" />
+<img width="1280" height="720" alt="1" src="https://github.com/user-attachments/assets/5a245b9f-1597-4cc4-826b-91315d174452" />
 
 ## Purpose
 
@@ -57,6 +57,8 @@ resources/
 |-- [gameplay]/weed-ui/
 |-- [gameplay]/nametags/
 |-- [gameplay]/freeroam/
+|-- [gameplay]/new-zombies-zday/
+|-- [gameplay]/parachute/
 |-- [gameplay]/blur/
 |-- [gameplay]/deathpickups/
 |-- [gameplay]/rustlerbombs/
@@ -142,6 +144,22 @@ The gamemode remains server authoritative. The main `play` resource owns gamepla
 - `blur` disables unwanted screen blur
 - `deathpickups` handles pickup drops after player deaths
 - `rustlerbombs` adds Rustler bomb controls
+- `new-zombies-zday` adds storm-based infected spawning, pursuit, and varied infected weapons
+- `parachute` provides the parachute system used by the Airyard route
+
+### Airyard Route
+
+- The ship capsule starts the Airyard route with `PRESS [H] TO START`
+- The Airyard plane blip leads to the Rustler loot box
+- Pressing H at the loot box equips a parachute and reveals the rooftop Hunter route
+- A black Hunter spawns at the Las Venturas rooftop and the red radar blip follows it
+- The Hunter blip is removed when the Hunter is destroyed, and a replacement can respawn
+
+### Storm Infected System
+
+- Weather 9 activates the infected event and shows a red warning notification
+- Infected can use different movement speeds and weapons
+- Spawning checks nearby ground and buildings so infected can reach elevated areas
 
 ## Pirate Map
 
