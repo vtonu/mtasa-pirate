@@ -40,6 +40,7 @@ addEventHandler("airyard:parachute", resourceRoot, function()
     landedPlayers[player] = nil
     giveWeapon(client, 46, 1, true)
     setPedWeaponSlot(client, 11)
+    outputChatBox("[NOTIFICATION] Get the gift at the Emerlad Isle rooftop!", client, 127, 255, 212)
     parachuteReady[client] = true
     rooftopPrompt[client] = nil
     local hunter = createVehicle(425, 2059.08545, 2434.55225, 166.5, 0, 0, 180)

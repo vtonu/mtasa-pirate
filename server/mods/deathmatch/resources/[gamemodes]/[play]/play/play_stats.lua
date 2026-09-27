@@ -68,13 +68,34 @@ function addPlayerMoneyEarned(playerElement, amount)
     return true
 end
 
+local function getKillPlayer(killerElement)
+    if not isElement(killerElement) then return nil end
+    if getElementType(killerElement) == "vehicle" then
+        killerElement = getVehicleOccupant(killerElement, 0)
+    end
+    if isElement(killerElement) and getElementType(killerElement) == "player" then
+        return killerElement
+    end
+end
+
 function onPlayerStatsWasted(killerElement)
     if isElement(source) then
         addPlayerPlayStat(source, "deaths", 1)
     end
 
-    if isElement(killerElement) and getElementType(killerElement) == "player" and killerElement ~= source then
-        addPlayerPlayStat(killerElement, "kills", 1)
+    local killer = getKillPlayer(killerElement)
+    if killer and killer ~= source then
+        addPlayerPlayStat(killer, "kills", 1)
     end
 end
+
+addEventHandler("onPedWasted", root, function(totalAmmo, killerElement)
+    local zombies = getResourceFromName("new-zombies-zday")
+    if not zombies or getElementData(source, "zday.variant") == false then return end
+    if getElementParent(source) ~= getResourceDynamicElementRoot(zombies) then return end
+    local killer = getKillPlayer(killerElement)
+    if killer then
+        addPlayerPlayStat(killer, "kills", 1)
+    end
+end)
 

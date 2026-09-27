@@ -12,6 +12,7 @@
 	<script src="play_world.lua" type="server"/>
 	<script src="play_messages.lua" type="server"/>
 	<script src="play_stats.lua" type="server"/>
+	<script src="play_scoreboard.lua" type="server"/>
 	<script src="play_players.lua" type="server"/>
 	<script src="play_respawn_prompt.lua" type="client"/>
 	<script src="play_vehicles.lua" type="server"/>
