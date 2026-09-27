@@ -5,8 +5,26 @@ local objectIds = {
     greenCapsule = true
 }
 
+-- WALK-THROUGH MODEL IDS
+local modelIds = {
+    [734] = true
+}
+
+-- INVISIBLE SOLID MODEL IDS
+local invisibleSolidModelIds = {
+    [964] = true
+}
+
 local function applyWalkthrough(object)
-    if getElementType(object) == "object" and objectIds[getElementID(object)] then
+    if getElementType(object) ~= "object" then return end
+
+    if invisibleSolidModelIds[getElementModel(object)] then
+        setElementAlpha(object, 0)
+        setElementCollisionsEnabled(object, true)
+        return
+    end
+
+    if objectIds[getElementID(object)] or modelIds[getElementModel(object)] then
         setElementCollisionsEnabled(object, false)
     end
 end
