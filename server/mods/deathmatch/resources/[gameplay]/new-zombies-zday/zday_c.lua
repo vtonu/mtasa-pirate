@@ -24,6 +24,24 @@ local function isPassive(player)
 	return getElementData(player,"freeroam.passive") == true
 end
 
+local function isZombieWeather()
+	return getElementData(resourceRoot,"zday.active") == true
+end
+
+local function resetZombieChase(zombie,data)
+	data.hunting = nil
+	data.paths = {}
+	data.positions = 0
+	data.changingTarget = nil
+	data.changingPath = nil
+	data.lastPosition = nil
+	data.eating = nil
+	setPedAnimation(zombie)
+	for _,control in ipairs({"forwards","fire","sprint","jump"}) do
+		setPedControlState(zombie,control,false)
+	end
+end
+
 local function rot( x1, y1, x2, y2 )
     local t = -math.deg( math.atan2( x2 - x1, y2 - y1 ) )
     return t < 0 and t + 360 or t
@@ -89,6 +107,11 @@ local function resetPlayer()
 	playersDoomed[source] = nil
 	playersEatable[source] = nil
 	playerEated[source] = nil
+	for zombie,data in pairs(zombieData) do
+		if isElement(zombie) and data.target == source then
+			resetZombieChase(zombie,data)
+		end
+	end
 
 end
 
@@ -100,7 +123,7 @@ end
 
 local function murderPlayerByZombie(player,zombie)
 
-	if isPassive(player) then return end
+	if not isZombieWeather() or isPassive(player) or isPedDead(player) then return end
 	playSound3D("sounds/mgroan"..tostring(math.random(1,10))..".ogg",zombie.position)
 	if player == localPlayer then triggerServerEvent("Zday:murderPlayer",localPlayer,zombie) end
 
@@ -190,6 +213,7 @@ end
 
 local function findNewTarget(player)
 
+	if not isZombieWeather() then return end
 	local valid,zombie = checkPlayer(player,source)
 	if not valid then return end
 	if player ~= zombieData[zombie].target then return end
@@ -214,7 +238,12 @@ local function trackMe()
 		local data = zombieData[zombie]
 		local zombieTarget = data and data.target
 		if not isElement(zombieTarget) then requestZombieTargets() end
-		if isElement(zombieTarget) and not isPassive(zombieTarget) and not isPedDead(zombie) then
+		if isZombieWeather() and isElement(zombieTarget) and not isPassive(zombieTarget) and not isPedDead(zombieTarget) and not isPedDead(zombie) then
+			if data.paused then
+				resetZombieChase(zombie,data)
+				data.paused = nil
+				playersDoomed[zombieTarget] = nil
+			end
 			local lx,ly,lz = getElementPosition(zombieTarget)
 			local lVector = Vector3(lx,ly,lz)
 			local hVector = Vector3(getPedBonePosition(zombie,6))
@@ -302,9 +331,9 @@ local function trackMe()
 						zombieData[zombie].positions = zombieData[zombie].positions + 1
 					end
 				else
-					if isPedDead(zombie) == false and getDistanceBetweenPoints3D(zVector,lVector) < 1 and not playersDoomed[zombieTarget] then
+					if zombieTarget == localPlayer and getDistanceBetweenPoints3D(zVector,lVector) < 1 and getTickCount() >= (playersDoomed[zombieTarget] or 0) then
 						murderPlayerByZombie(zombieTarget,zombie)
-						playersDoomed[zombieTarget] = true
+						playersDoomed[zombieTarget] = getTickCount() + 1500
 					elseif getDistanceBetweenPoints3D(zVector,lVector) < 1 and ((isPedDead(zombieTarget) or zombieTarget.health<1) and playersEatable[zombieTarget] and not playerEated[zombieTarget]) then
 						playerEated[zombieTarget] = true
 						zombieData[zombie].eating = true
@@ -329,6 +358,10 @@ local function trackMe()
 				end
 			end
 		else
+			if data and not data.paused then
+				resetZombieChase(zombie,data)
+				data.paused = true
+			end
 			setPedControlState(zombie,"forwards",false)
 			setPedControlState(zombie,"fire",false)
 			setPedControlState(zombie,"sprint",false)
@@ -353,7 +386,7 @@ end
 
 local function spawnZombie()
 
-	if isPassive(localPlayer) or isPedDead(localPlayer) or #zombiesChasingMe >= maxZombies then
+	if not isZombieWeather() or isPassive(localPlayer) or isPedDead(localPlayer) or #zombiesChasingMe >= maxZombies then
 		setTimer(spawnZombie,math.random(minInterval,maxInterval),1)
 		return
 	end
@@ -460,6 +493,11 @@ local function initScript()
 	addEventHandler("Zday:sendZombiesInfo",localPlayer,getZombiesInfo)
 	addEventHandler("Zday:setZombieTarget",resourceRoot,setZombieTarget)
 	addEventHandler("onClientPlayerSpawn",root,resetPlayer)
+	addEventHandler("onClientPlayerDamage",localPlayer,function(attacker)
+		if attacker and zombieData[attacker] and (not isZombieWeather() or isPassive(localPlayer)) then
+			cancelEvent()
+		end
+	end)
 	addEventHandler("onClientElementStreamIn",resourceRoot,function()
 		if getElementType(source) == "ped" then
 			local data = zombieData[source]

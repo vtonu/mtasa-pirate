@@ -7,6 +7,23 @@ local function isPassive(player)
 		and call(freeroam, "isPlayerPassive", player) == true
 end
 
+local function isZombieWeather()
+	return getWeather() == 9
+end
+
+local function updateZombieActivity()
+	local active = isZombieWeather()
+	if getElementData(resourceRoot,"zday.active") ~= active then
+		setElementData(resourceRoot,"zday.active",active)
+	end
+	for zombie,target in pairs(zombieTargets) do
+		if isElement(zombie) and not isPedDead(zombie) then
+			local paused = not active or not isElement(target) or isPassive(target) or isPedDead(target)
+			if isElementFrozen(zombie) ~= paused then setElementFrozen(zombie,paused) end
+		end
+	end
+end
+
 local function getRandomPlayerWithLowestPing(playerList,excludePlayer)
 
 	local lowestPing = false
@@ -114,11 +131,12 @@ local function spawnZombie(s,zx,zy,zz,r)
 
 	if #getElementsByType("ped",resourceRoot) >= maxZombies then return end
 	if client ~= source then return end
-	if isPassive(client) or isPedDead(client) then return end
+	if not isZombieWeather() or isPassive(client) or isPedDead(client) then return end
 	
 	local zombie = Ped(s,zx,zy,zz,r,true)
 	if not isElement(zombie) then return end
 	setZombieTarget(zombie,client)
+	updateZombieActivity()
 	
 	addEventHandler("Zday:damageZombie",zombie,damageZombie)
 	addEventHandler("Zday:destroyZombie",zombie,destroyZombie)
@@ -134,7 +152,7 @@ local function murderPlayer(zombie)
 
 	if not client then return end
 	if client ~= source then return end
-	if isPassive(client) or isPedDead(client) then return end
+	if not isZombieWeather() or isPassive(client) or isPedDead(client) then return end
 	if not isElement(zombie) or zombieTargets[zombie] ~= client or isPedDead(zombie) then return end
 	if getElementDimension(zombie) ~= getElementDimension(client) or getElementInterior(zombie) ~= getElementInterior(client) then return end
 	local x,y,z = getElementPosition(client)
@@ -168,15 +186,14 @@ local function initScript()
 	addEventHandler("Zday:getZombiesInfo",root,updateZombieTargets)
 	
 	addEventHandler("onPlayerQuit",root,destroyChasers)
+	updateZombieActivity()
+	setTimer(updateZombieActivity,250,0)
 
 end
 
 addEventHandler("onResourceStart",resourceRoot,initScript)
 
--- REMOVE CHASERS WHEN PASSIVE MODE IS ENABLED
+-- PAUSE CHASERS WITHOUT REMOVING THEM
 addEventHandler("onElementDataChange",root,function(key)
-	if key ~= "freeroam.passive" or not isPassive(source) then return end
-	for zombie,target in pairs(zombieTargets) do
-		if target == source then destroyZombie(zombie) end
-	end
+	if key == "freeroam.passive" then updateZombieActivity() end
 end)
