@@ -35,7 +35,9 @@ end)
 
 addEvent("airyard:parachute", true)
 addEventHandler("airyard:parachute", resourceRoot, function()
-    if not client or not landedPlayers[client] then return end
+    if not client or source ~= resourceRoot or not landedPlayers[client] then return end
+    local player = client
+    landedPlayers[player] = nil
     giveWeapon(client, 46, 1, true)
     setPedWeaponSlot(client, 11)
     parachuteReady[client] = true
@@ -45,31 +47,15 @@ addEventHandler("airyard:parachute", resourceRoot, function()
         setVehicleColor(hunter, 0, 0, 0, 0, 0, 0)
         setElementData(hunter, "airyard.owner", client)
         hunters[client] = hunter
-        addEventHandler("onElementDestroy", hunter, function()
-            if hunters[client] ~= source then return end
-            hunters[client] = nil
-            triggerClientEvent(client, "airyard:hunterGone", resourceRoot)
-        end)
-        addEventHandler("onVehicleExplode", hunter, function()
-            hunters[client] = nil
-            triggerClientEvent(client, "airyard:hunterGone", resourceRoot)
-            setTimer(function()
-                if isElement(client) and parachuteReady[client] and not isPedDead(client) then
-                    local replacement = createVehicle(425, 2059.08545, 2434.55225, 166.5, 0, 0, 180)
-                    if replacement then
-                        setVehicleColor(replacement, 0, 0, 0, 0, 0, 0)
-                        setElementData(replacement, "airyard.owner", client)
-                        hunters[client] = replacement
-                        addEventHandler("onElementDestroy", replacement, function()
-                            if hunters[client] ~= source then return end
-                            hunters[client] = nil
-                            triggerClientEvent(client, "airyard:hunterGone", resourceRoot)
-                        end)
-                        triggerClientEvent(client, "airyard:hunterReady", resourceRoot, replacement)
-                    end
-                end
-            end, 3000, 1)
-        end)
+        local function clearHunter()
+            if hunters[player] ~= source then return end
+            hunters[player] = nil
+            if isElement(player) then
+                triggerClientEvent(player, "airyard:hunterGone", resourceRoot)
+            end
+        end
+        addEventHandler("onElementDestroy", hunter, clearHunter)
+        addEventHandler("onVehicleExplode", hunter, clearHunter)
     end
     triggerClientEvent(client, "airyard:parachuteReady", resourceRoot, hunter)
 end)
