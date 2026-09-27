@@ -2,6 +2,12 @@
 local missions = {}
 local deskZone
 local targetZone
+local rooftopZone
+local rooftopMarker
+local parachuteReady = {}
+local rooftopRewarded = {}
+local landedPlayers = {}
+local rooftopPrompt = {}
 
 addEventHandler("onResourceStart", resourceRoot, function()
     local marker = createMarker(2000.7, 1522.5, 16.0, "cylinder", 0.8, 127, 255, 212, 150)
@@ -21,8 +27,35 @@ addEventHandler("onResourceStart", resourceRoot, function()
         if not matchingDimension or not missions[player] then return end
         if getElementInterior(player) ~= 0 or isPedDead(player) or isPedInVehicle(player) then return end
         missions[player] = nil
+        landedPlayers[player] = true
         triggerClientEvent(player, "airyard:finished", resourceRoot)
     end)
+    rooftopMarker = createMarker(2059.08545, 2434.55225, 164.8, "corona", 1.4, 255, 90, 25, 180)
+    rooftopZone = createColSphere(2059.08545, 2434.55225, 165.61719, 2.5)
+    addEventHandler("onColShapeHit", rooftopZone, function(player, matchingDimension)
+        if not matchingDimension or not parachuteReady[player] or rooftopRewarded[player] then return end
+        if isPedDead(player) or isPedInVehicle(player) then return end
+        rooftopPrompt[player] = true
+        triggerClientEvent(player, "airyard:rooftopPrompt", resourceRoot)
+    end)
+end)
+
+addEvent("airyard:claimRooftop", true)
+addEventHandler("airyard:claimRooftop", resourceRoot, function()
+    if not client or not rooftopPrompt[client] or rooftopRewarded[client] then return end
+    rooftopRewarded[client] = true
+    rooftopPrompt[client] = nil
+    giveWeapon(client, 37, 100000, true)
+    outputChatBox("[!] [NOTIFICATION] The rooftop cache is yours. Use the fire to hold them back.", client, 255, 90, 60)
+    triggerClientEvent(client, "airyard:rooftopReward", resourceRoot)
+end)
+
+addEvent("airyard:parachute", true)
+addEventHandler("airyard:parachute", resourceRoot, function()
+    if not client or not landedPlayers[client] then return end
+    giveWeapon(client, 46, 1, true)
+    parachuteReady[client] = true
+    triggerClientEvent(client, "airyard:parachuteReady", resourceRoot)
 end)
 
 addEvent("airyard:start", true)
@@ -38,6 +71,8 @@ end)
 
 addEventHandler("onPlayerWasted", root, function()
     missions[source] = nil
+    landedPlayers[source] = nil
+    parachuteReady[source] = nil
     triggerClientEvent(source, "airyard:finished", resourceRoot)
 end)
 addEventHandler("onPlayerQuit", root, function() missions[source] = nil end)

@@ -184,7 +184,10 @@ local function spawnZombie(s,zx,zy,zz,r)
 	if not isElement(zombie) then return end
 	setElementDimension(zombie,getElementDimension(client))
 	setElementInterior(zombie,getElementInterior(client))
-	giveWeapon(zombie,4,1,true)
+	local variant = s % 4
+	local weapon = variant == 0 and 4 or (variant == 1 and 9 or (variant == 2 and 0 or 5))
+	setElementData(zombie, "zday.variant", variant, true)
+	if weapon > 0 then giveWeapon(zombie,weapon,1,true) end
 	setZombieTarget(zombie,client)
 	updateZombieActivity()
 	

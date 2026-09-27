@@ -14,6 +14,14 @@ local DEFAULT_WORLD_SETTINGS = {
 
 local safeZoneCols = {}
 local weatherTimer
+local lastWeather
+
+local function announceWeather(weather)
+    if weather == 9 and lastWeather ~= 9 then
+        outputChatBox("[!] [NOTIFICATION] It's getting spooky outside, be careful!", root, 255, 70, 70)
+    end
+    lastWeather = weather
+end
 
 local function getWorldSetting(settingName)
     if playWorldSettings and playWorldSettings[settingName] ~= nil then
@@ -95,9 +103,11 @@ function initPlayWorld()
     if cycle and #cycle > 0 then
         local index = 1
         setWeather(cycle[index])
+        announceWeather(cycle[index])
         weatherTimer = setTimer(function()
             index = index % #cycle + 1
             setWeather(cycle[index])
+            announceWeather(cycle[index])
             setTime(time[1], time[2])
         end, getWorldSetting("weatherInterval"), 0)
     end

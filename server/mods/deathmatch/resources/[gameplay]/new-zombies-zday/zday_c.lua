@@ -229,6 +229,7 @@ local function trackMe()
 	for index,zombie in ipairs(zombies) do
 		if math.random(1,40) == 5 and isPedDead(zombie) == false then playSound3D("sounds/mgroan"..tostring(math.random(1,10))..".ogg",zombie.position) end
 		local data = zombieData[zombie]
+		local variant = tonumber(getElementData(zombie, "zday.variant")) or 0
 		local zombieTarget = data and data.target
 		if not isElement(zombieTarget) then requestZombieTargets() end
 		if isZombieWeather() and isElement(zombieTarget) and not isPassive(zombieTarget) and not isPedDead(zombieTarget) and not isPedDead(zombie) then
@@ -313,6 +314,11 @@ local function trackMe()
 					local angle = rot(zVector.x,zVector.y,nVector.x,nVector.y)
 					setPedCameraRotation(zombie,-angle)
 					setPedControlState(zombie,"forwards",true)
+					if variant == 1 then
+						setPedControlState(zombie,"sprint",false)
+					elseif variant == 2 then
+						setPedControlState(zombie,"sprint",true)
+					end
 					if zombie.inWater then
 						setElementRotation(zombie,0,0,angle)
 						setPedControlState(zombie,"sprint",true)

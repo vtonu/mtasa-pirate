@@ -561,6 +561,7 @@ local WEAPONS = {
         category = "heavy",
         price = 500,
         weapon = 37,
+        available = false,
         ammo = 1000,
         winningRate = 91,
         stealth = 0,
