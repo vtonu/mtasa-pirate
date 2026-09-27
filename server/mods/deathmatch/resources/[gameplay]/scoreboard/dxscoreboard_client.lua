@@ -3,6 +3,11 @@
 local triggerKey = "tab" -- default button to open/close scoreboard
 local settingsKey = "F7" -- default button to open the settings window
 local separationSpace = 80 -- the space between top/bottom screen and scoreboard top/bottom in pixels
+local perkColors = {
+    Indica = {184, 140, 255},
+    Sativa = {255, 230, 109},
+    Hybrid = {0, 255, 157}
+}
 
 drawOverGUI = true -- draw scoreboard over gui?
 
@@ -665,6 +670,7 @@ function doDrawScoreboard( rtPass, onlyAnim, sX, sY )
 					local theX = x
 					local content = scoreboardContent[index][column.name]
 
+
 					if content and column.name == "name" then
 
 						if useColors then
@@ -759,6 +765,12 @@ function doDrawScoreboard( rtPass, onlyAnim, sX, sY )
 						end
 
 						if getPlayerTeam( element ) and (showTeams or (serverInfo.forceshowteams and not serverInfo.forcehideteams)) and not serverInfo.forcehideteams then theX = x + s(12) end
+					end
+
+					if column.name == "play.scoreboard.money" then
+						r, g, b = 54, 104, 44
+					elseif column.name == "play.scoreboard.team" and perkColors[content] then
+						r, g, b = unpack(perkColors[content])
 					end
 
 					if content then

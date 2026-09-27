@@ -143,7 +143,8 @@ function onVehicleEnter(playerElement)
 
     checkTimer = setTimer(function()
 
-        if not isElement(vehicleElement) or not isElement(playerElement) then
+        if not isElement(vehicleElement) then
+            createPlayVehicle(vehicleData)
             if isTimer(checkTimer) then
                 killTimer(checkTimer)
             end
@@ -222,5 +223,9 @@ function onVehicleElementDestroy()
 
     destroyVehicleTimer(source)
     vehicleOwners[source] = nil
+    local vehicleData = vehiclesToSpawn[source]
     vehiclesToSpawn[source] = nil
+    if vehicleData then
+        setTimer(createPlayVehicle, 5000, 1, vehicleData)
+    end
 end

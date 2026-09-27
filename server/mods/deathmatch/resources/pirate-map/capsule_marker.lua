@@ -36,6 +36,9 @@ end)
 addEvent("airyard:parachute", true)
 addEventHandler("airyard:parachute", resourceRoot, function()
     if not client or source ~= resourceRoot or not landedPlayers[client] then return end
+    if isPedDead(client) or isPedInVehicle(client) then return end
+    if getElementDimension(client) ~= 0 or getElementInterior(client) ~= 0 then return end
+    if not isElement(targetZone) or not isElementWithinColShape(client, targetZone) then return end
     local player = client
     landedPlayers[player] = nil
     giveWeapon(client, 46, 1, true)
@@ -69,6 +72,7 @@ addEventHandler("airyard:start", resourceRoot, function()
     if not isElementWithinColShape(client, deskZone) then return end
     if not isElement(targetZone) then return end
     missions[client] = true
+    landedPlayers[client] = nil
     triggerClientEvent(client, "airyard:started", resourceRoot)
 end)
 
@@ -78,6 +82,6 @@ addEventHandler("onPlayerWasted", root, function()
     parachuteReady[source] = nil
     if isElement(hunters[source]) then destroyElement(hunters[source]) end
     hunters[source] = nil
-    triggerClientEvent(source, "airyard:finished", resourceRoot)
+    triggerClientEvent(source, "airyard:reset", resourceRoot)
 end)
 addEventHandler("onPlayerQuit", root, function() missions[source] = nil end)

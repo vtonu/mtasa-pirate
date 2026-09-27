@@ -23,10 +23,10 @@ local function atDesk()
 end
 
 local function atAiryard()
-    local target = getElementData(resourceRoot, "airyard:target")
-    if type(target) ~= "table" then return false end
+    if isPedDead(localPlayer) or isPedInVehicle(localPlayer) then return false end
+    if getElementDimension(localPlayer) ~= 0 or getElementInterior(localPlayer) ~= 0 then return false end
     local x, y, z = getElementPosition(localPlayer)
-    return getDistanceBetweenPoints3D(x, y, z, target[1], target[2], target[3]) < 3
+    return getDistanceBetweenPoints3D(x, y, z, 2024, 1437.6, 10.3) < 1.5
 end
 
 local function showAiryard()
@@ -45,6 +45,7 @@ end)
 addEvent("airyard:started", true)
 addEventHandler("airyard:started", resourceRoot, function()
     active = true
+    parachutePrompt = false
     pressedThisVisit = atDesk()
     showAiryard()
     stopBlinking()
@@ -63,9 +64,8 @@ addEventHandler("airyard:finished", resourceRoot, function()
 end)
 
 bindKey("h", "down", function()
-    if parachutePrompt and not isPedInVehicle(localPlayer) and not isPedDead(localPlayer) then
+    if parachutePrompt and atAiryard() and not isChatBoxInputActive() and not isConsoleActive() and not isMainMenuActive() then
         triggerServerEvent("airyard:parachute", resourceRoot)
-        parachutePrompt = false
     end
 end)
 
@@ -77,7 +77,19 @@ end
 
 addEvent("airyard:parachuteReady", true)
 addEventHandler("airyard:parachuteReady", resourceRoot, function(vehicle)
+    parachutePrompt = false
     attachHunterBlip(vehicle)
+end)
+
+addEvent("airyard:reset", true)
+addEventHandler("airyard:reset", resourceRoot, function()
+    active = false
+    parachutePrompt = false
+    pressedThisVisit = false
+    stopBlinking()
+    if isElement(targetBlip) then destroyElement(targetBlip) end
+    targetBlip = nil
+    attachHunterBlip(nil)
 end)
 
 addEvent("airyard:hunterReady", true)
@@ -93,17 +105,16 @@ addEventHandler("airyard:hunterGone", resourceRoot, function()
 end)
 
 addEventHandler("onClientRender", root, function()
-    if parachutePrompt and not atAiryard() then return end
     if not atDesk() then
         pressedThisVisit = false
-        if not parachutePrompt then return end
+        if not parachutePrompt or not atAiryard() then return end
     end
     showAiryard()
     if pressedThisVisit then return end
     local w, h = guiGetScreenSize()
     local width = math.min(420, w - 32)
     local left, top = (w - width) / 2, h * 0.82
-    if parachutePrompt then
+    if parachutePrompt and atAiryard() then
         dxDrawRectangle(left, top, width, 48, tocolor(235, 245, 250, 32))
         dxDrawText("PRESS [H] TO EQUIP PARACHUTE", left + 12, top, left + width - 12, top + 48,
             tocolor(248, 252, 255, 238), 1.05, "default", "center", "center", false, false, false, true)
