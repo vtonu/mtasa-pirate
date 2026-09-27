@@ -1,6 +1,6 @@
 local maxZombies = 10 --Max zombies to chase local player
-local minDistance = 10 --Minium distance from player to keep zombies spawning
-local maxDistance = 30 --Maximum distance to spawn zombies
+local minDistance = 10 -- MINIMUM SPAWN DISTANCE
+local maxDistance = 30 -- MAXIMUM SPAWN DISTANCE
 local minInterval = 2000 --Minium time between spawning zombies
 local maxInterval = 7000 --Maximum time between spawning zombies
 
@@ -13,6 +13,7 @@ local playerEated = {}
 local colshapes = {}
 local mySteps = {}
 local nextTargetRequest = 0
+local groundReadyAt = 0
 
 local function requestZombieTargets()
 	if getTickCount() < nextTargetRequest then return end
@@ -118,14 +119,6 @@ end
 local function setPlayerEatable(player)
 
 	playersEatable[player] = true
-
-end
-
-local function murderPlayerByZombie(player,zombie)
-
-	if not isZombieWeather() or isPassive(player) or isPedDead(player) then return end
-	playSound3D("sounds/mgroan"..tostring(math.random(1,10))..".ogg",zombie.position)
-	if player == localPlayer then triggerServerEvent("Zday:murderPlayer",localPlayer,zombie) end
 
 end
 
@@ -331,10 +324,7 @@ local function trackMe()
 						zombieData[zombie].positions = zombieData[zombie].positions + 1
 					end
 				else
-					if zombieTarget == localPlayer and getDistanceBetweenPoints3D(zVector,lVector) < 1 and getTickCount() >= (playersDoomed[zombieTarget] or 0) then
-						murderPlayerByZombie(zombieTarget,zombie)
-						playersDoomed[zombieTarget] = getTickCount() + 1500
-					elseif getDistanceBetweenPoints3D(zVector,lVector) < 1 and ((isPedDead(zombieTarget) or zombieTarget.health<1) and playersEatable[zombieTarget] and not playerEated[zombieTarget]) then
+					if getDistanceBetweenPoints3D(zVector,lVector) < 1 and ((isPedDead(zombieTarget) or zombieTarget.health<1) and playersEatable[zombieTarget] and not playerEated[zombieTarget]) then
 						playerEated[zombieTarget] = true
 						zombieData[zombie].eating = true
 						setPedAnimation(zombie,"MEDIC","cpr",-1,false,true,false)
@@ -357,6 +347,17 @@ local function trackMe()
 					setPedControlState(zombie,"forwards",false)
 				end
 			end
+            -- ATTACK WITH A KNIFE ONLY WHEN THE TARGET IS IN REACH
+            local inReach = getDistanceBetweenPoints3D(zVector,lVector) < 1.6 and doesZombieSeePlayer
+            setPedControlState(zombie,"fire",inReach)
+            setPedControlState(zombie,"aim_weapon",false)
+            if inReach then
+                setPedCameraRotation(zombie,-rot(zVector.x,zVector.y,lx,ly))
+                setPedControlState(zombie,"forwards",false)
+                setPedControlState(zombie,"jump",false)
+                setPedControlState(zombie,"sprint",false)
+            end
+
 		else
 			if data and not data.paused then
 				resetZombieChase(zombie,data)
@@ -392,22 +393,39 @@ local function spawnZombie()
 	end
 
 	local x,y,z = getElementPosition(localPlayer)
-	local dist = math.random(minDistance,maxDistance)
-	local _,_,_,_,_,_,_,fov = getCameraMatrix()
-	local cr = getPedCameraRotation(localPlayer)+(getPedControlState(localPlayer,"look_behind") and 0 or 180)
-	if cr > 360 then cr = cr-360 end
-	local r = math.random(cr-fov,cr+fov)
-	local zx,zy = getPointFromDistanceRotation(x,y,dist,r)
-	local zz = false
-	for tz = z,550 do
-		local newZ = getGroundPosition(zx,zy,tz)
-		if newZ and newZ ~= 0 then
-			zz = newZ+1
-			break
-		end
+	local vehicle = getPedOccupiedVehicle(localPlayer)
+	local ground = getGroundPosition(x,y,z + 2)
+	local airborne = vehicle and (getVehicleType(vehicle) == "Plane" or getVehicleType(vehicle) == "Helicopter")
+		and (not ground or z - ground > 4)
+	if airborne or isElementInWater(localPlayer) then
+		groundReadyAt = getTickCount() + 5000
+		setTimer(spawnZombie,1000,1)
+		return
 	end
-	if not zz then zz = z+3 end
-	if not isLineOfSightClear(x,y,z,zx,zy,zz,true,false,false,true,false,true,true,localPlayer) then return setTimer(spawnZombie,500,1) end
+	if getTickCount() < groundReadyAt then
+		setTimer(spawnZombie,1000,1)
+		return
+	end
+    local zx,zy,zz
+    -- TRY SEVERAL NEARBY POINTS BEFORE WAITING AGAIN
+    for attempt = 1,12 do
+        local distance = math.random(minDistance,maxDistance)
+        local px,py = getPointFromDistanceRotation(x,y,distance,math.random(0,359))
+        local floorZ = getGroundPosition(px,py,z + 3)
+        local waterZ = getWaterLevel(px,py,z + 3)
+        if floorZ and math.abs(floorZ - z) <= 8 and (not waterZ or waterZ < floorZ) then
+            local pz = floorZ + 1
+            local clear = isLineOfSightClear(x,y,z,px,py,pz,true,false,false,true,false,true,true,localPlayer)
+            local open = isLineOfSightClear(px,py,floorZ + 0.2,px,py,floorZ + 2,true,true,false,true,false)
+            -- KEEP A CLEAR APPROACH; ALLOW CLOSER POINTS WHEN SPACE IS TIGHT
+            if clear and open then
+                zx,zy,zz = px,py,pz
+                break
+            end
+        end
+    end
+    if not zz then return setTimer(spawnZombie,500,1) end
+
 	local zr = rot(x,y,zx,zy)
 	local s = zombieData.skins[math.random(1,#zombieData.skins)]
 	triggerServerEvent("Zday:spawnZombie",localPlayer,s,zx,zy,zz,zr)

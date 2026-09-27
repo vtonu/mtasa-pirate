@@ -1,5 +1,6 @@
 local maxZombies = 220 --Max zombies in TOTAL
 local zombieTargets = {}
+local zombieProgress = {}
 
 local function isPassive(player)
 	local freeroam = getResourceFromName("freeroam")
@@ -93,6 +94,7 @@ function destroyZombie(zombie)
 	zombie = zombie or source
 	
 	if not zombie then return end
+	zombieProgress[zombie] = nil
 	
 	if isElement(zombie) then
 		destroyElement(zombie)
@@ -102,6 +104,51 @@ function destroyZombie(zombie)
 		zombieTargets[zombie] = nil
 	end
 
+end
+
+-- CLEAR DISTANT OR STUCK CHASERS WITHOUT REMOVING NEARBY THREATS
+local function cleanZombieChasers()
+	local now = getTickCount()
+	for zombie,target in pairs(zombieTargets) do
+		if not isElement(zombie) then
+			zombieTargets[zombie] = nil
+			zombieProgress[zombie] = nil
+		elseif not isPedDead(zombie) then
+			local x,y,z = getElementPosition(zombie)
+			local nearest,nearestDistance
+			for _,player in ipairs(getElementsByType("player")) do
+				if not isPedDead(player) and not isPassive(player)
+					and getElementDimension(player) == getElementDimension(zombie)
+					and getElementInterior(player) == getElementInterior(zombie) then
+					local px,py,pz = getElementPosition(player)
+					local distance = getDistanceBetweenPoints3D(x,y,z,px,py,pz)
+					if not nearestDistance or distance < nearestDistance then
+						nearest,nearestDistance = player,distance
+					end
+				end
+			end
+			local progress = zombieProgress[zombie]
+			if not isZombieWeather() or isElementFrozen(zombie) then
+				zombieProgress[zombie] = nil
+			elseif not nearestDistance or nearestDistance > 120 then
+				destroyZombie(zombie)
+			else
+				if not progress or getDistanceBetweenPoints3D(x,y,z,progress.x,progress.y,progress.z) > 2 then
+					zombieProgress[zombie] = {x=x,y=y,z=z,tick=now}
+				elseif now - progress.tick > 30000 and nearestDistance > 40 then
+					destroyZombie(zombie)
+				end
+				if isElement(zombie) and nearest ~= target then
+					local distance = math.huge
+					if isElement(target) then
+						local tx,ty,tz = getElementPosition(target)
+						distance = getDistanceBetweenPoints3D(x,y,z,tx,ty,tz)
+					end
+					if distance > 120 then setZombieTarget(zombie,nearest) end
+				end
+			end
+		end
+	end
 end
 
 local function delayDestroyZombie()
@@ -135,6 +182,9 @@ local function spawnZombie(s,zx,zy,zz,r)
 	
 	local zombie = Ped(s,zx,zy,zz,r,true)
 	if not isElement(zombie) then return end
+	setElementDimension(zombie,getElementDimension(client))
+	setElementInterior(zombie,getElementInterior(client))
+	giveWeapon(zombie,4,1,true)
 	setZombieTarget(zombie,client)
 	updateZombieActivity()
 	
@@ -145,21 +195,6 @@ local function spawnZombie(s,zx,zy,zz,r)
 		setZombieTarget(source,target)
 	end)
 	addEventHandler("Zday:delayDestroyZombie",zombie,delayDestroyZombie)
-
-end
-
-local function murderPlayer(zombie)
-
-	if not client then return end
-	if client ~= source then return end
-	if not isZombieWeather() or isPassive(client) or isPedDead(client) then return end
-	if not isElement(zombie) or zombieTargets[zombie] ~= client or isPedDead(zombie) then return end
-	if getElementDimension(zombie) ~= getElementDimension(client) or getElementInterior(zombie) ~= getElementInterior(client) then return end
-	local x,y,z = getElementPosition(client)
-	local zx,zy,zz = getElementPosition(zombie)
-	if getDistanceBetweenPoints3D(x,y,z,zx,zy,zz) > 2 then return end
-	
-	killPed(client,zombie,55,9,true)
 
 end
 
@@ -177,17 +212,16 @@ local function initScript()
 	addEvent("Zday:getZombiesInfo",true)
 	addEvent("Zday:spawnZombie",true)
 	addEvent("Zday:destroyZombie",true)
-	addEvent("Zday:murderPlayer",true)
 	addEvent("Zday:damageZombie",true)
 	addEvent("Zday:delayDestroyZombie",true)
 	addEvent("Zday:setZombieNewTarget",true)
 	addEventHandler("Zday:spawnZombie",root,spawnZombie)
-	addEventHandler("Zday:murderPlayer",root,murderPlayer)
 	addEventHandler("Zday:getZombiesInfo",root,updateZombieTargets)
 	
 	addEventHandler("onPlayerQuit",root,destroyChasers)
 	updateZombieActivity()
 	setTimer(updateZombieActivity,250,0)
+	setTimer(cleanZombieChasers,5000,0)
 
 end
 
