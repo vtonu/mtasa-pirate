@@ -13,6 +13,7 @@ local DEFAULT_WORLD_SETTINGS = {
 }
 
 local safeZoneCols = {}
+local weatherTimer
 
 local function getWorldSetting(settingName)
     if playWorldSettings and playWorldSettings[settingName] ~= nil then
@@ -87,6 +88,19 @@ function initPlayWorld()
     setMinuteDuration(getWorldSetting("minuteDuration"))
     setTime(time[1], time[2])
     setWeather(getWorldSetting("weather"))
+    if isTimer(weatherTimer) then
+        killTimer(weatherTimer)
+    end
+    local cycle = getWorldSetting("weatherCycle")
+    if cycle and #cycle > 0 then
+        local index = 1
+        setWeather(cycle[index])
+        weatherTimer = setTimer(function()
+            index = index % #cycle + 1
+            setWeather(cycle[index])
+            setTime(time[1], time[2])
+        end, getWorldSetting("weatherInterval"), 0)
+    end
     setCloudsEnabled(getWorldSetting("cloudsEnabled"))
     setGravity(getWorldSetting("gravity"))
 

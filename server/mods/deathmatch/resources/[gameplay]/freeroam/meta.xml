@@ -22,6 +22,7 @@
 
 	<export function="appendControl" type="client" />
 	<export function="setPlayerPassiveMode" type="server" />
+	<export function="isPlayerPassive" type="server" />
 
 	<file src="img/localplayerblip.png" />
 	<file src="img/map.png" />

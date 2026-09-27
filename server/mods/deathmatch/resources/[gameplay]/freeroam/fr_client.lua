@@ -2515,7 +2515,14 @@ local function updatePassiveCollisions(forceCollidable)
         table.insert(elements, vehicle)
     end
 
+    local peds = getElementsByType("ped", root, true)
+
     for index, firstElement in ipairs(elements) do
+        local collidableWithPeds = forceCollidable or not isPassiveElement(firstElement)
+        for _, ped in ipairs(peds) do
+            setElementCollidableWith(firstElement, ped, collidableWithPeds)
+            setElementCollidableWith(ped, firstElement, collidableWithPeds)
+        end
         for secondIndex = index + 1, #elements do
             local secondElement = elements[secondIndex]
             local collidable = forceCollidable or
@@ -2900,7 +2907,7 @@ addEvent("onClientFreeroamLocalSettingChange", true)
 addEventHandler("onClientFreeroamLocalSettingChange", root, onLocalSettingChange)
 
 addEventHandler("onClientElementStreamIn", root, function()
-    if getElementType(source) == "player" or getElementType(source) == "vehicle" then
+    if getElementType(source) == "player" or getElementType(source) == "vehicle" or getElementType(source) == "ped" then
         updatePassiveCollisions()
     end
 end)

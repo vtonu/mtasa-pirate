@@ -166,6 +166,10 @@ local function isPassive(player)
     return isElement(player) and g_PlayerData[player] and g_PlayerData[player].settings.passive == true
 end
 
+function isPlayerPassive(player)
+    return isPassive(player) == true
+end
+
 function setPlayerPassiveMode(player, state)
     if not isElement(player) or not g_PlayerData[player] then
         return false
@@ -173,6 +177,7 @@ function setPlayerPassiveMode(player, state)
 
     state = state == true
     g_PlayerData[player].settings.passive = state
+    setElementData(player, "freeroam.passive", state)
     setElementAlpha(player, state and PASSIVE_ALPHA or 255)
 
     for _, control in ipairs(passiveControls) do
