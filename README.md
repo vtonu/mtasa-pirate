@@ -1,4 +1,4 @@
-# Project Details (mtasa-pirate v1.2.0)
+# Project Details (mtasa-pirate v1.2.1)
 
 <img width="1280" height="720" alt="1" src="https://github.com/user-attachments/assets/5a245b9f-1597-4cc4-826b-91315d174452" />
 
@@ -6,237 +6,115 @@
 
 - Personal freeroam MTA:SA server focused on experimentation, content creation, and multiplayer gameplay with friends. Public release is optional if development reaches a stable state.
 
-## Core Principles
+## Gameplay
 
-- Performance first
-- Minimal memory usage
-- No unnecessary bloat and leak free logic
-- Modular and self contained resources
-- Server authoritative architecture
+- Custom pirate map in Las Venturas, with the time held near 3 AM.
+- Weather switches between 18 and 9 every three minutes. Weather 9 starts the storm infected event.
+- New players spawn near Caligula's Palace. After death, players return to the nearest of six spawn points.
+- The respawn prompt appears after five seconds. Press Space to respawn, or wait one minute after the prompt for automatic respawn.
+- Passive mode is enabled on spawn and can be changed in F1. It blocks combat and changes player and vehicle collisions. Infected do not target passive players.
+- Placed vehicles have cleanup and replacement rules. Health, armor, and Loco skull pickups respawn after use.
+- Players drop their weapons and ammo on death. Unclaimed drops expire after 60 seconds.
+- The scoreboard shows Money, Team, and K/D. Team shows the active weed perk or N/A. Kills include players and storm infected.
 
-## Technical Stack
+## Missions and Shops
 
-- GTA San Andreas + MTA:SA 1.6+
-- Lua 5.1 & XML
-- HTML/CSS/JS (CEF when needed)
-- Preferably no database required to play
-- DX UI preferred (although the shop UIs use CEF & HTML and work fine)
+### Loco Skull Mission
 
-## Resource Structure
-
-```text
-resource_name/
-|-- meta.xml
-|-- server/
-|-- client/
-|-- shared/
-|-- assets/
-`-- config/
-```
-
-## Main Project Structure
-
-The main custom work for this project is kept inside `server/mods/deathmatch/resources/`.
-
-```text
-resources/
-|-- [gamemodes]/[play]/play/
-|   |-- meta.xml
-|   |-- play.lua
-|   |-- play_config.lua
-|   |-- play_world.lua
-|   |-- play_messages.lua
-|   |-- play_stats.lua
-|   |-- play_players.lua
-|   |-- play_vehicles.lua
-|   |-- play_pickups.lua
-|   |-- play_loco_mission.lua
-|   |-- play_bootyLoot.lua
-|   `-- play_weedSystem.lua
-|-- [gameplay]/booty-ui/
-|-- [gameplay]/weed-ui/
-|-- [gameplay]/nametags/
-|-- [gameplay]/freeroam/
-|-- [gameplay]/new-zombies-zday/
-|-- [gameplay]/parachute/
-|-- [gameplay]/blur/
-|-- [gameplay]/deathpickups/
-|-- [gameplay]/rustlerbombs/
-`-- pirate-map/
-```
-
-There are more resources inside the MTA gameplay folder, but most are default, unused, disabled, or only changed when the gamemode requires it. The resources listed above are the ones most relevant to `mtasa-pirate`.
-
-The `pirate-map` resource also contains the full map and its object files. Those files are not listed here because they mainly contain map objects rather than core gameplay logic.
-
-## Architecture Rules
-
-- Every resource must have a valid meta.xml
-- New custom resources should target MTA 1.6.0+
-- Keep resources decoupled
-- Use exports instead of globals
-- Resource names must be lowercase with no spaces
-
-## Meta.xml Standards
-
-Common tags:
-
-- info
-- script
-- file
-- include
-- config
-- export
-- min_mta_version
-- aclrequest
-- oop
-- download_priority_group
-
-Rules:
-
-- Use `cache="false"` for sensitive client files
-- Wildcards supported in MTA 1.6+
-- Shared scripts run in separate client and server environments
-
-## Gamemode Design
-
-- Follow standard MTA gamemode (play with freeroam) structure
-- Load maps dynamically (in my case a map folder named pirate-map in resources that also contains client lua & meta file)
-- Keep maps, vehicles, pickups, spawns, missions, shops, and other systems separated
-
-## Play Gamemode Modules
-
-- `meta.xml` - Defines the `play` gamemode, its server scripts, and required supporting resources
-- `play.lua` - Main gamemode entry point and event setup
-- `play_config.lua` - Gamemode configuration values and gameplay data
-- `play_world.lua` - World settings, safe zones, damage protection, and explosion handling
-- `play_messages.lua` - Central messages, notifications, colors, and timed player notices
-- `play_stats.lua` - Player stat tracking such as kills, deaths, and money earned
-- `play_players.lua` - Player spawning, respawning, joining, and cleanup
-- `play_vehicles.lua` - Vehicle creation, ownership, timers, cleanup, and respawning
-- `play_pickups.lua` - Health, armor, money, and weapon pickup creation and respawning
-- `play_loco_mission.lua` - Locomotive mission access, mission vehicles, rewards, failure, and cleanup
-- `play_bootyLoot.lua` - Pirate ship Booty Loot weapon shop marker and access logic
-- `play_weedSystem.lua` - Weed garden marker and access logic
-
-The gamemode remains server authoritative. The main `play` resource owns gameplay state and uses separate UI resources when client-side interfaces are needed.
-
-## Custom Gameplay Resources
-
-### Shop UIs
-
-- `booty-ui` provides the Pirate Booty Desk weapon shop and works with `play_bootyLoot.lua`
-- `weed-ui` provides strain purchases and timed health, armor, gravity, and movement perks through `play_weedSystem.lua`
-- Both use separate server, client, and CEF interface files
-
-### Nametags
-
-- Custom client-side nametag system
-- Uses a separate config file for display settings
-
-### Freeroam
-
-- Supporting freeroam resource used by the `play` gamemode
-- Mostly based on the existing MTA resource and only changed where needed, including the F1 GUI
-
-### Extra Gameplay Resources
-
-- `blur` disables unwanted screen blur
-- `deathpickups` handles pickup drops after player deaths
-- `rustlerbombs` adds Rustler bomb controls
-- `new-zombies-zday` adds storm-based infected spawning, pursuit, and varied infected weapons
-- `parachute` provides the parachute system used by the Airyard route
+1. Collect the Loco skull to receive Molotovs and ten seconds of mission access.
+2. Enter the mission marker on the pirate ship to start a three-minute session.
+3. Destroy each marked vehicle to earn $15,000 and one Loco point. A new target follows until the session ends.
+4. When the timer expires, wait through the 30-second cooldown and collect the skull again.
 
 ### Airyard Route
 
-- The ship capsule starts the Airyard route with `PRESS [H] TO START`
-- The Airyard plane blip leads to the Rustler loot box
-- Pressing H at the loot box equips a parachute and reveals the rooftop Hunter route
-- A black Hunter spawns at the Las Venturas rooftop and the red radar blip follows it
-- The Hunter blip is removed when the Hunter is destroyed, and a replacement can respawn
+1. Press H at the ship capsule to start the route and mark the Rustler loot box.
+2. Reach the loot box on foot and press H to equip a parachute.
+3. A black Hunter spawns at the Emerald Isle rooftop, with a radar blip attached to it.
 
-### Storm Infected System
+The Hunter blip clears when the Hunter is destroyed. Death resets the player's route and removes their tracked Hunter. Automatic Hunter replacement is not currently wired up.
 
-- Weather 9 activates the infected event and shows a red warning notification
-- Infected can use different movement speeds and weapons
-- Spawning checks nearby ground and buildings so infected can reach elevated areas
+### Booty Desk
 
-## Pirate Map
+- Press F6 at the desk to open the weapon shop.
+- The server handles prices, money checks, and weapon grants.
 
-- `pirate-map.map` contains the main pirate-themed map and its placed objects
-- `meta.xml` registers the map, map settings, editor scripts, and custom client script
-- `client.lua` handles object-specific collision and visibility workarounds
-- Selected model IDs can be made walk-through or invisible when required
-- Individual objects can also be targeted by their custom map element IDs
+### Fog of War Garden
 
-This client script is needed because some map objects are used as visual or replacement pieces and need different collision or visibility behavior from their default GTA object models.
+- Press F5 at the garden to choose a strain and package.
+- Indica favors armor regeneration and higher gravity.
+- Sativa gives balanced health and armor regeneration with normal gravity.
+- Hybrid favors health regeneration and lower gravity.
+- Each type also sets a walking style. Perks expire after 5, 10, 20, or 30 minutes, based on the package, and clear on death.
+- HARVEST gives spray-can ammo. It is not a crop-growing or cash-reward system.
 
-## Security
+### Storm Infected
 
-- Never trust client data
-- Validate inventory, money, permissions server side & all remote event data
-- Add rate limiting to remote events
-- Use Luac and cache protection where appropriate
-- Enable native anti cheat protections
-- Use `cache="false"` for sensitive downloadable client scripts or files
+- Weather 9 enables infected spawning and pursuit, with a red warning when the storm starts.
+- Infected use varied movement and melee weapons. Spawn checks use nearby ground and building surfaces.
+- Infected pause outside the storm. Cleanup removes distant or stuck chasers.
 
-## Coding Standards
+## Controls
 
-- Prefer local variables & splitting large systems into modules
-- Reuse UI elements instead of recreating them
-- Keep onClientRender lightweight
-- Don't come up with new colors for text, unless specified, or words, use the colors from the notifications & messages file
+| Key   | Action                                                                   |
+| ----- | ------------------------------------------------------------------------ |
+| F1    | Player options, perk and mode display, vehicle options, and passive mode |
+| F5    | Garden shop while at the garden                                          |
+| F6    | Weapon shop while at the Booty Desk                                      |
+| H     | Start Airyard at the capsule or equip the parachute at the loot box      |
+| Space | Respawn while the death prompt is shown                                  |
 
-## Common Utility Functions
+F1 includes vehicle repair, flip, upgrades, colors, and paintjobs. Rustler bombing uses the vehicle fire control.
 
-### Table
+## Main Files
 
-- table.copy
-- table.find
-- table.findall
-- table.merge
-- table.map
-- table.flatten
-- table.removevalue
+Custom resources are under `server/mods/deathmatch/resources/`. Startup resources are listed in `server/mods/deathmatch/mtaserver.conf`.
 
-### Math
+### Play Gamemode
 
-- Add shared math helpers only when needed
+`[gamemodes]/[play]/play/` contains the main server logic:
 
-### UI
+| File                      | Role                                                       |
+| ------------------------- | ---------------------------------------------------------- |
+| `meta.xml`                | Loads scripts and supporting resources                     |
+| `play.lua`                | Starts the gamemode and connects events                    |
+| `play_config.lua`         | Spawn points, placed vehicles, pickups, and world settings |
+| `play_world.lua`          | Time, weather, explosions, and safe-zone support           |
+| `play_messages.lua`       | Shared messages, colors, and timed notices                 |
+| `play_players.lua`        | Joining, spawning, respawning, and player cleanup          |
+| `play_respawn_prompt.lua` | Client respawn prompt and Space input                      |
+| `play_stats.lua`          | Kills, deaths, money earned, and mission stats             |
+| `play_scoreboard.lua`     | Money, Team, and K/D columns                               |
+| `play_vehicles.lua`       | Placed vehicles, ownership, cleanup, and replacements      |
+| `play_pickups.lua`        | Health, armor, and Loco skull pickups                      |
+| `play_loco_mission.lua`   | Vehicle targets, rewards, timer, and cleanup               |
+| `play_bootyLoot.lua`      | Booty Desk marker and shop access                          |
+| `play_weedSystem.lua`     | Garden marker and shop access                              |
 
-- Reuse existing GUI and CEF helpers instead of duplicating UI logic
+### Other Resources
 
-### Execution
+| Resource                      | Role                                                                                                                  |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `pirate-map`                  | Map objects, collision fixes in `walkthrough.lua`, and Airyard logic in `capsule_marker.lua` and `mission_client.lua` |
+| `[gameplay]/freeroam`         | F1 menu, vehicle options, and passive mode                                                                            |
+| `[gameplay]/booty-ui`         | Weapon shop server, client, and HTML UI                                                                               |
+| `[gameplay]/weed-ui`          | Strain shop, timed perks, and HTML UI                                                                                 |
+| `[gameplay]/new-zombies-zday` | Storm infected spawning and pursuit                                                                                   |
+| `[gameplay]/scoreboard`       | Scoreboard display                                                                                                    |
+| `[gameplay]/nametags`         | Custom player nametags                                                                                                |
+| `[gameplay]/deathpickups`     | Weapon and ammo drops on death                                                                                        |
+| `[gameplay]/rustlerbombs`     | Rustler bomb controls                                                                                                 |
+| `[gameplay]/parachute`        | Parachute support                                                                                                     |
+| `[gameplay]/blur`             | Removes screen blur                                                                                                   |
 
-- Add event throttling and debounce helpers only when needed
+Other startup resources include admin tools, speedometer, GPS, fastrope, headshots, death messages, join/quit messages, and player colors. A folder being present does not mean its resource is enabled.
 
-## Important Server and Client Events
+## Development Notes
 
-- onResourceStart
-- onResourceStop
-
-## Gamemode
-
-- onGamemodeMapStart
-- onGamemodeMapStop
-
-## Network
-
-- onClientResourceStart
-- onPlayerJoin
-- onPlayerQuit
-
-## Client Responsibilities
-
-- Rendering & UI
-- Input handling & Local text processing
-- Sending requests to server
-
-## Server Responsibilities
-
-- Single source of truth
-- Player state management
-- Permission validation
-- Event throttling
-- Secure state handling
+- GTA San Andreas + MTA:SA 1.6+, Lua 5.1, and XML. Shop UIs use HTML/CSS/JS through CEF.
+- Keep resources small and split systems by role. Use exports between resources where needed.
+- Keep gameplay checks and rewards on the server. Validate client requests and add rate limits where needed.
+- Reuse the current message colors and UI style. Keep render work light and clear timers and elements when no longer needed.
+- Custom play stats use player element data; the stats module has no save/load system.
+- Safe-zone support exists, but no zones are set in the current config.
+- Code review does not replace in-game and multiplayer testing.
