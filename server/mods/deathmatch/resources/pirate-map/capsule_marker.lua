@@ -3,7 +3,6 @@ local missions = {}
 local deskZone
 local targetZone
 local rooftopZone
-local rooftopMarker
 local parachuteReady = {}
 local rooftopRewarded = {}
 local landedPlayers = {}
@@ -31,14 +30,7 @@ addEventHandler("onResourceStart", resourceRoot, function()
         landedPlayers[player] = true
         triggerClientEvent(player, "airyard:finished", resourceRoot)
     end)
-    rooftopMarker = createMarker(2059.08545, 2434.55225, 164.8, "cylinder", 1.4, 120, 220, 255, 120)
     rooftopZone = createColSphere(2059.08545, 2434.55225, 165.61719, 2.5)
-    addEventHandler("onColShapeHit", rooftopZone, function(player, matchingDimension)
-        if not matchingDimension or not parachuteReady[player] or rooftopRewarded[player] then return end
-        if isPedDead(player) or isPedInVehicle(player) then return end
-        rooftopPrompt[player] = true
-        triggerClientEvent(player, "airyard:rooftopPrompt", resourceRoot)
-    end)
 end)
 
 addEvent("airyard:parachute", true)
@@ -53,8 +45,14 @@ addEventHandler("airyard:parachute", resourceRoot, function()
         setVehicleColor(hunter, 0, 0, 0, 0, 0, 0)
         setElementData(hunter, "airyard.owner", client)
         hunters[client] = hunter
+        addEventHandler("onElementDestroy", hunter, function()
+            if hunters[client] ~= source then return end
+            hunters[client] = nil
+            triggerClientEvent(client, "airyard:hunterGone", resourceRoot)
+        end)
         addEventHandler("onVehicleExplode", hunter, function()
             hunters[client] = nil
+            triggerClientEvent(client, "airyard:hunterGone", resourceRoot)
             setTimer(function()
                 if isElement(client) and parachuteReady[client] and not isPedDead(client) then
                     local replacement = createVehicle(425, 2059.08545, 2434.55225, 166.5, 0, 0, 180)
@@ -62,6 +60,11 @@ addEventHandler("airyard:parachute", resourceRoot, function()
                         setVehicleColor(replacement, 0, 0, 0, 0, 0, 0)
                         setElementData(replacement, "airyard.owner", client)
                         hunters[client] = replacement
+                        addEventHandler("onElementDestroy", replacement, function()
+                            if hunters[client] ~= source then return end
+                            hunters[client] = nil
+                            triggerClientEvent(client, "airyard:hunterGone", resourceRoot)
+                        end)
                         triggerClientEvent(client, "airyard:hunterReady", resourceRoot, replacement)
                     end
                 end

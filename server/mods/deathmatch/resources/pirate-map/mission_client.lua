@@ -85,6 +85,13 @@ addEventHandler("airyard:hunterReady", resourceRoot, function(vehicle)
     attachHunterBlip(vehicle)
 end)
 
+addEvent("airyard:hunterGone", true)
+addEventHandler("airyard:hunterGone", resourceRoot, function()
+    hunterVehicle = nil
+    if isElement(rooftopBlip) then destroyElement(rooftopBlip) end
+    rooftopBlip = nil
+end)
+
 addEventHandler("onClientRender", root, function()
     if parachutePrompt and not atAiryard() then return end
     if not atDesk() then
