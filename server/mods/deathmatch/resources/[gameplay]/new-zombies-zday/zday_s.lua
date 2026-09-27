@@ -60,13 +60,13 @@ end
 
 local function setZombieTarget(zombie,target)
 
-	if not isElement(zombie) or getElementParent(zombie) ~= resourceRoot then return end
+	if not isElement(zombie) or getElementParent(zombie) ~= getResourceDynamicElementRoot(getThisResource()) then return end
 	if target and isElement(target) and getElementType(target) == "player" and not isPassive(target) then
-		triggerClientEvent(root,"Zday:setZombieTarget",zombie,zombie,target)
 		zombieTargets[zombie] = target
 		if getElementSyncer(zombie) ~= target then
 			setElementSyncer(zombie,target)
 		end
+		triggerClientEvent(root,"Zday:setZombieTarget",resourceRoot,zombie,target)
 	end
 
 end
@@ -117,7 +117,7 @@ local function spawnZombie(s,zx,zy,zz,r)
 	if isPassive(client) or isPedDead(client) then return end
 	
 	local zombie = Ped(s,zx,zy,zz,r,true)
-	setElementParent(zombie, resourceRoot)
+	if not isElement(zombie) then return end
 	setZombieTarget(zombie,client)
 	
 	addEventHandler("Zday:damageZombie",zombie,damageZombie)

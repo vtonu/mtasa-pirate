@@ -12,6 +12,13 @@ local playersEatable = {}
 local playerEated = {}
 local colshapes = {}
 local mySteps = {}
+local nextTargetRequest = 0
+
+local function requestZombieTargets()
+	if getTickCount() < nextTargetRequest then return end
+	nextTargetRequest = getTickCount() + 2000
+	triggerServerEvent("Zday:getZombiesInfo",localPlayer)
+end
 
 local function isPassive(player)
 	return getElementData(player,"freeroam.passive") == true
@@ -24,21 +31,14 @@ end
 
 local function getZombieCalculatedPathDistance(zombie)
 
-	local currentIndex = zombieData[zombie].positions
-
+	local data = zombieData[zombie]
+	if not data or not data.paths then return 0 end
+	local x,y = getElementPosition(zombie)
 	local distance = 0
-	if currentIndex < #zombieData[zombie].paths then
-		for index = currentIndex,#zombieData[zombie].paths do
-			if zombieData[zombie].paths[index] and zombieData[zombie].paths[index+1] then
-				local ox,oy = unpack(zombieData[zombie].paths[index])
-				local nx,ny = unpack(zombieData[zombie].paths[index+1])
-				distance = distance + getDistanceBetweenPoints2D(ox,oy,nx,ny)
-			end
-		end
-	else
-		local zVector = zombie.position
-		local npVector = zombieData[zombie].paths[currentIndex]+1
-		distance = getDistanceBetweenPoints2D(zVector.x,zVector.y,npVector.x,npVector.y)
+	for index = (data.positions or 0) + 1,#data.paths do
+		local nx,ny = unpack(data.paths[index])
+		distance = distance + getDistanceBetweenPoints2D(x,y,nx,ny)
+		x,y = nx,ny
 	end
 
 	return distance
@@ -66,7 +66,7 @@ end
 
 local function onWasted(killer)
 
-	if zombieData[source].doomed then return end
+	if not zombieData[source] or zombieData[source].doomed then return end
 	zombieData[source].doomed = true
 	triggerServerEvent("Zday:delayDestroyZombie",source)
 
@@ -75,7 +75,11 @@ end
 local function onDestroy()
 
 	isZombieChasingMe(source,true)
-	if zombieData[source].syncCol and isElement(zombieData[source].syncCol) then destroyElement(zombieData[source].syncCol) end
+	local data = zombieData[source]
+	if data and data.syncCol then
+		colshapes[data.syncCol] = nil
+		if isElement(data.syncCol) then destroyElement(data.syncCol) end
+	end
 	zombieData[source] = nil
 
 end
@@ -148,7 +152,9 @@ end
 
 local function getNewTarget(zombie,excludedTarget)
 
-	local col = zombieData[zombie].syncCol
+	local data = zombieData[zombie]
+	if not data or not isElement(data.syncCol) then return false end
+	local col = data.syncCol
 	local players = getElementsWithinColShape(col,"player")
 	local possibleTargets = {}
 	local alternativeReturn = false
@@ -168,13 +174,14 @@ local function getNewTarget(zombie,excludedTarget)
 	
 	table.sort(possibleTargets,comp)
 	local target,distance2 = unpack(possibleTargets[1])
+	isClear = isLineOfSightClear(zombie.position,target.position,true,false,false,true,false,true,true,zombie)
 	return target,isClear,distance2
 
 end
 
 local function resetZombieAnimation(zombie)
 
-	if zombie and isElement(zombie) then
+	if zombie and isElement(zombie) and zombieData[zombie] then
 		setPedAnimation(zombie)
 		zombieData[zombie].eating = nil
 	end
@@ -204,8 +211,10 @@ local function trackMe()
 	
 	for index,zombie in ipairs(zombies) do
 		if math.random(1,40) == 5 and isPedDead(zombie) == false then playSound3D("sounds/mgroan"..tostring(math.random(1,10))..".ogg",zombie.position) end
-		local zombieTarget = zombieData[zombie].target
-		if zombieTarget and isElement(zombieTarget) and not isPassive(zombieTarget) then
+		local data = zombieData[zombie]
+		local zombieTarget = data and data.target
+		if not isElement(zombieTarget) then requestZombieTargets() end
+		if isElement(zombieTarget) and not isPassive(zombieTarget) and not isPedDead(zombie) then
 			local lx,ly,lz = getElementPosition(zombieTarget)
 			local lVector = Vector3(lx,ly,lz)
 			local hVector = Vector3(getPedBonePosition(zombie,6))
@@ -266,7 +275,7 @@ local function trackMe()
 					end
 					local dist = getDistanceBetweenPoints2D(zVector.x,zVector.y,nVector.x,nVector.y)
 					local pathDistance = getZombieCalculatedPathDistance(zombie)
-					local diff = pathDistance/distanceToPlayer
+					local diff = pathDistance/math.max(distanceToPlayer,0.01)
 					if pathDistance > distanceToPlayer and diff > 1.1 and doesZombieSeePlayer then
 						zombieData[zombie].paths = {}
 						zombieData[zombie].positions = 0
@@ -309,7 +318,7 @@ local function trackMe()
 					zombieData[zombie].hunting = true
 					zombieData[zombie].positions = 0
 				elseif not zombieData[zombie].hunting then
-					local newTarget = getNewTarget(zombie,localPlayer),doesSee
+					local newTarget,doesSee = getNewTarget(zombie,localPlayer)
 					if newTarget and doesSee and not zombieData[zombie].changingTarget then
 						triggerServerEvent("Zday:setZombieNewTarget",zombie,newTarget)
 						zombieData[zombie].changingTarget = true
@@ -388,7 +397,18 @@ end
 
 local function setZombieTarget(zombie,targett)
 
+	if not isElement(zombie) or getElementType(zombie) ~= "ped" then return end
 	if not zombieData[zombie] then zombieData[zombie] = {} end
+	local data = zombieData[zombie]
+	if data.target ~= targett then
+		data.target = targett
+		data.hunting = nil
+		data.paths = {}
+		data.positions = 0
+		data.changingTarget = nil
+		data.changingPath = nil
+		data.lastPosition = nil
+	end
 	if not zombieData[zombie].handled then
 		addEventHandler("onClientPedDamage",zombie,onDamage)
 		addEventHandler("onClientPedWasted",zombie,onWasted)
@@ -397,11 +417,16 @@ local function setZombieTarget(zombie,targett)
 		zombieData[zombie].handled = true
 	end
 	
-	if not zombieData[zombie].syncCol then
-		zombieData[zombie].syncCol = createColSphere(zombie.position,80)
-		colshapes[zombieData[zombie].syncCol] = zombie
-		attachElements(zombieData[zombie].syncCol,zombie)
-		addEventHandler("onClientColShapeLeave",zombieData[zombie].syncCol,findNewTarget)
+	if not isElement(data.syncCol) then
+		local x,y,z = getElementPosition(zombie)
+		data.syncCol = createColSphere(x,y,z,80)
+		if isElement(data.syncCol) then
+			setElementDimension(data.syncCol,getElementDimension(zombie))
+			setElementInterior(data.syncCol,getElementInterior(zombie))
+			colshapes[data.syncCol] = zombie
+			attachElements(data.syncCol,zombie)
+			addEventHandler("onClientColShapeLeave",data.syncCol,findNewTarget)
+		end
 	end
 	
 	zombieData[zombie].target = targett
@@ -428,19 +453,6 @@ local function initScript()
 		engineImportTXD(txd,id)
 	end
 	
-	for _,zombie in ipairs(getElementsByType("ped",resourceRoot)) do
-		zombieData[zombie] = {}
-		addEventHandler("onClientPedDamage",zombie,onDamage)
-		addEventHandler("onClientPedWasted",zombie,onWasted)
-		addEventHandler("onClientElementDestroy",zombie,onDestroy)
-		addEventHandler("Zday:askForNewTarget",zombie,lookForNewTarget)
-		zombieData[zombie].handled = true
-		zombieData[zombie].syncCol = createColSphere(zombie.position,80)
-		colshapes[zombieData[zombie].syncCol] = zombie
-		attachElements(zombieData[zombie].syncCol,zombie)
-		addEventHandler("onClientColShapeLeave",zombieData[zombie].syncCol,findNewTarget)
-	end
-
 	addEvent("Zday:askForNewTarget",true)
 	addEvent("Zday:setZombieTarget",true)
 	addEvent("Zday:sendZombiesInfo",true)
@@ -448,10 +460,20 @@ local function initScript()
 	addEventHandler("Zday:sendZombiesInfo",localPlayer,getZombiesInfo)
 	addEventHandler("Zday:setZombieTarget",resourceRoot,setZombieTarget)
 	addEventHandler("onClientPlayerSpawn",root,resetPlayer)
+	addEventHandler("onClientElementStreamIn",resourceRoot,function()
+		if getElementType(source) == "ped" then
+			local data = zombieData[source]
+			setZombieTarget(source,data and data.target)
+			if not data or not isElement(data.target) then requestZombieTargets() end
+		end
+	end)
+	for _,zombie in ipairs(getElementsByType("ped",resourceRoot)) do
+		setZombieTarget(zombie,nil)
+	end
 	
 	setTimer(trackMe,100,0)
 	setTimer(spawnZombie,math.random(minInterval,maxInterval),1)
-	triggerServerEvent("Zday:getZombiesInfo",localPlayer)
+	requestZombieTargets()
 	
 end
 
