@@ -60,10 +60,9 @@ addEventHandler("onClientRender", root, function()
     local w, h = guiGetScreenSize()
     local width = math.min(420, w - 32)
     local left, top = (w - width) / 2, h * 0.82
-    dxDrawRectangle(left, top, width, 48, tocolor(235, 245, 250, 38))
-    dxDrawRectangle(left, top, width, 1, tocolor(255, 255, 255, 55))
+    dxDrawRectangle(left, top, width, 48, tocolor(235, 245, 250, 32))
     dxDrawText("PRESS [H] TO START", left + 13, top + 1, left + width - 11, top + 49,
-        tocolor(0, 0, 0, 130), 1.15, "default-bold", "center", "center")
+        tocolor(20, 28, 32, 70), 1.05, "default", "center", "center", false, false, false, true)
     dxDrawText("PRESS [H] TO START", left + 12, top, left + width - 12, top + 48,
-        tocolor(230, 255, 246, 255), 1.15, "default-bold", "center", "center")
+        tocolor(248, 252, 255, 238), 1.05, "default", "center", "center", false, false, false, true)
 end)
