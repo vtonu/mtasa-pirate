@@ -6,6 +6,7 @@ local blinkVisible = true
 local parachutePrompt = false
 local rooftopBlip
 local rooftopPrompt = false
+local hunterVehicle
 
 local function stopBlinking()
     if isTimer(blinkTimer) then killTimer(blinkTimer) end
@@ -68,36 +69,24 @@ bindKey("h", "down", function()
     end
 end)
 
-addEvent("airyard:parachuteReady", true)
-addEventHandler("airyard:parachuteReady", resourceRoot, function()
-    local x, y, z = 2059.08545, 2434.55225, 165.61719
-    rooftopBlip = rooftopBlip or createBlip(x, y, z, 19, 2, 255, 80, 80, 255)
-end)
-
-addEvent("airyard:rooftopReward", true)
-addEventHandler("airyard:rooftopReward", resourceRoot, function()
+local function attachHunterBlip(vehicle)
+    hunterVehicle = vehicle
     if isElement(rooftopBlip) then destroyElement(rooftopBlip) end
-    rooftopBlip = nil
+    if isElement(vehicle) then rooftopBlip = createBlipAttachedTo(vehicle, 19, 2, 255, 80, 80, 255) end
+end
+
+addEvent("airyard:parachuteReady", true)
+addEventHandler("airyard:parachuteReady", resourceRoot, function(vehicle)
+    attachHunterBlip(vehicle)
 end)
 
-addEvent("airyard:rooftopPrompt", true)
-addEventHandler("airyard:rooftopPrompt", resourceRoot, function()
-    rooftopPrompt = true
-end)
-
-bindKey("h", "down", function()
-    if rooftopPrompt and not isPedDead(localPlayer) and not isPedInVehicle(localPlayer) then
-        triggerServerEvent("airyard:claimRooftop", resourceRoot)
-        rooftopPrompt = false
-    end
+addEvent("airyard:hunterReady", true)
+addEventHandler("airyard:hunterReady", resourceRoot, function(vehicle)
+    attachHunterBlip(vehicle)
 end)
 
 addEventHandler("onClientRender", root, function()
     if parachutePrompt and not atAiryard() then return end
-    if rooftopPrompt then
-        local x, y, z = getElementPosition(localPlayer)
-        if getDistanceBetweenPoints3D(x, y, z, 2059.08545, 2434.55225, 165.61719) > 4 then return end
-    end
     if not atDesk() then
         pressedThisVisit = false
         if not parachutePrompt then return end
@@ -107,12 +96,6 @@ addEventHandler("onClientRender", root, function()
     local w, h = guiGetScreenSize()
     local width = math.min(420, w - 32)
     local left, top = (w - width) / 2, h * 0.82
-    if rooftopPrompt then
-        dxDrawRectangle(left, top, width, 48, tocolor(235, 245, 250, 32))
-        dxDrawText("PRESS [H] TO EQUIP FLAMETHROWER", left + 12, top, left + width - 12, top + 48,
-            tocolor(248, 252, 255, 238), 1.05, "default", "center", "center", false, false, false, true)
-        return
-    end
     if parachutePrompt then
         dxDrawRectangle(left, top, width, 48, tocolor(235, 245, 250, 32))
         dxDrawText("PRESS [H] TO EQUIP PARACHUTE", left + 12, top, left + width - 12, top + 48,

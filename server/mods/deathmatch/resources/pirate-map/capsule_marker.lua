@@ -8,6 +8,7 @@ local parachuteReady = {}
 local rooftopRewarded = {}
 local landedPlayers = {}
 local rooftopPrompt = {}
+local hunters = {}
 
 addEventHandler("onResourceStart", resourceRoot, function()
     local marker = createMarker(2000.7, 1522.5, 16.0, "cylinder", 0.8, 127, 255, 212, 150)
@@ -30,7 +31,7 @@ addEventHandler("onResourceStart", resourceRoot, function()
         landedPlayers[player] = true
         triggerClientEvent(player, "airyard:finished", resourceRoot)
     end)
-    rooftopMarker = createMarker(2059.08545, 2434.55225, 164.8, "corona", 1.4, 255, 90, 25, 180)
+    rooftopMarker = createMarker(2059.08545, 2434.55225, 164.8, "cylinder", 1.4, 120, 220, 255, 120)
     rooftopZone = createColSphere(2059.08545, 2434.55225, 165.61719, 2.5)
     addEventHandler("onColShapeHit", rooftopZone, function(player, matchingDimension)
         if not matchingDimension or not parachuteReady[player] or rooftopRewarded[player] then return end
@@ -40,22 +41,34 @@ addEventHandler("onResourceStart", resourceRoot, function()
     end)
 end)
 
-addEvent("airyard:claimRooftop", true)
-addEventHandler("airyard:claimRooftop", resourceRoot, function()
-    if not client or not rooftopPrompt[client] or rooftopRewarded[client] then return end
-    rooftopRewarded[client] = true
-    rooftopPrompt[client] = nil
-    giveWeapon(client, 37, 100000, true)
-    outputChatBox("[!] [NOTIFICATION] The rooftop cache is yours. Use the fire to hold them back.", client, 255, 90, 60)
-    triggerClientEvent(client, "airyard:rooftopReward", resourceRoot)
-end)
-
 addEvent("airyard:parachute", true)
 addEventHandler("airyard:parachute", resourceRoot, function()
     if not client or not landedPlayers[client] then return end
     giveWeapon(client, 46, 1, true)
+    setPedWeaponSlot(client, 11)
     parachuteReady[client] = true
-    triggerClientEvent(client, "airyard:parachuteReady", resourceRoot)
+    rooftopPrompt[client] = nil
+    local hunter = createVehicle(425, 2059.08545, 2434.55225, 166.5, 0, 0, 180)
+    if hunter then
+        setVehicleColor(hunter, 0, 0, 0, 0, 0, 0)
+        setElementData(hunter, "airyard.owner", client)
+        hunters[client] = hunter
+        addEventHandler("onVehicleExplode", hunter, function()
+            hunters[client] = nil
+            setTimer(function()
+                if isElement(client) and parachuteReady[client] and not isPedDead(client) then
+                    local replacement = createVehicle(425, 2059.08545, 2434.55225, 166.5, 0, 0, 180)
+                    if replacement then
+                        setVehicleColor(replacement, 0, 0, 0, 0, 0, 0)
+                        setElementData(replacement, "airyard.owner", client)
+                        hunters[client] = replacement
+                        triggerClientEvent(client, "airyard:hunterReady", resourceRoot, replacement)
+                    end
+                end
+            end, 3000, 1)
+        end)
+    end
+    triggerClientEvent(client, "airyard:parachuteReady", resourceRoot, hunter)
 end)
 
 addEvent("airyard:start", true)
@@ -73,6 +86,8 @@ addEventHandler("onPlayerWasted", root, function()
     missions[source] = nil
     landedPlayers[source] = nil
     parachuteReady[source] = nil
+    if isElement(hunters[source]) then destroyElement(hunters[source]) end
+    hunters[source] = nil
     triggerClientEvent(source, "airyard:finished", resourceRoot)
 end)
 addEventHandler("onPlayerQuit", root, function() missions[source] = nil end)
