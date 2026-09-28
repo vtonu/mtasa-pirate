@@ -188,12 +188,12 @@
 					desc="Maximum chat log messages per player to store. Decreasing this value may save some of server RAM."
 					/>
 
-		<setting name="*reportCategories" value="Question,Suggestion,Other"
+		<setting name="*reportCategories" value="Questions,Suggestion"
 					friendlyname="Report categories"
 					desc="List of non player report categories."
 					/>
 
-		<setting name="*playerReportCategories" value="Rulebreaks,Cheater/Modder,Spammer"
+		<setting name="*playerReportCategories" value="Cheats/Rulebreaks"
 					friendlyname="Player report categories"
 					desc="List of report categories for reporting players."
 					/>
