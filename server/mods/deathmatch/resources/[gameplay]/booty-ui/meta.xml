@@ -3,6 +3,11 @@
     <script src="server.lua" type="server" />
     <script src="client.lua" type="client" />
     <file src="ui.html" />
+    <file src="images/leaf.svg" />
+    <file src="images/tec9.svg" />
+    <file src="images/micro_uzi.svg" />
+    <file src="images/molotov.svg" />
+    <file src="images/satchel.svg" />
     <file src="images/40.svg" />
     <file src="images/41.svg" />
     <file src="images/44.svg" />

@@ -189,6 +189,14 @@ addEventHandler("weedGarden:perkPreview", resourceRoot, function(preview)
     end
 end)
 
+addEvent("weedGarden:stockUpdate", true)
+addEventHandler("weedGarden:stockUpdate", resourceRoot, function(catalog)
+    currentPayload.strainCatalog = catalog
+    if isElement(uiBrowser) then
+        executeBrowserJavascript(uiBrowser, "window.updateGardenCatalog(" .. encodeValue(catalog) .. ");")
+    end
+end)
+
 addEvent("weedGarden:closeUI", true)
 addEventHandler("weedGarden:closeUI", resourceRoot, closeGardenUI)
 

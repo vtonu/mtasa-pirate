@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160">
+  <defs><linearGradient id="glass"><stop stop-color="#334e31"/><stop offset=".45" stop-color="#889b57"/><stop offset="1" stop-color="#263d28"/></linearGradient></defs>
+  <g transform="rotate(18 70 85)">
+    <path d="M62 44h22v29c0 9 17 15 17 28v39q-29 13-58 0v-39c0-13 19-19 19-28z" fill="url(#glass)" stroke="#bac5a0" stroke-width="2"/>
+    <path d="M60 43h26v9H60z" fill="#a59675" stroke="#d2c6a6" stroke-width="2"/>
+    <path d="M69 45q-11-10-1-24l-9-11 9-7 17 18q-11 13-4 23z" fill="#e3e2d3" stroke="#aeb5a5" stroke-width="2"/>
+    <path d="M51 105h42v24H51z" fill="#a18e59" stroke="#d0c399"/>
+    <path d="M54 133v-31q0-10 13-21" fill="none" stroke="#c4d2a0" stroke-width="4" opacity=".6"/>
+    <path d="M60 112h25M60 119h18" stroke="#595d3c" stroke-width="3"/>
+  </g>
+</svg>

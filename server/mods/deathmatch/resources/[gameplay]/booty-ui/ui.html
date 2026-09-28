@@ -633,6 +633,8 @@
         filter: grayscale(0.65) sepia(0.45) hue-rotate(95deg) saturate(0.65) brightness(1.12);
       }
       .preview-art[hidden] { display: none; }
+      .preview-art.fire-art { filter: saturate(1.2) brightness(1.1); }
+      .preview-art.grey-art { filter: grayscale(1) brightness(1.12); }
       .preview-placeholder { text-align: center; font-size: 28px; color: var(--green-soft); opacity: 0.45; }
       .preview-placeholder[hidden] { display: none; }
       .preview-copy { min-width: 0; }
@@ -824,6 +826,7 @@
 
 
       const weaponImages = {"1": "brassknuckle.png", "2": "golfclub.png", "3": "nitestick.png", "4": "knifecur.png", "5": "bat.png", "6": "shovel.png", "7": "poolcue.png", "8": "katana.png", "9": "chnsaw.png", "10": "gun_dildo1.png", "12": "gun_vibe1.png", "14": "flowera.png", "15": "gun_cane.png", "16": "grenade.png", "17": "teargas.png", "18": "molotov.png", "22": "colt45.png", "23": "Silenced.png", "24": "desert_eagle.png", "25": "chromegun.png", "26": "sawnoff.png", "27": "shotgspa.png", "28": "micro_uzi.png", "29": "mp5lng.png", "30": "ak47.png", "31": "m4.png", "32": "tec9.png", "33": "cuntgun.png", "34": "sniper.png", "35": "rocketla.png", "36": "heatseek.png", "37": "flame.png", "38": "minigun.png", "39": "satchel.png", "42": "fireextinguisher.png", "40": "40.svg", "41": "41.svg", "44": "44.svg", "46": "46.svg", "jetpack": "jetpack.svg", "45": "45.svg"};
+      Object.assign(weaponImages, {14: "leaf.svg", 18: "molotov.svg", 28: "micro_uzi.svg", 32: "tec9.svg", 39: "satchel.svg"});
       let previewInventory = [];
 
       function renderWeaponPreview() {
@@ -831,6 +834,8 @@
         const image = document.getElementById("preview-weapon-image");
         const placeholder = document.getElementById("preview-weapon-placeholder");
         const file = weapon && weaponImages[weapon.weapon == null ? weapon.id : weapon.weapon];
+        image.classList.toggle("fire-art", !!weapon && weapon.weapon === 37);
+        image.classList.toggle("grey-art", !!weapon && weapon.weapon === 39);
         image.hidden = !file;
         placeholder.hidden = !!file;
         placeholder.textContent = weapon ? weapon.symbol : "--";

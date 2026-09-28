@@ -163,6 +163,62 @@ local STRAINS = {
     }
 }
 
+-- PREMIUM STOCK PRICES
+local STRAIN_PRICE_FACTORS = {
+    ["Hindu Kush"] = 0.80,
+    ["Bubba Kush"] = 0.85,
+    ["Purple Kush"] = 0.90,
+    ["Northern Lights"] = 0.95,
+    ["Granddaddy Purple"] = 1.00,
+    ["Durban Poison"] = 1.05,
+    ["Green Crack"] = 1.10,
+    ["Jack Herer"] = 1.15,
+    ["Sour Diesel"] = 1.20,
+    ["Super Lemon Haze"] = 1.25,
+    ["White Widow"] = 1.30,
+    ["Gorilla Glue"] = 1.35,
+    ["OG Kush"] = 1.40,
+    ["Girl Scout Cookies"] = 1.45,
+    ["Blue Zushi"] = 1.50
+}
+
+for name, strain in pairs(STRAINS) do
+    for size, price in pairs(strain.prices) do
+        strain.prices[size] = math.floor(price * STRAIN_PRICE_FACTORS[name] / 5 + 0.5) * 5
+    end
+end
+
+local unavailableStrains = {}
+local STOCK_INTERVAL = 30 * 60 * 1000
+
+local function getStrainCatalog()
+    local catalog = {}
+    for name, strain in pairs(STRAINS) do
+        catalog[name] = {prices = strain.prices, available = not unavailableStrains[name]}
+    end
+    return catalog
+end
+
+local function rotateStock()
+    local names = {}
+    for name in pairs(STRAINS) do table.insert(names, name) end
+    for index = #names, 2, -1 do
+        local other = math.random(index)
+        names[index], names[other] = names[other], names[index]
+    end
+    unavailableStrains = {}
+    for index = 1, math.random(1, 2) do unavailableStrains[names[index]] = true end
+    local catalog = getStrainCatalog()
+    for player in pairs(previewState) do
+        if isElement(player) then
+            triggerClientEvent(player, "weedGarden:stockUpdate", resourceRoot, catalog)
+        end
+    end
+end
+
+rotateStock()
+setTimer(rotateStock, STOCK_INTERVAL, 0)
+
 local FLOWER_WEAPON = 14
 local SPRAYCAN_WEAPON = 41
 local HARVEST_SPRAYCAN_AMMO = 1000
@@ -215,6 +271,7 @@ end
 local function addPreviewData(player, payload)
     payload = payload or {}
     payload.perkPreview = getPerkPreview(player)
+    payload.strainCatalog = getStrainCatalog()
     payload.packageDurations = {}
     for name, package in pairs(PACKAGE_SETTINGS) do
         payload.packageDurations[name] = package.duration
@@ -227,6 +284,7 @@ local function sendGardenUI(player, payload)
         return
     end
 
+    previewState[player] = true
     triggerClientEvent(player, "weedGarden:openUI", resourceRoot, addPreviewData(player, payload))
 end
 
@@ -241,6 +299,7 @@ function updateGardenUI(player, payload)
 end
 
 function closeGardenUI(player)
+    previewState[player] = nil
     if isElement(player) then
         triggerClientEvent(player, "weedGarden:closeUI", resourceRoot)
     end
@@ -440,6 +499,10 @@ local function handlePurchase(player, state)
     end
 
     local strain = STRAINS[state.strain]
+    if unavailableStrains[state.strain] then
+        sendShopMessage(player, string.upper(state.strain) .. " IS CURRENTLY UNAVAILABLE.")
+        return
+    end
     local package = PACKAGE_SETTINGS[state.package]
     local price = strain.prices[state.package]
 

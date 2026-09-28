@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140">
+  <defs><linearGradient id="metal" x2="0" y2="1"><stop stop-color="#97a9a2"/><stop offset="1" stop-color="#37483f"/></linearGradient><g id="uzi" stroke="#b5c6bb" stroke-width="2" stroke-linejoin="round"><path d="M35 30h101v29H35zM136 37h38v13h-38z" fill="url(#metal)"/><path d="M50 59h28l-3 38H51zM56 97h17v17H56zM107 59h24v19h-24z" fill="#53685a"/><path d="M80 60h24v25H78M91 61v12H80M37 35H17v-9h24M20 26v55h26" fill="none"/><path d="M53 29v-8h13v8M124 29v-8h9v8" fill="#91a797"/><path d="M55 68h18M55 75h17M54 82h18M45 39h50M114 43h11" fill="none" stroke="#c1cec5"/></g></defs>
+  <use href="#uzi" transform="translate(46 -10) scale(.88)" opacity=".55"/>
+  <use href="#uzi" transform="translate(3 19)"/>
+</svg>

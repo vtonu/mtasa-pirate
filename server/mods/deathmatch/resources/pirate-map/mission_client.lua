@@ -44,6 +44,7 @@ end)
 
 addEvent("airyard:started", true)
 addEventHandler("airyard:started", resourceRoot, function()
+    playSoundFrontEnd(42)
     active = true
     parachutePrompt = false
     pressedThisVisit = atDesk()

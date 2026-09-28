@@ -879,7 +879,7 @@
             </div>
             <div class="metric">
               <div class="metric-label">Stock</div>
-              <div class="metric-value" id="stock">AVAILABLE</div>
+              <div class="metric-value" id="stock">--</div>
             </div>
           </div>
 
@@ -1219,6 +1219,19 @@
       let selectedStrain = null;
       let selectedBuySizeValue = null;
       let displayedStrains = [];
+      let strainCatalog = {};
+
+      function applyStrainCatalog(strain) {
+        return Object.assign({}, strain, strainCatalog[strain.name] || {});
+      }
+
+      window.updateGardenCatalog = function (catalog) {
+        strainCatalog = catalog || {};
+        displayedStrains = displayedStrains.map(applyStrainCatalog);
+        if (selectedStrain) selectedStrain = applyStrainCatalog(selectedStrain);
+        setStrains(displayedStrains);
+        updatePrice();
+      };
 
 
       let packageDurations = {};
@@ -1269,6 +1282,7 @@
 
       function updatePrice() {
         renderPerkPreview();
+        setText("stock", selectedStrain ? (selectedStrain.available === false ? "UNAVAILABLE" : "AVAILABLE") : "--");
         if (!selectedStrain || !selectedBuySizeValue) {
           setText("price", "--");
           return;
@@ -1451,6 +1465,7 @@
 
       window.updateGarden = function updateGarden(payload) {
         const data = Object.assign({}, defaults, payload || {});
+        if (data.strainCatalog) strainCatalog = data.strainCatalog;
         if (data.packageDurations) packageDurations = data.packageDurations;
         if (data.perkPreview) window.updatePerkPreview(data.perkPreview);
         const sourceStrains = Array.isArray(data.strains)
@@ -1464,8 +1479,10 @@
         }
 
         if (data.resetSelection || displayedStrains.length === 0) {
-          displayedStrains = shuffleStrains(sourceStrains);
+          displayedStrains = shuffleStrains(sourceStrains).map(applyStrainCatalog);
         }
+        displayedStrains = displayedStrains.map(applyStrainCatalog);
+        if (selectedStrain) selectedStrain = applyStrainCatalog(selectedStrain);
 
         setText("title", data.title);
         setText("zone", data.zone);
@@ -1482,7 +1499,6 @@
             ? String(selectedStrainIndex + 1).padStart(2, "0")
             : "--",
         );
-        setText("stock", (data.stock || "AVAILABLE").toUpperCase());
         const selectedStats = selectedStrain
           ? strainStats[String(selectedStrain.type || "hybrid").toLowerCase()]
           : null;
