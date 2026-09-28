@@ -1,13 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 120">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 150">
   <defs><linearGradient id="steel" x2="0" y2="1"><stop stop-color="#a2b4ac"/><stop offset=".48" stop-color="#687b71"/><stop offset="1" stop-color="#35473e"/></linearGradient></defs>
   <g stroke="#b7c9bd" stroke-width="2" stroke-linejoin="round">
     <path d="M22 30h104l8 8v17H25l-7-9z" fill="url(#steel)"/>
-    <path d="M134 34h96q7 0 7 10t-7 10h-96z" fill="url(#steel)"/>
-    <path d="M26 55h95v10H78L65 108H28l11-46z" fill="#40564a"/>
+    <path d="M134 34h96q7 0 7 10t-7 10h-96z" fill="#17221e" stroke="#697e72"/>
+    <path d="M26 55h95v10H78L63 132H25l14-70z" fill="#40564a"/>
     <path d="M78 65h33v19q-2 8-13 8H70M89 65v14h-9" fill="none"/>
-    <path d="M41 69h25l-9 29H34z" fill="#758b79"/>
-    <path d="M32 35v13M39 35v13M46 35v13M53 35v13M150 38h74M29 29v-6h10v6M113 29v-5h8v5" fill="none"/>
-    <path d="M39 78h21M37 85h21M35 92h21" stroke="#42584b"/>
+    <path d="M43 71h24l-11 50H32z" fill="#758b79"/>
+    <path d="M32 35v13M39 35v13M46 35v13M53 35v13M29 29v-6h10v6M113 29v-5h8v5" fill="none"/>
+    <path d="M150 38h74" stroke="#52685b"/>
+    <path d="M41 80h21M39 88h21M37 96h21M35 104h21M33 112h21" stroke="#42584b"/>
     <path d="M230 38v12" stroke="#31433a" stroke-width="3"/>
   </g>
 </svg>

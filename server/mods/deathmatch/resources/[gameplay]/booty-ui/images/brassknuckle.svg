@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 145">
+  <defs><linearGradient id="brass" x2="0" y2="1"><stop stop-color="#c2c4a3"/><stop offset=".5" stop-color="#8a967a"/><stop offset="1" stop-color="#52694f"/></linearGradient></defs>
+  <path fill="url(#brass)" fill-rule="evenodd" stroke="#c5d0b8" stroke-width="2.5" stroke-linejoin="round" d="M20 60Q17 34 39 29q17-22 36-8 26-16 43 0 22-11 40 8 29 0 31 30l-3 22-24 18-11 24H61L49 99 25 82z M31 54a14 17 0 1 0 28 0 14 17 0 1 0-28 0 M66 46a15 18 0 1 0 30 0 15 18 0 1 0-30 0 M104 46a15 18 0 1 0 30 0 15 18 0 1 0-30 0 M141 54a15 17 0 1 0 30 0 15 17 0 1 0-30 0 M69 89l-6 10 8 10h71l8-10-8-10z"/>
+  <path d="M31 78l25 13M174 78l-19 12M74 117h65" fill="none" stroke="#d4dcc7" stroke-width="2" opacity=".65"/>
+</svg>

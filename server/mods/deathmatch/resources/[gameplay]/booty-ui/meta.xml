@@ -4,6 +4,8 @@
     <script src="client.lua" type="client" />
     <file src="ui.html" />
     <file src="images/leaf.svg" />
+    <file src="images/colt45.svg" />
+    <file src="images/brassknuckle.svg" />
     <file src="images/silenced.svg" />
     <file src="images/mp5.svg" />
     <file src="images/teargas.svg" />
