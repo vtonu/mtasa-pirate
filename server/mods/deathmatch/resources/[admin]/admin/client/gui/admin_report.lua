@@ -137,7 +137,6 @@ function aClientReportClick(button)
                 tableOut.message = guiGetText(aReportMessage)
                 triggerServerEvent("aMessage", localPlayer, "new", tableOut)
                 aReportClose()
-                outputChatBox("[NOTIFICATION] Your message has been submitted.", 205, 250, 80)
             end
             -- elseif ( source == aReportSubject ) then
 

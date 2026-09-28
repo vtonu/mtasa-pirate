@@ -122,7 +122,7 @@
 					desc="When enabled, players will be able to submit reports to admins via the /report command."
 				  />
 
-	  <setting name="*maxmsgs" value="55"
+	  <setting name="*maxmsgs" value="100"
 					friendlyname="Max messages"
 					accept="1-1000"
 					desc="Maximum admin messages to keep."

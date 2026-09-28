@@ -20,6 +20,41 @@ aWeathers = {}
 
 local aUnmuteTimerList = {}
 local chatHistory = {}
+local reportCooldowns = {}
+
+local function saveReports ( )
+	local node = xmlLoadFile ( "conf\\reports.xml" )
+	if ( node ) then
+		while ( xmlFindChild ( node, "message", 0 ) ~= false ) do
+			local subnode = xmlFindChild ( node, "message", 0 )
+			xmlDestroyNode ( subnode )
+		end
+	else
+		node = xmlCreateFile ( "conf\\reports.xml", "messages" )
+	end
+	if not node then return false end
+	for id, message in ipairs ( aReports ) do
+		local subnode = xmlCreateChild ( node, "message" )
+		for key, value in pairs ( message ) do
+			if ( value ) then
+				if ( type ( value ) == "table" ) then
+					local child = xmlCreateChild ( subnode, key )
+					xmlNodeSetValue ( child, tostring ( value.chatLog ) )
+					xmlNodeSetAttribute ( child, "name", value.name )
+					xmlNodeSetAttribute ( child, "username", value.username )
+					xmlNodeSetAttribute ( child, "ip", value.ip )
+					xmlNodeSetAttribute ( child, "serial", value.serial )
+					xmlNodeSetAttribute ( child, "version", value.version )
+				else
+					xmlNodeSetValue ( xmlCreateChild ( subnode, key ), tostring ( value ) )
+				end
+			end
+		end
+	end
+	local saved = xmlSaveFile ( node )
+	xmlUnloadFile ( node )
+	return saved
+end
 
 function notifyPlayerLoggedIn(player)
 	outputChatBox ( "Press 'p' to open your admin panel", player )
@@ -265,35 +300,7 @@ addEventHandler ( "onResourceStop", root, function ( resource )
 			aHandleIP2CUpdate()
 		end
 	else
-		local node = xmlLoadFile ( "conf\\reports.xml" )
-		if ( node ) then
-			while ( xmlFindChild ( node, "message", 0 ) ~= false ) do
-				local subnode = xmlFindChild ( node, "message", 0 )
-				xmlDestroyNode ( subnode )
-			end
-		else
-			node = xmlCreateFile ( "conf\\reports.xml", "messages" )
-		end
-		for id, message in ipairs ( aReports ) do
-			local subnode = xmlCreateChild ( node, "message" )
-			for key, value in pairs ( message ) do
-				if ( value ) then
-					if ( type ( value ) == "table" ) then
-						local child = xmlCreateChild ( subnode, key )
-						xmlNodeSetValue ( child, tostring ( value.chatLog ) )
-						xmlNodeSetAttribute ( child, "name", value.name )
-						xmlNodeSetAttribute ( child, "username", value.username )
-						xmlNodeSetAttribute ( child, "ip", value.ip )
-						xmlNodeSetAttribute ( child, "serial", value.serial )
-						xmlNodeSetAttribute ( child, "version", value.version )
-					else
-						xmlNodeSetValue ( xmlCreateChild ( subnode, key ), tostring ( value ) )
-					end
-				end
-			end
-		end
-		xmlSaveFile ( node )
-		xmlUnloadFile ( node )
+		if not saveReports () then outputDebugString ( "ADMIN: Failed to save reports.", 1 ) end
 
 		-- Unmute anybody muted by admin
 		for i, player in ipairs(getElementsByType("player")) do
@@ -1494,16 +1501,33 @@ function ( action, data )
 	end
 	if ( action == "new" ) then
 		--dont allow creating reports when reports are disabled
-		if ( get("reportsEnabled") ~= "true" ) then return end
+		if ( get("reportsEnabled") ~= "true" ) then
+			outputChatBox ( "[NOTIFICATION] Reports are not accepted currently.", source, 255, 250, 80 )
+			return
+		end
+		if type ( data ) ~= "table" or type ( data.category ) ~= "string" or type ( data.subject ) ~= "string" or type ( data.message ) ~= "string" then return end
+		if #data.subject < 1 or #data.subject > 200 or #data.message < 5 or #data.message > 8000 or #data.category > 100 then
+			outputChatBox ( "[NOTIFICATION] Report not submitted. Use a subject of 1-200 characters and a message of 5-8000 characters.", source, 255, 250, 80 )
+			return
+		end
+		local serial = getPlayerSerial ( source )
+		local now = getTickCount ()
+		if reportCooldowns[serial] and now < reportCooldowns[serial] then
+			outputChatBox ( "[NOTIFICATION] Please wait " .. math.ceil ( ( reportCooldowns[serial] - now ) / 1000 ) .. " seconds before submitting another report.", source, 255, 250, 80 )
+			return
+		end
+		local previousReports = {}
+		for i, report in ipairs ( aReports ) do previousReports[i] = report end
 		local time = getRealTime()
 		local id = #aReports + 1
 		aReports[id] = {}
 		aReports[id].author = getPlayerName ( source )
 		aReports[id].category = tostring ( data.category )
 		aReports[id].subject = tostring ( data.subject )
-		aReports[id].text = tostring ( data.message )
+		local x, y, z = getElementPosition ( source )
+		aReports[id].text = data.message .. string.format ( "\n\nREPORT DETAILS\nPosition: %.2f, %.2f, %.2f\nInterior: %d | Dimension: %d\nWeather: %d\nPassive: %s\nPing: %d ms", x, y, z, getElementInterior ( source ), getElementDimension ( source ), getWeather (), tostring ( getElementData ( source, "freeroam.passive" ) == true ), getPlayerPing ( source ) )
 		aReports[id].time = string.format( '%04d-%02d-%02d %02d:%02d', time.year + 1900, time.month + 1, time.monthday, time.hour, time.minute )
-		if ( data.suspect ) then
+		if ( type ( data.suspect ) == "string" ) then
 			local suspectedPlayer = getPlayerFromName( data.suspect )
 			if suspectedPlayer then
 				aReports[id].suspect = {
@@ -1517,28 +1541,47 @@ function ( action, data )
 			end
 		end
 		aReports[id].read = false
+		local submittedReport = aReports[id]
+		while #aReports > g_Prefs.maxmsgs do table.remove ( aReports, 1 ) end
+		if not saveReports () then
+			aReports = previousReports
+			outputChatBox ( "[NOTIFICATION] Your report could not be saved. Please try again.", source, 255, 250, 80 )
+			outputDebugString ( "ADMIN: Failed to save submitted report.", 1 )
+			return
+		end
+		for key, expires in pairs ( reportCooldowns ) do
+			if expires <= now then reportCooldowns[key] = nil end
+		end
+		reportCooldowns[serial] = now + 30000
+		outputChatBox ( "[NOTIFICATION] Your message has been submitted.", source, 255, 105, 180 )
 		-- PM all admins to say a new message has arrived
 		for _, p in ipairs ( getElementsByType ( "player" ) ) do
 			if ( hasObjectPermissionTo ( p, "general.adminpanel", false ) ) then
-				outputChatBox( "New Admin message from " .. aReports[id].author .. " (" .. aReports[id].subject .. ")", p, 255, 0, 0 )
+				outputChatBox( "New Admin message from " .. submittedReport.author .. " (" .. submittedReport.subject .. ")", p, 255, 0, 0 )
 			end
 		end
-		-- Keep message count no greater that 'maxmsgs'
-		while #aReports > g_Prefs.maxmsgs do
-			table.remove( aReports, 1 )
-		end
+
 	end
 	if ( hasObjectPermissionTo ( client or source, "general.adminpanel", false ) ) then
 		if ( action == "get" ) then
 			triggerClientEvent ( source, "aMessage", source, "get", aReports, get("reportsEnabled") )
 		elseif ( action == "read" ) then
 			if ( aReports[data] ) then
+				local wasRead = aReports[data].read
 				aReports[data].read = true
+				if not saveReports () then
+					aReports[data].read = wasRead
+					outputChatBox ( "[NOTIFICATION] Could not save the report status. Please try again.", source, 255, 250, 80 )
+				end
 			end
 		elseif ( action == "delete" ) then
 			if ( aReports[data] ) then
 				outputServerLog ( "ADMIN: "..getPlayerName(client).." has deleted a report with subject '"..aReports[data].subject.."'." )
-				table.remove ( aReports, data )
+				local removed = table.remove ( aReports, data )
+				if not saveReports () then
+					table.insert ( aReports, data, removed )
+					outputChatBox ( "[NOTIFICATION] Could not delete the saved report. Please try again.", source, 255, 250, 80 )
+				end
 			end
 			triggerClientEvent ( source, "aMessage", source, "get", aReports )
 		end
