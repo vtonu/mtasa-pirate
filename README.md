@@ -11,6 +11,7 @@ Personal MTA:SA freeroam server for custom gameplay, content creation, and playi
 - Booty Desk weapon shop with item previews and live inventory info.
 - Fog of War Garden with strain prices, rotating stock, and Indica, Sativa, and Hybrid perks lasting 5, 10, 20, or 30 minutes.
 - Passive mode, vehicle options, weapon drops, and a Money / Team / K/D scoreboard.
+- Built-in reports with saved admin inbox, gameplay details, and spam cooldown.
 
 ## Controls
 
@@ -23,6 +24,8 @@ Personal MTA:SA freeroam server for custom gameplay, content creation, and playi
 | Space | Respawn when prompted                                                  |
 
 Rustler bombs use the vehicle fire control.
+
+Use `/report` to submit questions, suggestions, or cheats/rulebreak reports.
 
 ## Requirements
 
