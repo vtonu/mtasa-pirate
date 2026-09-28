@@ -29,136 +29,136 @@ local STRAINS = {
     ["Granddaddy Purple"] = {
         type = "indica",
         prices = {
-            eighth = 90,
-            ounce = 190,
-            qp = 340,
-            cart = 45
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Northern Lights"] = {
         type = "indica",
         prices = {
-            eighth = 80,
-            ounce = 175,
-            qp = 315,
-            cart = 40
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Bubba Kush"] = {
         type = "indica",
         prices = {
-            eighth = 75,
-            ounce = 165,
-            qp = 295,
-            cart = 35
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Purple Kush"] = {
         type = "indica",
         prices = {
-            eighth = 85,
-            ounce = 185,
-            qp = 330,
-            cart = 45
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Hindu Kush"] = {
         type = "indica",
         prices = {
-            eighth = 70,
-            ounce = 155,
-            qp = 275,
-            cart = 30
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Sour Diesel"] = {
         type = "sativa",
         prices = {
-            eighth = 100,
-            ounce = 220,
-            qp = 390,
-            cart = 50
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Durban Poison"] = {
         type = "sativa",
         prices = {
-            eighth = 90,
-            ounce = 200,
-            qp = 350,
-            cart = 45
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Jack Herer"] = {
         type = "sativa",
         prices = {
-            eighth = 85,
-            ounce = 180,
-            qp = 325,
-            cart = 40
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Green Crack"] = {
         type = "sativa",
         prices = {
-            eighth = 95,
-            ounce = 210,
-            qp = 375,
-            cart = 50
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Super Lemon Haze"] = {
         type = "sativa",
         prices = {
-            eighth = 80,
-            ounce = 175,
-            qp = 310,
-            cart = 40
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Gorilla Glue"] = {
         type = "hybrid",
         prices = {
-            eighth = 100,
-            ounce = 215,
-            qp = 385,
-            cart = 50
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Girl Scout Cookies"] = {
         type = "hybrid",
         prices = {
-            eighth = 95,
-            ounce = 205,
-            qp = 365,
-            cart = 45
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["OG Kush"] = {
         type = "hybrid",
         prices = {
-            eighth = 85,
-            ounce = 190,
-            qp = 335,
-            cart = 40
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["White Widow"] = {
         type = "hybrid",
         prices = {
-            eighth = 80,
-            ounce = 180,
-            qp = 320,
-            cart = 35
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     },
     ["Blue Zushi"] = {
         type = "hybrid",
         prices = {
-            eighth = 100,
-            ounce = 220,
-            qp = 400,
-            cart = 50
+            eighth = 900,
+            ounce = 1600,
+            qp = 2200,
+            cart = 500
         }
     }
 }

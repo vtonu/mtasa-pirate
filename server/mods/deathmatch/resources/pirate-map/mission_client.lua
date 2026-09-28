@@ -117,10 +117,9 @@ addEventHandler("onClientRender", root, function()
     local prompt = parachutePrompt and atAiryard() and "PRESS [H] TO EQUIP PARACHUTE" or "PRESS [H] TO START"
     local font = "unifont"
     local scale = math.min(1, (width - 32) / dxGetTextWidth(prompt, 1, font))
-    dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 138))
+    dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 124))
     dxDrawRectangle(left, top, width, 1, tocolor(220, 255, 239, 55))
     dxDrawRectangle(left, top, 2, 48, tocolor(127, 255, 212, 200))
-    dxDrawRectangle(left + width - 18, top + 22, 4, 4, tocolor(242, 176, 128, 210))
     dxDrawText(prompt, left + 12, top, left + width - 12, top + 48,
         tocolor(238, 255, 247, 245), scale, font, "center", "center", false, false, false, false)
 end)
