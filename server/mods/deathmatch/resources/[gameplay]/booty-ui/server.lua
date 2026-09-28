@@ -720,6 +720,7 @@ local function getWeaponPayload()
             item[key] = value
         end
         item.id = id
+        item.slot = weapon.weapon and getSlotFromWeapon(weapon.weapon) or false
         table.insert(payload, item)
     end
 

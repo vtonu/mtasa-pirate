@@ -792,6 +792,60 @@
         box-shadow: none;
       }
       button:focus-visible { outline: 1px solid #f2b080; outline-offset: 2px; }
+
+      /* ITEM health-scope */
+      .health-scope.preview-card {
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        align-items: stretch;
+        justify-content: stretch;
+        --preview-accent: #b88cff;
+      }
+      .preview-main {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 34% minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+      }
+      .preview-art {
+        width: 100%;
+        height: 74px;
+        object-fit: contain;
+        opacity: 0.85;
+        filter: grayscale(0.65) sepia(0.45) hue-rotate(95deg) saturate(0.65) brightness(1.12);
+      }
+      .preview-art[hidden] { display: none; }
+      .preview-placeholder { text-align: center; font-size: 28px; color: var(--green-soft); opacity: 0.45; }
+      .preview-placeholder[hidden] { display: none; }
+      .preview-copy { min-width: 0; }
+      .preview-label { color: var(--green-soft); font-size: 9px; letter-spacing: 0.5px; }
+      .preview-name {
+        color: var(--preview-accent);
+        font-size: 16px;
+        line-height: 1.05;
+        margin: 3px 0;
+        overflow-wrap: break-word;
+      }
+      .preview-detail { color: var(--mint); font-size: 10px; line-height: 1.3; }
+      .preview-value { margin-top: 5px; color: var(--preview-accent); font-size: 12px; }
+      .preview-status {
+        min-width: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 9px;
+        border-top: 1px solid var(--line);
+        background: rgba(9, 25, 25, 0.35);
+        color: var(--green-soft);
+        font-size: 9px;
+        line-height: 1.25;
+      }
+      .preview-status span { min-width: 0; overflow-wrap: break-word; }
+      .preview-status strong { color: var(--preview-accent); font-weight: normal; text-align: right; flex-shrink: 0; }
+      .perk-progress { position: absolute; bottom: 0; left: 0; height: 2px; width: 0; background: var(--preview-accent); }
     </style>
   </head>
   <body>
@@ -891,20 +945,21 @@
             </div>
           </div>
 
-          <div class="health-scope">
-            <div class="scope-ring inner"></div>
-            <div class="plant-core">
-              <div class="leaf"></div>
-              <div class="leaf"></div>
-              <div class="leaf"></div>
-              <div class="leaf"></div>
-              <div class="leaf"></div>
-              <div class="leaf"></div>
-              <div class="core-text">
-                <strong id="health-core">--</strong>
-                <span>Health</span>
+          <div class="health-scope preview-card" id="perk-preview">
+            <div class="preview-main">
+              <img class="preview-art" src="images/leaf.svg" alt="" />
+              <div class="preview-copy">
+                <div class="preview-label">SELECTED PERK</div>
+                <div class="preview-name" id="preview-perk-name">SELECT A STRAIN</div>
+                <div class="preview-detail" id="preview-perk-effect">--</div>
+                <div class="preview-value" id="preview-perk-duration">SELECT A SIZE</div>
               </div>
             </div>
+            <div class="preview-status">
+              <span id="preview-perk-active">NO ACTIVE PERK</span>
+              <strong id="preview-perk-time">--</strong>
+            </div>
+            <div class="perk-progress" id="preview-perk-progress"></div>
           </div>
 
           <div class="notification-wrap">
@@ -1165,6 +1220,47 @@
       let selectedBuySizeValue = null;
       let displayedStrains = [];
 
+
+      let packageDurations = {};
+      let activePreview = { type: false, duration: 0, endsAt: 0 };
+      const perkEffects = {
+        indica: "ARMOR REGEN / LESS DAMAGE",
+        sativa: "FAST MOVEMENT / MORE DAMAGE",
+        hybrid: "LOW GRAVITY / HEALTH REGEN",
+      };
+
+      function renderPerkPreview() {
+        const type = selectedStrain && String(selectedStrain.type || "hybrid").toLowerCase();
+        document.getElementById("perk-preview").style.setProperty("--preview-accent", strainColors[type] || "#b88cff");
+        setText("preview-perk-name", type ? type.toUpperCase() : "SELECT A STRAIN");
+        setText("preview-perk-effect", type ? perkEffects[type] || "--" : "--");
+        const duration = selectedBuySizeValue && packageDurations[selectedBuySizeValue];
+        setText("preview-perk-duration", duration ? `${Math.round(duration / 60000)} MIN PERK DURATION` : "SELECT A SIZE");
+      }
+
+      function renderActivePerk() {
+        const remaining = Math.max(0, activePreview.endsAt - Date.now());
+        const active = activePreview.type && remaining > 0;
+        const seconds = Math.ceil(remaining / 1000);
+        setText("preview-perk-active", active ? `ACTIVE PERK: ${String(activePreview.type).toUpperCase()}` : "NO ACTIVE PERK");
+        setText("preview-perk-time", active ? `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")} LEFT` : "--");
+        const color = strainColors[activePreview.type] || "var(--green-soft)";
+        document.getElementById("preview-perk-time").style.color = color;
+        const progress = document.getElementById("preview-perk-progress");
+        progress.style.backgroundColor = color;
+        progress.style.width = active && activePreview.duration > 0 ? `${Math.min(100, remaining / activePreview.duration * 100)}%` : "0%";
+      }
+
+      window.updatePerkPreview = function (preview) {
+        activePreview = {
+          type: preview.type || false,
+          duration: Number(preview.duration) || 0,
+          endsAt: Date.now() + Math.max(0, Number(preview.remaining) || 0),
+        };
+        renderActivePerk();
+      };
+      setInterval(renderActivePerk, 1000);
+
       function animatePurchase(button) {
         button.classList.remove("purchase-click");
         void button.offsetWidth;
@@ -1172,6 +1268,7 @@
       }
 
       function updatePrice() {
+        renderPerkPreview();
         if (!selectedStrain || !selectedBuySizeValue) {
           setText("price", "--");
           return;
@@ -1338,11 +1435,7 @@
             setText("health-regen", `${selectedStats.healthRegen}%`);
             setText("armor-regen", `${selectedStats.armorRegen}%`);
             updatePrice();
-            if (strain.health != null) {
-              setText("health-core", `${Math.round(clamp(strain.health))}%`);
-            }
-            document.getElementById("health-core").style.color =
-              strainColors[type] || strainColors.hybrid;
+
             setBar("indica", strain.indica, strainColors.indica);
             setBar("sativa", strain.sativa, strainColors.sativa);
             setBar("hybrid", strain.hybrid, strainColors.hybrid);
@@ -1358,6 +1451,8 @@
 
       window.updateGarden = function updateGarden(payload) {
         const data = Object.assign({}, defaults, payload || {});
+        if (data.packageDurations) packageDurations = data.packageDurations;
+        if (data.perkPreview) window.updatePerkPreview(data.perkPreview);
         const sourceStrains = Array.isArray(data.strains)
           ? data.strains
           : defaults.strains;
@@ -1388,21 +1483,6 @@
             : "--",
         );
         setText("stock", (data.stock || "AVAILABLE").toUpperCase());
-        const displayedHealth =
-          selectedStrain && !data.resetSelection
-            ? selectedStrain.health
-            : null;
-        setText(
-          "health-core",
-          displayedHealth == null
-            ? "--"
-            : `${Math.round(clamp(displayedHealth))}%`,
-        );
-        document.getElementById("health-core").style.color = selectedStrain
-          ? strainColors[
-              String(selectedStrain.type || "hybrid").toLowerCase()
-            ] || strainColors.hybrid
-          : "var(--green-soft)";
         const selectedStats = selectedStrain
           ? strainStats[String(selectedStrain.type || "hybrid").toLowerCase()]
           : null;

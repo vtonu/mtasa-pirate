@@ -181,6 +181,14 @@ addEventHandler("weedGarden:openUI", resourceRoot, createGardenUI)
 addEvent("weedGarden:updateUI", true)
 addEventHandler("weedGarden:updateUI", resourceRoot, sendPayloadToBrowser)
 
+addEvent("weedGarden:perkPreview", true)
+addEventHandler("weedGarden:perkPreview", resourceRoot, function(preview)
+    currentPayload.perkPreview = preview
+    if isElement(uiBrowser) then
+        executeBrowserJavascript(uiBrowser, "window.updatePerkPreview(" .. encodeValue(preview) .. ");")
+    end
+end)
+
 addEvent("weedGarden:closeUI", true)
 addEventHandler("weedGarden:closeUI", resourceRoot, closeGardenUI)
 

@@ -608,6 +608,60 @@
         box-shadow: none;
       }
       button:focus-visible { outline: 1px solid #f2b080; outline-offset: 2px; }
+
+      /* ITEM weapon-display */
+      .weapon-display.preview-card {
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        align-items: stretch;
+        justify-content: stretch;
+        --preview-accent: #b88cff;
+      }
+      .preview-main {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 34% minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+      }
+      .preview-art {
+        width: 100%;
+        height: 74px;
+        object-fit: contain;
+        opacity: 0.85;
+        filter: grayscale(0.65) sepia(0.45) hue-rotate(95deg) saturate(0.65) brightness(1.12);
+      }
+      .preview-art[hidden] { display: none; }
+      .preview-placeholder { text-align: center; font-size: 28px; color: var(--green-soft); opacity: 0.45; }
+      .preview-placeholder[hidden] { display: none; }
+      .preview-copy { min-width: 0; }
+      .preview-label { color: var(--green-soft); font-size: 9px; letter-spacing: 0.5px; }
+      .preview-name {
+        color: var(--preview-accent);
+        font-size: 16px;
+        line-height: 1.05;
+        margin: 3px 0;
+        overflow-wrap: break-word;
+      }
+      .preview-detail { color: var(--mint); font-size: 10px; line-height: 1.3; }
+      .preview-value { margin-top: 5px; color: var(--preview-accent); font-size: 12px; }
+      .preview-status {
+        min-width: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 9px;
+        border-top: 1px solid var(--line);
+        background: rgba(9, 25, 25, 0.35);
+        color: var(--green-soft);
+        font-size: 9px;
+        line-height: 1.25;
+      }
+      .preview-status span { min-width: 0; overflow-wrap: break-word; }
+      .preview-status strong { color: var(--preview-accent); font-weight: normal; text-align: right; flex-shrink: 0; }
+      .perk-progress { position: absolute; bottom: 0; left: 0; height: 2px; width: 0; background: var(--preview-accent); }
     </style>
   </head>
   <body>
@@ -697,11 +751,20 @@
             </div>
           </div>
 
-          <div class="weapon-display">
-            <div class="scope-ring inner"></div>
-            <div class="weapon-core">
-              <strong id="winning-rate">0%</strong>
-              <span>Winning Rate</span>
+          <div class="weapon-display preview-card" id="weapon-preview">
+            <div class="preview-main">
+              <img class="preview-art" id="preview-weapon-image" alt="" hidden />
+              <div class="preview-placeholder" id="preview-weapon-placeholder">--</div>
+              <div class="preview-copy">
+                <div class="preview-label">SELECTED ITEM</div>
+                <div class="preview-name" id="preview-weapon-name">SELECT AN ITEM</div>
+                <div class="preview-detail" id="preview-weapon-detail">--</div>
+                <div class="preview-value" id="preview-weapon-owned">--</div>
+              </div>
+            </div>
+            <div class="preview-status">
+              <span id="preview-weapon-slot">CURRENT SLOT: --</span>
+              <strong id="preview-weapon-action">--</strong>
             </div>
           </div>
 
@@ -759,6 +822,50 @@
         setText(`${name}-text`, `${Math.round(percent)}%`);
       }
 
+
+      const weaponImages = {"1": "brassknuckle.png", "2": "golfclub.png", "3": "nitestick.png", "4": "knifecur.png", "5": "bat.png", "6": "shovel.png", "7": "poolcue.png", "8": "katana.png", "9": "chnsaw.png", "10": "gun_dildo1.png", "12": "gun_vibe1.png", "14": "flowera.png", "15": "gun_cane.png", "16": "grenade.png", "17": "teargas.png", "18": "molotov.png", "22": "colt45.png", "23": "Silenced.png", "24": "desert_eagle.png", "25": "chromegun.png", "26": "sawnoff.png", "27": "shotgspa.png", "28": "micro_uzi.png", "29": "mp5lng.png", "30": "ak47.png", "31": "m4.png", "32": "tec9.png", "33": "cuntgun.png", "34": "sniper.png", "35": "rocketla.png", "36": "heatseek.png", "37": "flame.png", "38": "minigun.png", "39": "satchel.png", "42": "fireextinguisher.png", "40": "40.svg", "41": "41.svg", "44": "44.svg", "46": "46.svg", "jetpack": "jetpack.svg", "45": "45.svg"};
+      let previewInventory = [];
+
+      function renderWeaponPreview() {
+        const weapon = selectedWeapon;
+        const image = document.getElementById("preview-weapon-image");
+        const placeholder = document.getElementById("preview-weapon-placeholder");
+        const file = weapon && weaponImages[weapon.weapon == null ? weapon.id : weapon.weapon];
+        image.hidden = !file;
+        placeholder.hidden = !!file;
+        placeholder.textContent = weapon ? weapon.symbol : "--";
+        if (file && image.getAttribute("src") !== `images/${file}`) image.src = `images/${file}`;
+        image.onerror = () => { image.hidden = true; placeholder.hidden = false; };
+        document.getElementById("weapon-preview").style.setProperty("--preview-accent", weapon ? colors[weapon.category] : "#b88cff");
+        setText("preview-weapon-name", weapon ? weapon.name.toUpperCase() : "SELECT AN ITEM");
+        if (!weapon) {
+          setText("preview-weapon-detail", "--");
+          setText("preview-weapon-owned", "--");
+          setText("preview-weapon-slot", "CURRENT SLOT: --");
+          setText("preview-weapon-action", "--");
+          return;
+        }
+        const current = previewInventory.find((item) => item.slot === weapon.slot);
+        const owned = current && current.weapon === weapon.weapon;
+        const currentItem = current && shopData.weapons.find((item) => item.weapon === current.weapon);
+        const gearLabels = {44: "NIGHT VISION", 45: "HEAT VISION", 46: "PARACHUTE", 40: "REMOTE DETONATOR"};
+        const detail = gearLabels[weapon.weapon] || (weapon.capacity !== "N/A" ? `${weapon.ammo} AMMO INCLUDED` : "MELEE WEAPON");
+        setText("preview-weapon-detail", weapon.weapon == null ? "FLIGHT GEAR" : detail);
+        setText("preview-weapon-owned", weapon.available === false ? "UNAVAILABLE" : owned ? "OWNED" : "NOT OWNED");
+        setText("preview-weapon-slot", current ? `CURRENT: ${String(currentItem ? currentItem.name : current.name || "OTHER ITEM").toUpperCase()}` : "CURRENT SLOT: EMPTY");
+        setText("preview-weapon-action", weapon.available === false ? "--" : owned ? "ALREADY EQUIPPED" : current ? "REPLACES ON BUY" : "SLOT FREE");
+        if (owned && weapon.capacity !== "N/A" && !gearLabels[weapon.weapon]) {
+          setText("preview-weapon-slot", `AMMO OWNED: ${current.ammo}`);
+          setText("preview-weapon-action", "ADDS AMMO");
+        }
+        if (weapon.weapon == null) setText("preview-weapon-slot", "CURRENT SLOT: --");
+      }
+
+      window.updateShopInventory = function (inventory) {
+        previewInventory = Array.isArray(inventory) ? inventory : [];
+        renderWeaponPreview();
+      };
+
       function displayWeapon(weapon) {
         selectedWeapon = weapon;
         setText("weapon-id", weapon.weapon == null ? "N/A" : weapon.weapon);
@@ -767,9 +874,7 @@
           "stock",
           weapon.available === false ? "UNAVAILABLE" : "AVAILABLE",
         );
-        setText("winning-rate", `${weapon.winningRate}%`);
-        document.getElementById("winning-rate").style.color =
-          colors[weapon.category];
+        renderWeaponPreview();
         setText("damage", weapon.damage);
         setText("range", weapon.range);
         setText("capacity", weapon.capacity);
@@ -794,6 +899,7 @@
           button.onclick = () => {
             selectedCategory = category;
             selectedWeapon = null;
+            renderWeaponPreview();
             renderCategories();
             renderWeapons();
           };
@@ -849,6 +955,10 @@
             : (shopData.stock || "AVAILABLE").toUpperCase(),
         );
         setText("note", shopData.note || "SELECT A WEAPON.");
+        if (selectedWeapon) {
+          selectedWeapon = shopData.weapons.find((weapon) => weapon.id === selectedWeapon.id) || null;
+        }
+        renderWeaponPreview();
         renderCategories();
         renderWeapons();
       };

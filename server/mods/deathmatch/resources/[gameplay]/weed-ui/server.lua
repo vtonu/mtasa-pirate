@@ -202,12 +202,32 @@ local INDICA_DAMAGE_REDUCTION = 0.15 -- 15% Damage reduction for indica.
 local HYBRID_DAMAGE_REDUCTION = 0.15 -- 15% Damage reduction for hybrid.
 local SATIVA_DAMAGE_INCREASE = 0.15 -- 15% Damage increase for sativa.
 
+local function getPerkPreview(player)
+    local active = playerPerks[player]
+    local remaining = active and isTimer(active.expireTimer) and getTimerDetails(active.expireTimer) or 0
+    return {
+        type = remaining > 0 and getElementData(player, "weed.perk") or false,
+        remaining = remaining,
+        duration = active and active.duration or 0
+    }
+end
+
+local function addPreviewData(player, payload)
+    payload = payload or {}
+    payload.perkPreview = getPerkPreview(player)
+    payload.packageDurations = {}
+    for name, package in pairs(PACKAGE_SETTINGS) do
+        payload.packageDurations[name] = package.duration
+    end
+    return payload
+end
+
 local function sendGardenUI(player, payload)
     if not isElement(player) then
         return
     end
 
-    triggerClientEvent(player, "weedGarden:openUI", resourceRoot, payload or {})
+    triggerClientEvent(player, "weedGarden:openUI", resourceRoot, addPreviewData(player, payload))
 end
 
 function openGardenUI(player, payload)
@@ -216,7 +236,7 @@ end
 
 function updateGardenUI(player, payload)
     if isElement(player) then
-        triggerClientEvent(player, "weedGarden:updateUI", resourceRoot, payload or {})
+        triggerClientEvent(player, "weedGarden:updateUI", resourceRoot, addPreviewData(player, payload))
     end
 end
 
@@ -290,6 +310,9 @@ local function restorePlayerPerks(player)
     end
 
     playerPerks[player] = nil
+    if isElement(player) then
+        triggerClientEvent(player, "weedGarden:perkPreview", resourceRoot, getPerkPreview(player))
+    end
 end
 
 local function equipPlayerPerks(player, strainName, strainType, packageName)
@@ -321,6 +344,7 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
     local baseWalkingStyle = previous and previous.baseWalkingStyle or getPedWalkingStyle(player)
 
     local active = {
+        duration = package.duration,
         weapon = perks.weapon,
         baseGravity = baseGravity,
         baseWalkingStyle = baseWalkingStyle

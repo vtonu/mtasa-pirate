@@ -6,6 +6,7 @@ local isDragging = false
 local dragOffsetX = 0
 local dragOffsetY = 0
 local previousInputMode = nil
+local previewTimer
 
 local UI_WIDTH = math.floor(screenW * 0.52)
 local UI_HEIGHT = math.floor(screenH * 0.66)
@@ -53,11 +54,25 @@ local function encodeValue(value)
     return "null"
 end
 
+local function sendInventoryToBrowser()
+    if not isElement(uiBrowser) then return end
+    local inventory = {}
+    for slot = 0, 12 do
+        local weapon = getPedWeapon(localPlayer, slot)
+        local ammo = getPedTotalAmmo(localPlayer, slot)
+        if weapon and weapon > 0 and ammo and ammo > 0 then
+            table.insert(inventory, {slot = slot, weapon = weapon, ammo = ammo, name = getWeaponNameFromID(weapon)})
+        end
+    end
+    executeBrowserJavascript(uiBrowser, "window.updateShopInventory(" .. encodeValue(inventory) .. ");")
+end
+
 local function sendPayloadToBrowser(payload)
     currentPayload = payload or currentPayload
 
     if isElement(uiBrowser) then
         executeBrowserJavascript(uiBrowser, "window.updateBootyShop(" .. encodeValue(currentPayload) .. ");")
+        sendInventoryToBrowser()
     end
 end
 
@@ -78,6 +93,8 @@ local function createBootyUI(payload)
 
     addEventHandler("onClientBrowserDocumentReady", uiBrowser, function()
         sendPayloadToBrowser(currentPayload)
+        if isTimer(previewTimer) then killTimer(previewTimer) end
+        previewTimer = setTimer(sendInventoryToBrowser, 1000, 0)
     end)
 
     previousInputMode = guiGetInputMode()
@@ -86,6 +103,8 @@ local function createBootyUI(payload)
 end
 
 local function closeBootyUI()
+    if isTimer(previewTimer) then killTimer(previewTimer) end
+    previewTimer = nil
     if isElement(uiBrowserElement) then
         destroyElement(uiBrowserElement)
     end
