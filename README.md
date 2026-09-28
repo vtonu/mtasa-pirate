@@ -1,4 +1,4 @@
-# Project Details (mtasa-pirate v1.2.3)
+# Project Details (mtasa-pirate v1.2.4)
 
 <img width="1280" height="720" alt="1" src="https://github.com/user-attachments/assets/5a245b9f-1597-4cc4-826b-91315d174452" />
 
