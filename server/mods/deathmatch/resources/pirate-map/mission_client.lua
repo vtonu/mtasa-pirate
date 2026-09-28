@@ -114,15 +114,13 @@ addEventHandler("onClientRender", root, function()
     local w, h = guiGetScreenSize()
     local width = math.min(420, w - 32)
     local left, top = (w - width) / 2, h * 0.82
-    if parachutePrompt and atAiryard() then
-        dxDrawRectangle(left, top, width, 48, tocolor(235, 245, 250, 32))
-        dxDrawText("PRESS [H] TO EQUIP PARACHUTE", left + 12, top, left + width - 12, top + 48,
-            tocolor(248, 252, 255, 238), 1.05, "default", "center", "center", false, false, false, true)
-        return
-    end
-    dxDrawRectangle(left, top, width, 48, tocolor(235, 245, 250, 32))
-    dxDrawText("PRESS [H] TO START", left + 13, top + 1, left + width - 11, top + 49,
-        tocolor(20, 28, 32, 70), 1.05, "default", "center", "center", false, false, false, true)
-    dxDrawText("PRESS [H] TO START", left + 12, top, left + width - 12, top + 48,
-        tocolor(248, 252, 255, 238), 1.05, "default", "center", "center", false, false, false, true)
+    local prompt = parachutePrompt and atAiryard() and "PRESS [H] TO EQUIP PARACHUTE" or "PRESS [H] TO START"
+    local font = "unifont"
+    local scale = math.min(1, (width - 32) / dxGetTextWidth(prompt, 1, font))
+    dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 138))
+    dxDrawRectangle(left, top, width, 1, tocolor(220, 255, 239, 55))
+    dxDrawRectangle(left, top, 2, 48, tocolor(127, 255, 212, 200))
+    dxDrawRectangle(left + width - 18, top + 22, 4, 4, tocolor(242, 176, 128, 210))
+    dxDrawText(prompt, left + 12, top, left + width - 12, top + 48,
+        tocolor(238, 255, 247, 245), scale, font, "center", "center", false, false, false, false)
 end)

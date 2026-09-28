@@ -714,6 +714,83 @@
           transform: scale(1);
         }
       }
+
+      /* HUD COLORS AND SURFACES */
+      :root {
+        --green: #7fffd4;
+        --green-soft: #b5e7d8;
+        --mint: #e8fff6;
+        --panel: transparent;
+        --panel-deep: rgba(9, 25, 25, 0.48);
+        --line: rgba(185, 255, 226, 0.16);
+      }
+
+      .shop-ui, .garden-ui {
+        border-color: rgba(210, 255, 239, 0.18);
+        border-radius: 1px;
+        background: linear-gradient(135deg, rgba(26, 51, 48, 0.56), rgba(8, 20, 23, 0.46));
+        box-shadow: inset 0 1px rgba(240, 255, 248, 0.12);
+      }
+      .shop-ui::before, .garden-ui::before { display: none; }
+      .topbar { background: rgba(205, 255, 232, 0.035); border-bottom-color: var(--line); }
+      h1, .data-header, .note-title, .strain-symbol, .core-text strong,
+      .weapon-core strong, .close-btn, .note-icon {
+        font-family: "Share Tech Mono", "Consolas", monospace;
+        text-shadow: none;
+      }
+      h1 { letter-spacing: 0.4px; }
+      .panel, .metric, .weapon-scope, .garden-scope {
+        border-color: transparent;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+      }
+      .data-header, .weapon-header { border-bottom-color: transparent; }
+      .metric-label, .eyebrow, .bar-meta, .readout span { color: #b5e7d8; }
+      .readout {
+        border-color: transparent;
+        border-radius: 0;
+        background: rgba(202, 255, 233, 0.045);
+      }
+      .bar { border: 0; background: rgba(218, 255, 239, 0.12); }
+      .weapon-tile, .strain-tile { background: rgba(11, 31, 31, 0.48); }
+      .weapon-tile:hover, .strain-tile:hover { background: rgba(127, 255, 212, 0.14); }
+      .weapon-tile.selected, .strain-tile.selected {
+        background: rgba(127, 255, 212, 0.24);
+        box-shadow: inset 0 -2px #7fffd4;
+      }
+      .category-btn, .strain-check, .close-btn, .buy-btn, .action-btn,
+      .note, .note-icon, .weapon-display, .health-scope { border-radius: 0; }
+      .category-btn { background: rgba(11, 31, 31, 0.4); }
+      .category-btn.selected, .category-btn:hover { box-shadow: none; }
+      .note { border-color: rgba(185, 255, 226, 0.16); background: var(--panel-deep); }
+      .note-icon { color: #172c27; background: #f2b080; border: 0; box-shadow: none; }
+      .weapon-display, .health-scope {
+        border-color: transparent;
+        background: rgba(202, 255, 233, 0.035);
+      }
+      .scope-ring { opacity: 0.25; }
+      .weapon-core, .plant-core { box-shadow: none; }
+      .close-btn { border-color: var(--line); background: transparent; }
+      .close-btn:hover { color: #f2b080; background: rgba(242, 176, 128, 0.12); box-shadow: none; }
+      .buy-btn, .action-btn {
+        color: #e8fff6;
+        border-color: rgba(127, 255, 212, 0.48);
+        background: rgba(127, 255, 212, 0.13);
+        box-shadow: none;
+      }
+      .buy-btn:hover, .action-btn:hover {
+        background: rgba(127, 255, 212, 0.25);
+        box-shadow: none;
+        filter: none;
+      }
+      .buy-btn.selected, .action-btn.cart-selected {
+        color: #102c25;
+        background: #7fffd4;
+        box-shadow: none;
+      }
+      button:focus-visible { outline: 1px solid #f2b080; outline-offset: 2px; }
     </style>
   </head>
   <body>
