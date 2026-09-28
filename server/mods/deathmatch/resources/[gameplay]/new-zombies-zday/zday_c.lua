@@ -156,68 +156,11 @@ local function checkPlayer(player,col)
 	
 end
 
-local function comp(w1,w2)
-
-	if w1[2] < w2[2] then
-		return true
-	end
-	
-	return false
-
-end
-
-local function getNewTarget(zombie,excludedTarget)
-
-	local data = zombieData[zombie]
-	if not data or not isElement(data.syncCol) then return false end
-	local col = data.syncCol
-	local players = getElementsWithinColShape(col,"player")
-	local possibleTargets = {}
-	local alternativeReturn = false
-	local isClear = false
-	for index,player in ipairs(players) do
-		if checkPlayer(player,col) and player ~= excludedTarget and player ~= zombieData[zombie].target then
-			local distance = getDistanceBetweenPoints2D(zombie.position,player.position)
-			if distance < 80 then
-				table.insert(possibleTargets,{player,distance})
-				isClear = isLineOfSightClear(zombie.position,player.position,true,false,false,true,false,true,true,zombie)
-				alternativeReturn=true
-			end
-		end
-	end
-	
-	if not alternativeReturn then return false end
-	
-	table.sort(possibleTargets,comp)
-	local target,distance2 = unpack(possibleTargets[1])
-	isClear = isLineOfSightClear(zombie.position,target.position,true,false,false,true,false,true,true,zombie)
-	return target,isClear,distance2
-
-end
-
 local function resetZombieAnimation(zombie)
 
 	if zombie and isElement(zombie) and zombieData[zombie] then
 		setPedAnimation(zombie)
 		zombieData[zombie].eating = nil
-	end
-
-end
-
-local function findNewTarget(player)
-
-	if not isZombieWeather() then return end
-	local valid,zombie = checkPlayer(player,source)
-	if not valid then return end
-	if player ~= zombieData[zombie].target then return end
-	if player ~= localPlayer then return end
-	local newTarget = getNewTarget(zombie)
-	
-	if newTarget and newTarget ~= localPlayer and newTarget ~= zombieData[zombie].target then
-		triggerServerEvent("Zday:setZombieNewTarget",zombie,newTarget)
-	elseif not zombieData[zombie].doomed then
-		zombieData[zombie].doomed = true
-		triggerLatentServerEvent("Zday:destroyZombie",5000,true,zombie)
 	end
 
 end
@@ -231,7 +174,7 @@ local function trackMe()
 		local data = zombieData[zombie]
 		local variant = tonumber(getElementData(zombie, "zday.variant")) or 0
 		local zombieTarget = data and data.target
-		if not isElement(zombieTarget) then requestZombieTargets() end
+		if not data or zombieTarget == nil then requestZombieTargets() end
 		if isZombieWeather() and isElement(zombieTarget) and not isPassive(zombieTarget) and not isPedDead(zombieTarget) and not isPedDead(zombie) then
 			if data.paused then
 				resetZombieChase(zombie,data)
@@ -244,18 +187,8 @@ local function trackMe()
 			local zVector = Vector3(getElementPosition(zombie))
 			local doesZombieSeePlayer = isLineOfSightClear(hVector,lVector,true,false,false,true,false,true,true,zombie)
 			local distanceToPlayer = getDistanceBetweenPoints2D(zVector.x,zVector.y,lVector.x,lVector.y)
-			if timesExecuted%5 == 0 and zombieData[zombie].target == localPlayer then
-				local newTarget,doesSee,distance = getNewTarget(zombie)
-				if newTarget and doesSee and distance < distanceToPlayer and newTarget ~= zombieData[zombie].target then
-					triggerServerEvent("Zday:setZombieNewTarget",zombie,newTarget)
-				end
-			end
-			if zombieData[zombie].target == localPlayer and doesZombieSeePlayer == false and isPedDead(zombieTarget)==false then
-				local newTarget,doesSee = getNewTarget(zombie,localPlayer)
-				if newTarget and doesSee and newTarget ~= zombieData[zombie].target then
-					triggerServerEvent("Zday:setZombieNewTarget",zombie,newTarget)
-				end
-			end
+
+
 			if zombieData[zombie].hunting then
 				if not zombieData[zombie].positions then zombieData[zombie].positions = 0 end
 				if not zombieData[zombie].paths then zombieData[zombie].paths = {} end
@@ -342,12 +275,7 @@ local function trackMe()
 				if doesZombieSeePlayer and not zombieData[zombie].hunting then
 					zombieData[zombie].hunting = true
 					zombieData[zombie].positions = 0
-				elseif not zombieData[zombie].hunting then
-					local newTarget,doesSee = getNewTarget(zombie,localPlayer)
-					if newTarget and doesSee and not zombieData[zombie].changingTarget then
-						triggerServerEvent("Zday:setZombieNewTarget",zombie,newTarget)
-						zombieData[zombie].changingTarget = true
-					end
+
 				end
 				if not zombieData[zombie].changingPath then
 					setPedControlState(zombie,"forwards",false)
@@ -391,9 +319,25 @@ local function getPointFromDistanceRotation(x, y, dist, angle)
 
 end
 
+-- COUNT IDLE ZOMBIES TOO SO PASSIVE PLAYERS KEEP THE SAME LOCAL LIMIT
+local function getLocalZombieCount()
+	local count = #zombiesChasingMe
+	local x,y,z = getElementPosition(localPlayer)
+	for _,zombie in ipairs(getElementsByType("ped",resourceRoot,true)) do
+		local data = zombieData[zombie]
+		if not isPedDead(zombie) and data and data.target ~= localPlayer and (not isElement(data.target) or isPassive(localPlayer))
+			and getElementDimension(zombie) == getElementDimension(localPlayer)
+			and getElementInterior(zombie) == getElementInterior(localPlayer) then
+			local zx,zy,zz = getElementPosition(zombie)
+			if getDistanceBetweenPoints3D(x,y,z,zx,zy,zz) <= 120 then count = count + 1 end
+		end
+	end
+	return count
+end
+
 local function spawnZombie()
 
-	if not isZombieWeather() or isPassive(localPlayer) or isPedDead(localPlayer) or #zombiesChasingMe >= maxZombies then
+	if not isZombieWeather() or isPedDead(localPlayer) or getLocalZombieCount() >= maxZombies then
 		setTimer(spawnZombie,math.random(minInterval,maxInterval),1)
 		return
 	end
@@ -439,19 +383,6 @@ local function spawnZombie()
 
 end
 
-local function lookForNewTarget(excludedTarget)
-
-	local newTarget = getNewTarget(source,excludedTarget,true)
-	
-	if isElement(newTarget) and zombieData[source].target ~= newTarget then
-		triggerServerEvent("Zday:setZombieNewTarget",source,newTarget)
-	elseif not zombieData[source].doomed then
-		zombieData[source].doomed = true
-		triggerLatentServerEvent("Zday:destroyZombie",5000,true,source)
-	end
-
-end
-
 local function setZombieTarget(zombie,targett)
 
 	if not isElement(zombie) or getElementType(zombie) ~= "ped" then return end
@@ -470,7 +401,6 @@ local function setZombieTarget(zombie,targett)
 		addEventHandler("onClientPedDamage",zombie,onDamage)
 		addEventHandler("onClientPedWasted",zombie,onWasted)
 		addEventHandler("onClientElementDestroy",zombie,onDestroy)
-		addEventHandler("Zday:askForNewTarget",zombie,lookForNewTarget)
 		zombieData[zombie].handled = true
 	end
 	
@@ -482,7 +412,7 @@ local function setZombieTarget(zombie,targett)
 			setElementInterior(data.syncCol,getElementInterior(zombie))
 			colshapes[data.syncCol] = zombie
 			attachElements(data.syncCol,zombie)
-			addEventHandler("onClientColShapeLeave",data.syncCol,findNewTarget)
+			-- TARGET SWITCHING IS HANDLED BY THE SERVER
 		end
 	end
 	
@@ -510,7 +440,6 @@ local function initScript()
 		engineImportTXD(txd,id)
 	end
 	
-	addEvent("Zday:askForNewTarget",true)
 	addEvent("Zday:setZombieTarget",true)
 	addEvent("Zday:sendZombiesInfo",true)
 	
@@ -526,7 +455,7 @@ local function initScript()
 		if getElementType(source) == "ped" then
 			local data = zombieData[source]
 			setZombieTarget(source,data and data.target)
-			if not data or not isElement(data.target) then requestZombieTargets() end
+			if not data or data.target == nil then requestZombieTargets() end
 		end
 	end)
 	for _,zombie in ipairs(getElementsByType("ped",resourceRoot)) do

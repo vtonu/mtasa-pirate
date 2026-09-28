@@ -1,6 +1,15 @@
 local maxZombies = 220 --Max zombies in TOTAL
 local zombieTargets = {}
 local zombieProgress = {}
+local setZombieTarget
+
+local function targetDistance(zombie,player)
+	if not isElement(player) or isPedDead(player) or getElementData(player,"freeroam.passive") == true then return math.huge end
+	if getElementDimension(player) ~= getElementDimension(zombie) or getElementInterior(player) ~= getElementInterior(zombie) then return math.huge end
+	local x,y,z = getElementPosition(zombie)
+	local px,py,pz = getElementPosition(player)
+	return getDistanceBetweenPoints3D(x,y,z,px,py,pz)
+end
 
 local function isPassive(player)
 	local freeroam = getResourceFromName("freeroam")
@@ -19,39 +28,23 @@ local function updateZombieActivity()
 	end
 	for zombie,target in pairs(zombieTargets) do
 		if isElement(zombie) and not isPedDead(zombie) then
-			local paused = not active or not isElement(target) or isPassive(target) or isPedDead(target)
+			if active then
+				local currentDistance = targetDistance(zombie,target)
+				local nearest,nearestDistance = false,120
+				for _,player in ipairs(getElementsByType("player")) do
+					local distance = targetDistance(zombie,player)
+					if distance < nearestDistance then nearest,nearestDistance = player,distance end
+				end
+				-- SWITCH ONLY WHEN ANOTHER PLAYER IS AT LEAST FIVE METRES CLOSER
+				if currentDistance > 120 or (nearest and nearestDistance + 5 < currentDistance) then
+					setZombieTarget(zombie,nearest)
+					target = nearest
+				end
+			end
+			local paused = not active or targetDistance(zombie,target) > 120
 			if isElementFrozen(zombie) ~= paused then setElementFrozen(zombie,paused) end
 		end
 	end
-end
-
-local function getRandomPlayerWithLowestPing(playerList,excludePlayer)
-
-	local lowestPing = false
-	local returnPlayer = false
-	local playerCount = #playerList
-	
-	if playerCount == 0 then
-		return false
-	elseif playerCount == 1 then
-		if excludePlayer ~= playerList[1] then
-			return playerList[1]
-		else
-			return false
-		end
-	else
-		for index,player in ipairs(playerList) do
-			if player ~= excludePlayer then
-				local ping = player.ping
-				if lowestPing == false or ping < lowestPing then
-					lowestPing = ping
-					returnPlayer = player
-				end
-			end
-		end
-		return returnPlayer
-	end
-
 end
 
 local function updateZombieTargets()
@@ -62,26 +55,13 @@ local function updateZombieTargets()
 
 end
 	
-local function destroyChasers()
-	
-	local clientWeAsk = getRandomPlayerWithLowestPing(getElementsByType("player"),source)
-	
-	for index,zombie in ipairs(getElementsByType("ped",resourceRoot)) do
-		if zombieTargets[zombie] == source and clientWeAsk then
-			triggerClientEvent(clientWeAsk,"Zday:askForNewTarget",zombie,source)
-		elseif not clientWeAsk then
-			destroyZombie(zombie)
-		end
-	end
-
-end
-
-local function setZombieTarget(zombie,target)
+setZombieTarget = function(zombie,target)
 
 	if not isElement(zombie) or getElementParent(zombie) ~= getResourceDynamicElementRoot(getThisResource()) then return end
-	if target and isElement(target) and getElementType(target) == "player" and not isPassive(target) then
+	if target == false or (target and targetDistance(zombie,target) <= 120) then
+		if zombieTargets[zombie] == target then return end
 		zombieTargets[zombie] = target
-		if getElementSyncer(zombie) ~= target then
+		if target and getElementSyncer(zombie) ~= target then
 			setElementSyncer(zombie,target)
 		end
 		triggerClientEvent(root,"Zday:setZombieTarget",resourceRoot,zombie,target)
@@ -100,9 +80,7 @@ function destroyZombie(zombie)
 		destroyElement(zombie)
 	end
 	
-	if zombieTargets[zombie] then
-		zombieTargets[zombie] = nil
-	end
+	zombieTargets[zombie] = nil
 
 end
 
@@ -117,7 +95,7 @@ local function cleanZombieChasers()
 			local x,y,z = getElementPosition(zombie)
 			local nearest,nearestDistance
 			for _,player in ipairs(getElementsByType("player")) do
-				if not isPedDead(player) and not isPassive(player)
+				if not isPedDead(player)
 					and getElementDimension(player) == getElementDimension(zombie)
 					and getElementInterior(player) == getElementInterior(zombie) then
 					local px,py,pz = getElementPosition(player)
@@ -128,24 +106,17 @@ local function cleanZombieChasers()
 				end
 			end
 			local progress = zombieProgress[zombie]
-			if not isZombieWeather() or isElementFrozen(zombie) then
-				zombieProgress[zombie] = nil
-			elseif not nearestDistance or nearestDistance > 120 then
+			if not nearestDistance or nearestDistance > 120 then
 				destroyZombie(zombie)
+			elseif not isZombieWeather() or isElementFrozen(zombie) then
+				zombieProgress[zombie] = nil
 			else
 				if not progress or getDistanceBetweenPoints3D(x,y,z,progress.x,progress.y,progress.z) > 2 then
 					zombieProgress[zombie] = {x=x,y=y,z=z,tick=now}
 				elseif now - progress.tick > 30000 and nearestDistance > 40 then
 					destroyZombie(zombie)
 				end
-				if isElement(zombie) and nearest ~= target then
-					local distance = math.huge
-					if isElement(target) then
-						local tx,ty,tz = getElementPosition(target)
-						distance = getDistanceBetweenPoints3D(x,y,z,tx,ty,tz)
-					end
-					if distance > 120 then setZombieTarget(zombie,nearest) end
-				end
+
 			end
 		end
 	end
@@ -178,7 +149,7 @@ local function spawnZombie(s,zx,zy,zz,r)
 
 	if #getElementsByType("ped",resourceRoot) >= maxZombies then return end
 	if client ~= source then return end
-	if not isZombieWeather() or isPassive(client) or isPedDead(client) then return end
+	if not isZombieWeather() or isPedDead(client) then return end
 	
 	local zombie = Ped(s,zx,zy,zz,r,true)
 	if not isElement(zombie) then return end
@@ -188,15 +159,12 @@ local function spawnZombie(s,zx,zy,zz,r)
 	local weapon = variant == 0 and 4 or (variant == 1 and 9 or (variant == 2 and 0 or 5))
 	setElementData(zombie, "zday.variant", variant, true)
 	if weapon > 0 then giveWeapon(zombie,weapon,1,true) end
-	setZombieTarget(zombie,client)
+	setZombieTarget(zombie,false)
 	updateZombieActivity()
 	
 	addEventHandler("Zday:damageZombie",zombie,damageZombie)
 	addEventHandler("Zday:destroyZombie",zombie,destroyZombie)
-	addEventHandler("Zday:setZombieNewTarget",zombie,function(target)
-		if not client or (zombieTargets[source] ~= client and getElementSyncer(source) ~= client) then return end
-		setZombieTarget(source,target)
-	end)
+
 	addEventHandler("Zday:delayDestroyZombie",zombie,delayDestroyZombie)
 
 end
@@ -217,11 +185,10 @@ local function initScript()
 	addEvent("Zday:destroyZombie",true)
 	addEvent("Zday:damageZombie",true)
 	addEvent("Zday:delayDestroyZombie",true)
-	addEvent("Zday:setZombieNewTarget",true)
 	addEventHandler("Zday:spawnZombie",root,spawnZombie)
 	addEventHandler("Zday:getZombiesInfo",root,updateZombieTargets)
 	
-	addEventHandler("onPlayerQuit",root,destroyChasers)
+	-- TARGETS ARE CHECKED BY THE SERVER TIMER
 	updateZombieActivity()
 	setTimer(updateZombieActivity,250,0)
 	setTimer(cleanZombieChasers,5000,0)
@@ -230,7 +197,7 @@ end
 
 addEventHandler("onResourceStart",resourceRoot,initScript)
 
--- PAUSE CHASERS WITHOUT REMOVING THEM
+-- UPDATE TARGETS WHEN PASSIVE MODE CHANGES
 addEventHandler("onElementDataChange",root,function(key)
 	if key == "freeroam.passive" then updateZombieActivity() end
 end)
