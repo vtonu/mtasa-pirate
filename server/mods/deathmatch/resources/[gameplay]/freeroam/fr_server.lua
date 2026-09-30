@@ -177,6 +177,10 @@ function setPlayerPassiveMode(player, state)
     end
 
     state = state == true
+    if g_PlayerData[player].safeZone then
+        g_PlayerData[player].safeZonePassive = state
+        state = true
+    end
     g_PlayerData[player].settings.passive = state
     setElementData(player, "freeroam.passive", state)
     setElementAlpha(player, state and PASSIVE_ALPHA or 255)
@@ -201,6 +205,10 @@ function onLocalSettingChange(setting, value)
     end
 
     local playerData = g_PlayerData[client]
+    if playerData.safeZone then
+        triggerClientEvent(client, "onClientFreeroamLocalSettingChange", client, "passive", true)
+        return
+    end
     local state = playerData.settings.passive == true
     local now = getTickCount()
     if value == state then
@@ -222,6 +230,21 @@ function onLocalSettingChange(setting, value)
     if setPlayerPassiveMode(client, value) then
         playerData.passiveNextToggle = now + PASSIVE_TOGGLE_COOLDOWN
         outputChatBox("Passive mode " .. (value and "enabled" or "disabled") .. ".", client, 255, 255, 0)
+    end
+end
+
+function setPlayerSafeZoneState(player, inside)
+    local data = g_PlayerData[player]
+    if not data or (data.safeZone == true) == inside then return end
+    if inside then
+        local previous = data.settings.passive == true
+        data.safeZone = true
+        setPlayerPassiveMode(player, previous)
+    else
+        local previous = data.safeZonePassive == true
+        data.safeZone = false
+        data.safeZonePassive = nil
+        setPlayerPassiveMode(player, previous)
     end
 end
 
@@ -299,13 +322,15 @@ end)
 
 addEventHandler("onPlayerSpawn", root, function()
     if isPassive(source) then
-        setPlayerPassiveMode(source, true)
+        local data = g_PlayerData[source]
+        setPlayerPassiveMode(source, not data.safeZone or data.safeZonePassive == true)
     end
 end)
 
 addEventHandler("onResourceStop", resourceRoot, function()
     for player in pairs(g_PlayerData) do
         if isElement(player) then
+            g_PlayerData[player].safeZone = false
             setPlayerPassiveMode(player, false)
         end
     end

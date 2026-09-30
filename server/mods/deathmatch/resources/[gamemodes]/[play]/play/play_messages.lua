@@ -20,7 +20,7 @@ local MESSAGE_DEFINITIONS = {
         color = JOIN_COLOR
     },
     locoPickup = {
-        text = "You picked up the Loco Treasure! Molotovs granted.",
+        text = "Molotovs granted! Head to the ship deck mission marker to spawn a vehicle, then destroy it.",
         color = PLAY_COLOR
     },
     locoReward = {

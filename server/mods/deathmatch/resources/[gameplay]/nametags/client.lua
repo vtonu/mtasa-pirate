@@ -4,12 +4,12 @@ local screenW, screenH = guiGetScreenSize()
 
 local function renderNameTags()
     -- Hide default MTA tags
-    setPlayerNametagShowing(localPlayer, false)
 
     local players = getElementsByType("player")
     local lx, ly, lz = getElementPosition(localPlayer)
 
     for _, player in ipairs(players) do
+        setPlayerNametagShowing(player, false)
         -- REMOVED: player ~= localPlayer check so you can see yourself
         if isElementStreamedIn(player) or player == localPlayer then
             local x, y, z = getElementPosition(player)
@@ -51,3 +51,9 @@ local function renderNameTags()
     end
 end
 addEventHandler("onClientRender", root, renderNameTags)
+
+addEventHandler("onClientResourceStop", resourceRoot, function()
+    for _, player in ipairs(getElementsByType("player")) do
+        setPlayerNametagShowing(player, true)
+    end
+end)
