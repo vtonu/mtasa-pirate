@@ -1,6 +1,7 @@
 local g_PlayerData = {}
 local g_VehicleData = {}
 local PASSIVE_ALPHA = 160
+local PASSIVE_TOGGLE_COOLDOWN = 5000
 local passiveControls = {"fire", "aim_weapon", "next_weapon", "previous_weapon", "action"}
 
 g_ArmedVehicles = {
@@ -199,7 +200,29 @@ function onLocalSettingChange(setting, value)
         return
     end
 
-    setPlayerPassiveMode(client, value)
+    local playerData = g_PlayerData[client]
+    local state = playerData.settings.passive == true
+    local now = getTickCount()
+    if value == state then
+        triggerClientEvent(client, "onClientFreeroamLocalSettingChange", client, "passive", state)
+        return
+    end
+
+    -- LIMIT PASSIVE SWITCHES AND REPEATED WARNINGS
+    local remaining = (playerData.passiveNextToggle or 0) - now
+    if remaining > 0 then
+        triggerClientEvent(client, "onClientFreeroamLocalSettingChange", client, "passive", state)
+        if now >= (playerData.passiveNextNotice or 0) then
+            outputChatBox("Wait " .. math.ceil(remaining / 1000) .. " seconds before changing passive mode again.", client, 255, 255, 0)
+            playerData.passiveNextNotice = now + 1000
+        end
+        return
+    end
+
+    if setPlayerPassiveMode(client, value) then
+        playerData.passiveNextToggle = now + PASSIVE_TOGGLE_COOLDOWN
+        outputChatBox("Passive mode " .. (value and "enabled" or "disabled") .. ".", client, 255, 255, 0)
+    end
 end
 
 function joinHandler(player)

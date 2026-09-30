@@ -2534,10 +2534,11 @@ local function updatePassiveCollisions(forceCollidable)
 end
 
 function togglePassiveMode()
-    local state = guiCheckBoxGetSelected(getControl(wndMain, 'passive'))
-    setPassiveControls(state)
+    local checkbox = getControl(wndMain, 'passive')
+    local state = guiCheckBoxGetSelected(checkbox)
+    local currentState = g_PlayerData[localPlayer] and g_PlayerData[localPlayer].passive == true
+    guiCheckBoxSetSelected(checkbox, currentState == true)
     triggerServerEvent("onFreeroamLocalSettingChange", localPlayer, "passive", state)
-    outputChatBox("Passive mode " .. (state and "enabled" or "disabled") .. ".", 255, 255, 0)
 end
 
 function updateGUI()
