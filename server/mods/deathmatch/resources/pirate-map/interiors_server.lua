@@ -74,6 +74,14 @@ end
 
 -- SHARED CASINO ROOM AND EXIT
 addEventHandler("onResourceStart", resourceRoot, function()
+    local entrance = getElementByID("royalCasinoMarker")
+    if isElement(entrance) then
+        local blip = createBlipAttachedTo(entrance, 44, 2, 255, 255, 255, 255, 0, 65535)
+        if isElement(blip) then
+            setElementInterior(blip, getElementInterior(entrance))
+            setElementDimension(blip, getElementDimension(entrance))
+        end
+    end
     exitMarker = createMarker(EXIT_X, EXIT_Y, EXIT_Z + 0.6, "arrow", 1, 4, 210, 193, 255)
     if not isElement(exitMarker) then return end
     setElementID(exitMarker, "royalCasinoExitMarker")

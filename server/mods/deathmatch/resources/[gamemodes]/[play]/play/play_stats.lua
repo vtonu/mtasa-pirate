@@ -1,6 +1,14 @@
 -- ==========================================
 -- PLAY STATS
 -- ==========================================
+local ZOMBIE_KILL_REWARDS = {
+    [0] = 75, -- KNIFE
+    [1] = 50, -- CHAINSAW
+    [2] = 20, -- UNARMED RUNNER
+    [3] = 35 -- BASEBALL BAT
+}
+local rewardedZombies = setmetatable({}, {__mode = "k"})
+
 local STAT_DEFAULTS = {
     kills = 0,
     deaths = 0,
@@ -107,10 +115,14 @@ end
 
 addEventHandler("onPedWasted", root, function(totalAmmo, killerElement)
     if not isZombie(source) then return end
+    if rewardedZombies[source] then return end
     local killer = getKillPlayer(killerElement)
     if killer then
+        rewardedZombies[source] = true
         addPlayerPlayStat(killer, "kills", 1)
         addPlayerPlayStat(killer, "zombieKills", 1)
+        local reward = ZOMBIE_KILL_REWARDS[tonumber(getElementData(source, "zday.variant"))]
+        if reward then addPlayerMoneyEarned(killer, reward) end
     end
 end)
 
