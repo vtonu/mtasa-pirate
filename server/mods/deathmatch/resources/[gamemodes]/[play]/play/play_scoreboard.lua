@@ -3,7 +3,8 @@ local PERK_TEAMS = {indica = "Indica", sativa = "Sativa", hybrid = "Hybrid"}
 local COLUMNS = {
     {"play.scoreboard.money", 100, "Money", 2},
     {"play.scoreboard.team", 85, "Team", 3},
-    {"play.scoreboard.kd", 75, "K/D", 4}
+    {"play.scoreboard.kd", 75, "K/D", 4},
+    {"play.scoreboard.zombieKills", 85, "Z KILLS", 5}
 }
 
 local function setScoreboardValue(player, key, value)
@@ -15,9 +16,10 @@ end
 local function updatePlayerScoreboard(player)
     setScoreboardValue(player, "play.scoreboard.money", "$" .. getPlayerMoney(player))
     setScoreboardValue(player, "play.scoreboard.team", PERK_TEAMS[getElementData(player, "weed.perk")] or "N/A")
-    local kills = getPlayerPlayStat(player, "kills")
-    local deaths = getPlayerPlayStat(player, "deaths")
-    setScoreboardValue(player, "play.scoreboard.kd", kills .. "/" .. deaths)
+    local kills = getPlayerPlayStat(player, "pvpKills")
+    local deaths = getPlayerPlayStat(player, "pvpDeaths")
+    setScoreboardValue(player, "play.scoreboard.kd", string.format("%.2f", kills / math.max(deaths, 1)))
+    setScoreboardValue(player, "play.scoreboard.zombieKills", getPlayerPlayStat(player, "zombieKills"))
 end
 
 local function registerScoreboardColumns()
@@ -45,7 +47,8 @@ end)
 
 addEventHandler("onElementDataChange", root, function(key)
     if getElementType(source) ~= "player" then return end
-    if key == "weed.perk" or key == "play.stats.kills" or key == "play.stats.deaths" then
+    if key == "weed.perk" or key == "play.stats.pvpKills" or key == "play.stats.pvpDeaths"
+        or key == "play.stats.zombieKills" then
         updatePlayerScoreboard(source)
     end
 end)

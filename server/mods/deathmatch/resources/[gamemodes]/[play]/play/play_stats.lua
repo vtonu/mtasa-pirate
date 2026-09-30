@@ -4,6 +4,9 @@
 local STAT_DEFAULTS = {
     kills = 0,
     deaths = 0,
+    pvpKills = 0,
+    pvpDeaths = 0,
+    zombieKills = 0,
     moneyEarned = 0,
     vehiclesDestroyed = 0,
     missionCompletions = 0,
@@ -86,6 +89,8 @@ function onPlayerStatsWasted(killerElement)
     local killer = getKillPlayer(killerElement)
     if killer and killer ~= source then
         addPlayerPlayStat(killer, "kills", 1)
+        addPlayerPlayStat(killer, "pvpKills", 1)
+        addPlayerPlayStat(source, "pvpDeaths", 1)
     end
 end
 
@@ -96,6 +101,7 @@ addEventHandler("onPedWasted", root, function(totalAmmo, killerElement)
     local killer = getKillPlayer(killerElement)
     if killer then
         addPlayerPlayStat(killer, "kills", 1)
+        addPlayerPlayStat(killer, "zombieKills", 1)
     end
 end)
 
