@@ -1,0 +1,139 @@
+-- MAP VEHICLES
+local vehicles = {}
+local stopping = false
+local idleDelay = 60000
+local wreckDelay = 5000
+local vipSirens = {
+    vehicleStafford = 0.85,
+    vehicleHuntley = 1.05,
+}
+
+local function numbers(value)
+    local result = {}
+    for part in tostring(value or ""):gmatch("[^,]+") do
+        local number = tonumber(part)
+        if not number then return {} end
+        result[#result + 1] = number
+    end
+    return result
+end
+
+local function clearTimer(data)
+    if data.timer and isTimer(data.timer) then killTimer(data.timer) end
+    data.timer = nil
+end
+
+local function applySettings(vehicle, data)
+    local settings = data.settings
+    setElementInterior(vehicle, tonumber(settings.interior) or 0)
+    setElementDimension(vehicle, tonumber(settings.dimension) or 0)
+    setElementAlpha(vehicle, tonumber(settings.alpha) or 255)
+    setElementCollisionsEnabled(vehicle, settings.collisions ~= "false")
+    setElementFrozen(vehicle, settings.frozen == "true")
+    setVehicleLocked(vehicle, settings.locked == "true")
+    setElementHealth(vehicle, tonumber(settings.health) or 1000)
+    if settings.plate then setVehiclePlateText(vehicle, settings.plate) end
+    if settings.paintjob then setVehiclePaintjob(vehicle, tonumber(settings.paintjob) or 3) end
+    local colors = numbers(settings.color)
+    if #colors == 3 or #colors == 4 or #colors == 6 or #colors == 9 or #colors == 12 then
+        setVehicleColor(vehicle, unpack(colors))
+    end
+    for _, upgrade in ipairs(getVehicleUpgrades(vehicle)) do removeVehicleUpgrade(vehicle, upgrade) end
+    for _, upgrade in ipairs(numbers(settings.upgrades)) do addVehicleUpgrade(vehicle, upgrade) end
+    local sirenHeight = vipSirens[settings.id]
+    if sirenHeight then
+        removeVehicleSirens(vehicle)
+        addVehicleSirens(vehicle, 2, 2, true, true, false, false)
+        setVehicleSirens(vehicle, 1, -0.3, 0, sirenHeight, 255, 0, 0, 255, 128)
+        setVehicleSirens(vehicle, 2, 0.3, 0, sirenHeight, 0, 0, 255, 255, 128)
+    end
+    setVehicleSirensOn(vehicle, settings.sirens == "true")
+    setVehicleLandingGearDown(vehicle, settings.landingGearDown == "true")
+end
+
+local function restoreVehicle(data)
+    clearTimer(data)
+    local vehicle = data.vehicle
+    if isElement(vehicle) then
+        if next(getVehicleOccupants(vehicle)) then return end
+        respawnVehicle(vehicle)
+    else
+        local s = data.settings
+        vehicle = createVehicle(tonumber(s.model), tonumber(s.posX), tonumber(s.posY), tonumber(s.posZ),
+            tonumber(s.rotX) or 0, tonumber(s.rotY) or 0, tonumber(s.rotZ) or 0)
+        if not vehicle then
+            outputDebugString("MAP VEHICLE FAILED TO SPAWN: " .. tostring(s.id), 1)
+            return
+        end
+        setElementParent(vehicle, resourceRoot)
+        if s.id then setElementID(vehicle, s.id) end
+        data.vehicle = vehicle
+        vehicles[vehicle] = data
+    end
+    applySettings(vehicle, data)
+end
+
+addEventHandler("onResourceStart", resourceRoot, function()
+    local map = xmlLoadFile("pirate-map.map")
+    if not map then
+        outputDebugString("MAP VEHICLE SETTINGS COULD NOT BE LOADED", 1)
+        return
+    end
+    local mapVehicles = {}
+    for _, vehicle in ipairs(getElementsByType("vehicle", resourceRoot)) do
+        mapVehicles[getElementID(vehicle)] = vehicle
+    end
+    for _, node in ipairs(xmlNodeGetChildren(map)) do
+        if xmlNodeGetName(node) == "vehicle" then
+            local settings = xmlNodeGetAttributes(node)
+            local vehicle = settings.id and mapVehicles[settings.id]
+            if isElement(vehicle) then
+                local data = { settings = settings, vehicle = vehicle }
+                vehicles[vehicle] = data
+                toggleVehicleRespawn(vehicle, false)
+                setVehicleRespawnPosition(vehicle, tonumber(settings.posX), tonumber(settings.posY), tonumber(settings.posZ))
+                setVehicleRespawnRotation(vehicle, tonumber(settings.rotX) or 0, tonumber(settings.rotY) or 0, tonumber(settings.rotZ) or 0)
+                applySettings(vehicle, data)
+            end
+        end
+    end
+    xmlUnloadFile(map)
+end)
+
+addEventHandler("onVehicleEnter", resourceRoot, function()
+    local data = vehicles[source]
+    if data then clearTimer(data) end
+end)
+
+addEventHandler("onVehicleExit", resourceRoot, function()
+    local data = vehicles[source]
+    if not data then return end
+    clearTimer(data)
+    if not next(getVehicleOccupants(source)) then
+        data.timer = setTimer(restoreVehicle, idleDelay, 1, data)
+    end
+end)
+
+addEventHandler("onVehicleExplode", resourceRoot, function()
+    local data = vehicles[source]
+    if not data then return end
+    clearTimer(data)
+    data.timer = setTimer(function()
+        if isElement(data.vehicle) then destroyElement(data.vehicle) end
+    end, wreckDelay, 1)
+end)
+
+-- RESTORE MAP CARS REMOVED BY OTHER RESOURCES
+addEventHandler("onElementDestroy", resourceRoot, function()
+    local data = vehicles[source]
+    if not data then return end
+    vehicles[source] = nil
+    clearTimer(data)
+    data.vehicle = nil
+    if not stopping then data.timer = setTimer(restoreVehicle, 50, 1, data) end
+end)
+
+addEventHandler("onResourceStop", resourceRoot, function()
+    stopping = true
+    for _, data in pairs(vehicles) do clearTimer(data) end
+end)
