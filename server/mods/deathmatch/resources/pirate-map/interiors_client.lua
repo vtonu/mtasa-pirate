@@ -1,23 +1,41 @@
 local casinoMarker
+local exitMarker
+local nextDoorTick = 0
+
+local function getNearbyDoor()
+    if isPedDead(localPlayer) or getPedOccupiedVehicle(localPlayer)
+        or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
+    if not isElement(casinoMarker) then casinoMarker = getElementByID("royalCasinoMarker") end
+    if not isElement(exitMarker) then exitMarker = getElementByID("royalCasinoExitMarker") end
+    local x, y, z = getElementPosition(localPlayer)
+    for _, door in ipairs({{casinoMarker, "enter"}, {exitMarker, "exit"}}) do
+        local marker = door[1]
+        if isElement(marker) and getElementDimension(localPlayer) == getElementDimension(marker)
+            and getElementInterior(localPlayer) == getElementInterior(marker) then
+            local mx, my, mz = getElementPosition(marker)
+            if getDistanceBetweenPoints2D(x, y, mx, my) <= 1.8 and math.abs(z - mz) <= 2 then
+                return door[2]
+            end
+        end
+    end
+end
+
+bindKey("h", "down", function()
+    local door = getNearbyDoor()
+    if not door or getTickCount() < nextDoorTick then return end
+    nextDoorTick = getTickCount() + 1500
+    triggerServerEvent("royalCasino:useDoor", resourceRoot, door)
+end)
 
 -- ROYAL CASINO DOOR PROMPT
 addEventHandler("onClientRender", root, function()
-    if not isElement(casinoMarker) then
-        casinoMarker = getElementByID("royalCasinoMarker")
-    end
-    if not isElement(casinoMarker) or isPedDead(localPlayer) or getPedOccupiedVehicle(localPlayer)
-        or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
-    if getElementDimension(localPlayer) ~= getElementDimension(casinoMarker)
-        or getElementInterior(localPlayer) ~= getElementInterior(casinoMarker) then return end
-
-    local x, y, z = getElementPosition(localPlayer)
-    local mx, my, mz = getElementPosition(casinoMarker)
-    if getDistanceBetweenPoints2D(x, y, mx, my) > 1.8 or math.abs(z - mz) > 2 then return end
+    local door = getNearbyDoor()
+    if not door then return end
 
     local w, h = guiGetScreenSize()
     local width = math.min(420, w - 32)
     local left, top = (w - width) / 2, h * 0.82
-    local prompt = "PRESS [H] TO ENTER"
+    local prompt = door == "exit" and "PRESS [H] TO EXIT" or "PRESS [H] TO ENTER"
     local font = "unifont"
     local scale = math.min(1, (width - 32) / dxGetTextWidth(prompt, 1, font))
     dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 124))
