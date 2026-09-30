@@ -47,6 +47,12 @@ function createKillMessage(_, killer, weapon, bodypart, stealth)
                 eventTriggered(source, killer, weapon, bodypart, usedVehicle)
             end
         end
+    elseif killer and killerType == 'ped'
+        and getResourceFromName('new-zombies-zday')
+        and getElementParent(killer) == getResourceDynamicElementRoot(getResourceFromName('new-zombies-zday')) then
+        if triggerEvent("onPlayerKillMessage", source, false, weapon, bodypart) then
+            eventTriggered(source, '☠ ZOMBIE', weapon, bodypart)
+        end
     else
         -- Avoid showing deaths caused by explosions, cuz they are client-side
         if (weapon ~= 63) then
@@ -131,7 +137,8 @@ function outputConsoleMessage(player, killer, vehicle, weapon)
         if (player == killer) then
             msg = ('* %s killed himself.'):format(getPlayerName(player))
         else
-            msg = ('* %s killed %s.'):format(getPlayerName(killer), getPlayerName(player))
+            local killerName = type(killer) == 'string' and killer or getPlayerName(killer)
+            msg = ('* %s killed %s.'):format(killerName, getPlayerName(player))
         end
         local weaponName = getWeaponNameFromID(weapon)
         if weaponName then
@@ -151,14 +158,11 @@ function outputConsoleMessage(player, killer, vehicle, weapon)
 end
 
 function getPlayerColor(player)
-    local r, g, b
-    if isElement(player) then
-        local team = getPlayerTeam(player)
-        if team then
-            r, g, b = getTeamColor(team)
-        else
-            r, g, b = getPlayerNametagColor(player)
+    if isElement(player) and getElementType(player) == 'player' then
+        local hex = getPlayerName(player):match('#(%x%x%x%x%x%x)')
+        if hex then
+            return tonumber(hex:sub(1, 2), 16), tonumber(hex:sub(3, 4), 16), tonumber(hex:sub(5, 6), 16)
         end
     end
-    return r, g, b
+    return 255, 255, 255
 end

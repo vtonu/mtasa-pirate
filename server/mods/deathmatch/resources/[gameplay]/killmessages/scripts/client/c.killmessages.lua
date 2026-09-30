@@ -20,6 +20,17 @@ function outputKillMessage(player, pR, pG, pB, killer, kR, kG, kB, weapon)
         return false
     end
 
+    -- USE THE NAME COLOR, OR WHITE WHEN NONE IS SET
+    local function nameColor(name)
+        local hex = name:match('#(%x%x%x%x%x%x)')
+        if hex then
+            return tonumber(hex:sub(1, 2), 16), tonumber(hex:sub(3, 4), 16), tonumber(hex:sub(5, 6), 16)
+        end
+        return 255, 255, 255
+    end
+
+    pR, pG, pB = nameColor(getPlayerName(player))
+
     local killerName
 
     if isElement(killer) then
@@ -32,6 +43,10 @@ function outputKillMessage(player, pR, pG, pB, killer, kR, kG, kB, weapon)
     elseif (type(killer) == 'string') then
         killerName = killer
 
+    end
+
+    if killerName then
+        kR, kG, kB = nameColor(killerName)
     end
 
     local message = {
