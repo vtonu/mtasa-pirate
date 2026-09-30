@@ -7,6 +7,7 @@ local STAT_DEFAULTS = {
     pvpKills = 0,
     pvpDeaths = 0,
     zombieKills = 0,
+    zombieDeaths = 0,
     moneyEarned = 0,
     vehiclesDestroyed = 0,
     missionCompletions = 0,
@@ -81,9 +82,19 @@ local function getKillPlayer(killerElement)
     end
 end
 
+local function isZombie(element)
+    local zombies = getResourceFromName("new-zombies-zday")
+    return isElement(element) and getElementType(element) == "ped"
+        and zombies and getElementData(element, "zday.variant") ~= false
+        and getElementParent(element) == getResourceDynamicElementRoot(zombies)
+end
+
 function onPlayerStatsWasted(killerElement)
     if isElement(source) then
         addPlayerPlayStat(source, "deaths", 1)
+        if isZombie(killerElement) then
+            addPlayerPlayStat(source, "zombieDeaths", 1)
+        end
     end
 
     local killer = getKillPlayer(killerElement)
@@ -95,9 +106,7 @@ function onPlayerStatsWasted(killerElement)
 end
 
 addEventHandler("onPedWasted", root, function(totalAmmo, killerElement)
-    local zombies = getResourceFromName("new-zombies-zday")
-    if not zombies or getElementData(source, "zday.variant") == false then return end
-    if getElementParent(source) ~= getResourceDynamicElementRoot(zombies) then return end
+    if not isZombie(source) then return end
     local killer = getKillPlayer(killerElement)
     if killer then
         addPlayerPlayStat(killer, "kills", 1)
