@@ -60,7 +60,8 @@ local playerNotificationTimers = {}
 local NOTIFICATION_MESSAGES = {"[NOTIFICATION] Aye Captain, you can always come to us!",
                                "[NOTIFICATION] Welcome aboard, Captain!",
                                "[NOTIFICATION] The crew awaits your orders, Captain!",
-                               "[NOTIFICATION] English only in chat."}
+                               "[NOTIFICATION] English only in chat.",
+                               "[NOTIFICATION] Found a bug? Use /report to let us know."}
 
 function startPlayerNotifications(playerElement)
     if not playerElement then
