@@ -1,6 +1,7 @@
 local CASINO_INTERIOR = 12
 local CASINO_DIMENSION = 12012
 local EXIT_X, EXIT_Y, EXIT_Z = 1133.25, -15.26, 1000.68
+local entranceIDs = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"}
 local returnPoints = {}
 local doorCooldowns = {}
 local doorTransitions = {}
@@ -96,8 +97,15 @@ addEventHandler("royalCasino:useDoor", resourceRoot, function(door)
     local now = getTickCount()
     if doorTransitions[client] or now < (doorCooldowns[client] or 0) then return end
     if door == "enter" then
-        local entrance = getElementByID("royalCasinoMarker")
-        if not isNearDoor(client, entrance) then return end
+        local entrance
+        for _, id in ipairs(entranceIDs) do
+            local marker = getElementByID(id)
+            if isNearDoor(client, marker) then
+                entrance = marker
+                break
+            end
+        end
+        if not entrance then return end
         useDoor(client, entrance, {
             x = EXIT_X, y = EXIT_Y + 2.5, z = EXIT_Z, rotation = 0,
             interior = CASINO_INTERIOR, dimension = CASINO_DIMENSION

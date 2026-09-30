@@ -1,14 +1,19 @@
-local casinoMarker
+local entranceIDs = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"}
+local casinoMarkers = {}
 local exitMarker
 local nextDoorTick = 0
 
 local function getNearbyDoor()
     if isPedDead(localPlayer) or getPedOccupiedVehicle(localPlayer)
         or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
-    if not isElement(casinoMarker) then casinoMarker = getElementByID("royalCasinoMarker") end
     if not isElement(exitMarker) then exitMarker = getElementByID("royalCasinoExitMarker") end
+    local doors = {{exitMarker, "exit"}}
+    for _, id in ipairs(entranceIDs) do
+        if not isElement(casinoMarkers[id]) then casinoMarkers[id] = getElementByID(id) end
+        doors[#doors + 1] = {casinoMarkers[id], "enter"}
+    end
     local x, y, z = getElementPosition(localPlayer)
-    for _, door in ipairs({{casinoMarker, "enter"}, {exitMarker, "exit"}}) do
+    for _, door in ipairs(doors) do
         local marker = door[1]
         if isElement(marker) and getElementDimension(localPlayer) == getElementDimension(marker)
             and getElementInterior(localPlayer) == getElementInterior(marker) then
