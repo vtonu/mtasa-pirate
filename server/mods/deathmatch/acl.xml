@@ -899,4 +899,11 @@
     <acl name="autoACL_runcode">
         <right name="function.loadstring" access="false" who="" pending="true" date=""></right>
     </acl>
+    <group name="ZombieConfig">
+        <acl name="ZombieConfig" />
+        <object name="resource.new-zombies-zday" />
+    </group>
+    <acl name="ZombieConfig">
+        <right name="function.setServerConfigSetting" access="true" />
+    </acl>
 </acl>
