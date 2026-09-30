@@ -15,6 +15,11 @@ local mySteps = {}
 local nextTargetRequest = 0
 local groundReadyAt = 0
 
+-- MELEE APPROACH RANGES
+local attackRanges = {[0] = 1.0, [4] = 1.0, [5] = 1.3, [9] = 1.1}
+local stuckDelay = 2000
+local jumpDelay = 1500
+
 local function requestZombieTargets()
 	if getTickCount() < nextTargetRequest then return end
 	nextTargetRequest = getTickCount() + 2000
@@ -35,8 +40,12 @@ local function resetZombieChase(zombie,data)
 	data.positions = 0
 	data.changingTarget = nil
 	data.changingPath = nil
+	data.changePathTick = nil
 	data.lastPosition = nil
 	data.eating = nil
+	data.progressPosition = nil
+	data.progressTick = nil
+	data.nextJumpTick = nil
 	setPedAnimation(zombie)
 	for _,control in ipairs({"forwards","fire","sprint","jump"}) do
 		setPedControlState(zombie,control,false)
@@ -187,6 +196,27 @@ local function trackMe()
 			local zVector = Vector3(getElementPosition(zombie))
 			local doesZombieSeePlayer = isLineOfSightClear(hVector,lVector,true,false,false,true,false,true,true,zombie)
 			local distanceToPlayer = getDistanceBetweenPoints2D(zVector.x,zVector.y,lVector.x,lVector.y)
+			local attackRange = attackRanges[getPedWeapon(zombie)] or 1.0
+			local inReach = getDistanceBetweenPoints3D(zVector,lVector) < attackRange and doesZombieSeePlayer
+			local now = getTickCount()
+
+			-- RETRY A STALLED CHASE WITHOUT REMOVING THE ZOMBIE
+			if data.hunting and not inReach and not data.eating then
+				if not data.progressPosition or getDistanceBetweenPoints3D(data.progressPosition,zVector) > 0.25 then
+					data.progressPosition = zVector
+					data.progressTick = now
+				elseif now - data.progressTick >= stuckDelay then
+					data.paths = {}
+					data.positions = 0
+					data.changingPath = nil
+					data.changePathTick = nil
+					data.progressPosition = zVector
+					data.progressTick = now
+				end
+			else
+				data.progressPosition = nil
+				data.progressTick = nil
+			end
 
 
 			if zombieData[zombie].hunting then
@@ -206,27 +236,12 @@ local function trackMe()
 					local nx,ny,nz,jump,sprint = unpack(zombieData[zombie].paths[zombieData[zombie].positions+1])
 					local nVector = Vector3(nx,ny,nz)
 					local isClear = isLineOfSightClear(zVector,nVector,true,true,false,true,false,true,true,zombie)
-					local notMoving = false
-					if zombieData[zombie].lastPosition then
-						local dist = getDistanceBetweenPoints3D(zombieData[zombie].lastPosition,zVector)
-						if dist < 0.01 then
-							local action = math.random(1,2)
-							if action == 1 then
-								setPedControlState(zombie,"fire",true)
-							elseif action == 2 then
-								notMoving = true
-							end
-						else
-							setPedControlState(zombie,"fire",false)
-						end
-					end
-					local needToJump = (jump or getPedSimplestTask(zombie) == "TASK_SIMPLE_CLIMB" or arePedLegsBlocked(zombie) or notMoving)
-					if needToJump then
-						if (getPedMoveState(zombie) ~= "jump" or getPedMoveState(zombie) ~= "climb") then setPedControlState(zombie,"forwards",false) end
-						if sprint then setPedControlState(zombie,"sprint",true) end
+					local moveState = getPedMoveState(zombie)
+					local needToJump = not inReach and not zombie.inWater and (jump or arePedLegsBlocked(zombie))
+					if needToJump and moveState ~= "jump" and moveState ~= "climb" and now >= (data.nextJumpTick or 0) then
 						setPedControlState(zombie,"jump",true)
+						data.nextJumpTick = now + jumpDelay
 					else
-						setPedControlState(zombie,"sprint",false)
 						setPedControlState(zombie,"jump",false)
 					end
 					local dist = getDistanceBetweenPoints2D(zVector.x,zVector.y,nVector.x,nVector.y)
@@ -247,16 +262,10 @@ local function trackMe()
 					local angle = rot(zVector.x,zVector.y,nVector.x,nVector.y)
 					setPedCameraRotation(zombie,-angle)
 					setPedControlState(zombie,"forwards",true)
-					if variant == 1 then
-						setPedControlState(zombie,"sprint",false)
-					elseif variant == 2 then
-						setPedControlState(zombie,"sprint",true)
-					end
+					setPedControlState(zombie,"sprint",variant == 2 or (variant ~= 1 and sprint == true))
 					if zombie.inWater then
 						setElementRotation(zombie,0,0,angle)
 						setPedControlState(zombie,"sprint",true)
-					elseif not sprint then
-						setPedControlState(zombie,"sprint",false)
 					end
 					zombieData[zombie].lastPosition = Vector3(getElementPosition(zombie))
 					if isClear and dist < 1 then
@@ -281,14 +290,17 @@ local function trackMe()
 					setPedControlState(zombie,"forwards",false)
 				end
 			end
-            -- ATTACK WITH A KNIFE ONLY WHEN THE TARGET IS IN REACH
-            local inReach = getDistanceBetweenPoints3D(zVector,lVector) < 1.6 and doesZombieSeePlayer
+            -- CLOSE THE GAP BEFORE ATTACKING WITH THE EQUIPPED WEAPON
             setPedControlState(zombie,"fire",inReach)
             setPedControlState(zombie,"aim_weapon",false)
             if inReach then
                 setPedCameraRotation(zombie,-rot(zVector.x,zVector.y,lx,ly))
                 setPedControlState(zombie,"forwards",false)
                 setPedControlState(zombie,"jump",false)
+                setPedControlState(zombie,"sprint",false)
+            elseif doesZombieSeePlayer and getDistanceBetweenPoints3D(zVector,lVector) < 4 and not data.eating then
+                setPedCameraRotation(zombie,-rot(zVector.x,zVector.y,lx,ly))
+                setPedControlState(zombie,"forwards",true)
                 setPedControlState(zombie,"sprint",false)
             end
 
@@ -389,13 +401,8 @@ local function setZombieTarget(zombie,targett)
 	if not zombieData[zombie] then zombieData[zombie] = {} end
 	local data = zombieData[zombie]
 	if data.target ~= targett then
+		resetZombieChase(zombie,data)
 		data.target = targett
-		data.hunting = nil
-		data.paths = {}
-		data.positions = 0
-		data.changingTarget = nil
-		data.changingPath = nil
-		data.lastPosition = nil
 	end
 	if not zombieData[zombie].handled then
 		addEventHandler("onClientPedDamage",zombie,onDamage)

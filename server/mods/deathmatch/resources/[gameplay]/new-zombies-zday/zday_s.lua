@@ -43,6 +43,9 @@ local function updateZombieActivity()
 			end
 			local paused = not active or targetDistance(zombie,target) > 120
 			if isElementFrozen(zombie) ~= paused then setElementFrozen(zombie,paused) end
+			if not paused and getElementSyncer(zombie) ~= target then
+				setElementSyncer(zombie,target)
+			end
 		end
 	end
 end
