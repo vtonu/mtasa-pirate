@@ -17,7 +17,6 @@ local function onPlayerEnterShop(hitElement, matchingDimension)
     end
 
     setElementData(hitElement, "atBootyShop", true)
-    outputChatBox("You're at the Booty Desk. Press F6 to show/hide controls.", hitElement, 127, 255, 212)
 end
 
 local function onPlayerLeaveShop(leftElement)

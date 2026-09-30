@@ -1,6 +1,7 @@
 local maxZombies = 220 --Max zombies in TOTAL
 local zombieTargets = {}
 local zombieProgress = {}
+local knifeAttempts = {}
 local setZombieTarget
 
 local function targetDistance(zombie,player)
@@ -172,6 +173,18 @@ local function spawnZombie(s,zx,zy,zz,r)
 
 end
 
+-- CHECK KNIFE NECK STABS ON THE SERVER
+local function murderPlayer(zombie)
+	if not client or client ~= source then return end
+	if not isZombieWeather() or isPassive(client) or getElementData(client,"freeroam.passive") == true or isPedDead(client) or getPedOccupiedVehicle(client) then return end
+	if not isElement(zombie) or zombieTargets[zombie] ~= client or isPedDead(zombie) or getPedWeapon(zombie) ~= 4 then return end
+	if targetDistance(zombie,client) > 1.2 then return end
+	local now = getTickCount()
+	if now < (knifeAttempts[client] or 0) then return end
+	knifeAttempts[client] = now + 3500
+	if math.random(1,100) <= 35 then killPed(client,zombie,55,9,true) end
+end
+
 local function initScript()
 
 	local thisResourceName = getResourceName(getThisResource())
@@ -186,9 +199,11 @@ local function initScript()
 	addEvent("Zday:getZombiesInfo",true)
 	addEvent("Zday:spawnZombie",true)
 	addEvent("Zday:destroyZombie",true)
+	addEvent("Zday:murderPlayer",true)
 	addEvent("Zday:damageZombie",true)
 	addEvent("Zday:delayDestroyZombie",true)
 	addEventHandler("Zday:spawnZombie",root,spawnZombie)
+	addEventHandler("Zday:murderPlayer",root,murderPlayer)
 	addEventHandler("Zday:getZombiesInfo",root,updateZombieTargets)
 	
 	-- TARGETS ARE CHECKED BY THE SERVER TIMER
@@ -199,6 +214,8 @@ local function initScript()
 end
 
 addEventHandler("onResourceStart",resourceRoot,initScript)
+addEventHandler("onPlayerQuit",root,function() knifeAttempts[source] = nil end)
+addEventHandler("onPlayerSpawn",root,function() knifeAttempts[source] = nil end)
 
 -- UPDATE TARGETS WHEN PASSIVE MODE CHANGES
 addEventHandler("onElementDataChange",root,function(key)

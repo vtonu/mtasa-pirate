@@ -2,6 +2,8 @@ local screenW, screenH = guiGetScreenSize()
 local uiBrowser
 local uiBrowserElement
 local currentPayload = {}
+local shopNotice = nil
+local shopNoticeUntil = 0
 local isDragging = false
 local dragOffsetX = 0
 local dragOffsetY = 0
@@ -93,6 +95,34 @@ local function createGardenUI(payload)
     guiSetInputMode("no_binds")
     showCursor(true)
 end
+
+-- KEEP PERK EXPIRY FEEDBACK OUT OF CHAT
+addEvent("weedGarden:notification", true)
+addEventHandler("weedGarden:notification", resourceRoot, function(message)
+    if type(message) ~= "string" then return end
+    if isElement(uiBrowserElement) then
+        currentPayload.note = message
+        sendPayloadToBrowser(currentPayload)
+    else
+        shopNotice = message
+        shopNoticeUntil = getTickCount() + 5000
+    end
+end)
+
+addEventHandler("onClientRender", root, function()
+    if not shopNotice or getTickCount() >= shopNoticeUntil or isElement(uiBrowserElement)
+        or isMainMenuActive() then return end
+    local w, h = guiGetScreenSize()
+    local width = math.min(420, w - 32)
+    local left, top = (w - width) / 2, h * 0.74
+    local font = "unifont"
+    local scale = math.min(1, (width - 32) / dxGetTextWidth(shopNotice, 1, font))
+    dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 124))
+    dxDrawRectangle(left, top, width, 1, tocolor(220, 255, 239, 55))
+    dxDrawRectangle(left, top, 2, 48, tocolor(127, 255, 212, 200))
+    dxDrawText(shopNotice, left + 12, top, left + width - 12, top + 48,
+        tocolor(238, 255, 247, 245), scale, font, "center", "center", false, false, false, false)
+end)
 
 local function closeGardenUI()
     if isElement(uiBrowserElement) then
@@ -247,13 +277,15 @@ addEventHandler("onClientResourceStop", resourceRoot, closeGardenUI)
 -- ==========================================
 -- KEY BIND INTEGRATION (WITH MARKER CHECK)
 -- ==========================================
-local HARVEST_KEY = "f5" -- "F5" key to open the UI
+local HARVEST_KEY = "h" -- H TO OPEN THE SHOP
 local SPAM_THRESHOLD = 1000
 local SPAM_LOCKOUT = 10000
 local lastKeyTick = nil
 local lockoutUntilTick = 0
 
 local function handleHarvestToggle()
+    if getElementData(localPlayer, "atWeedGarden") ~= true or isElement(uiBrowserElement) or isPedDead(localPlayer)
+        or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
     local currentTick = getTickCount()
 
     if currentTick < lockoutUntilTick then
@@ -261,11 +293,6 @@ local function handleHarvestToggle()
     end
 
     if lastKeyTick and currentTick - lastKeyTick < SPAM_THRESHOLD then
-        if getElementData(localPlayer, "atWeedGarden") == true then
-            outputChatBox("Don't spam key.", 127, 255, 212)
-        else
-            outputChatBox("You need to be at the Fog of War Garden to use this key. Don't spam.", 127, 255, 212)
-        end
         lockoutUntilTick = currentTick + SPAM_LOCKOUT
         lastKeyTick = nil
         return
@@ -279,10 +306,26 @@ local function handleHarvestToggle()
 
     if getElementData(localPlayer, "atWeedGarden") == true then
         triggerServerEvent("weedGarden:requestOpen", resourceRoot)
-    else
-        outputChatBox("You need to be at the Fog of War Garden to use this key.", 127, 255, 212)
     end
 end
+
+-- MATCH THE AIRYARD H PROMPT
+addEventHandler("onClientRender", root, function()
+    if getElementData(localPlayer, "atWeedGarden") ~= true or isElement(uiBrowserElement)
+        or isPedDead(localPlayer) or isCursorShowing() or isChatBoxInputActive()
+        or isConsoleActive() or isMainMenuActive() then return end
+    local w, h = guiGetScreenSize()
+    local width = math.min(420, w - 32)
+    local left, top = (w - width) / 2, h * 0.82
+    local prompt = "PRESS [H] TO OPEN WEED SHOP"
+    local font = "unifont"
+    local scale = math.min(1, (width - 32) / dxGetTextWidth(prompt, 1, font))
+    dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 124))
+    dxDrawRectangle(left, top, width, 1, tocolor(220, 255, 239, 55))
+    dxDrawRectangle(left, top, 2, 48, tocolor(127, 255, 212, 200))
+    dxDrawText(prompt, left + 12, top, left + width - 12, top + 48,
+        tocolor(238, 255, 247, 245), scale, font, "center", "center", false, false, false, false)
+end)
 
 addEventHandler("onClientKey", root, function(button)
     if isElement(uiBrowserElement) and not button:find("^mouse") then

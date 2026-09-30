@@ -223,7 +223,6 @@ local FLOWER_WEAPON = 14
 local SPRAYCAN_WEAPON = 41
 local HARVEST_SPRAYCAN_AMMO = 1000
 local HARVEST_SPRAYCAN_AMMO_LIMIT = 3000
-local WEED_NOTIFICATION_COLOR = {127, 255, 212}
 
 local PERK_SETTINGS = {
     indica = {
@@ -338,8 +337,7 @@ local function sendShopMessage(player, message, resetSelection)
 end
 
 local function sendWeedNotification(player, message)
-    outputChatBox("[NOTIFICATION] " .. message, player, WEED_NOTIFICATION_COLOR[1], WEED_NOTIFICATION_COLOR[2],
-        WEED_NOTIFICATION_COLOR[3])
+    triggerClientEvent(player, "weedGarden:notification", resourceRoot, message)
 end
 
 local function restorePlayerPerks(player)
@@ -519,7 +517,6 @@ local function handlePurchase(player, state)
 
     sendShopMessage(player, "PURCHASE COMPLETE: " .. package.label .. " " .. string.upper(state.strain) .. " FOR $" ..
         price .. ".")
-    sendWeedNotification(player, "Aye-aye, great choice! Perks equipped.")
     scheduleIdleReset(player, state)
 end
 
@@ -554,7 +551,6 @@ local function handleShopAction(player, actionName)
 
         if giveWeapon(player, SPRAYCAN_WEAPON, ammoToGive, true) then
             sendShopMessage(player, "Harvest Tool Available.")
-            sendWeedNotification(player, "Tools equipped.")
         else
             sendShopMessage(player, "HARVEST FAILED. EQUIPMENT COULD NOT BE ISSUED.")
         end
@@ -612,8 +608,6 @@ addEventHandler("weedGarden:requestOpen", resourceRoot, function()
             revision = 0
         }
         sendGardenUI(client, getGardenPayload("SELECT A STRAIN.", true))
-    else
-        outputChatBox("Error: You must be at the garden.", client, 127, 255, 212)
     end
 end)
 

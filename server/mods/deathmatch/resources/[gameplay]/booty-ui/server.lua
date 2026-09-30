@@ -819,7 +819,6 @@ local function purchaseWeapon(player, weaponId)
         state.insufficientFunds = 0
     end
     updateShop(player, "PURCHASE COMPLETE: " .. string.upper(weapon.name) .. " FOR $" .. weapon.price .. ".")
-    outputChatBox("[NOTIFICATION] Aye-aye! " .. weapon.name .. " purchased.", player, 255, 250, 80)
 end
 
 addEvent("bootyShop:uiAction", true)

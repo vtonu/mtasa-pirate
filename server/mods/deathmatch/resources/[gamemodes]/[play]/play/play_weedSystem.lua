@@ -20,7 +20,6 @@ local function onPlayerEnterGarden(hitElement, matchingDimension)
     end
 
     setElementData(hitElement, "atWeedGarden", true)
-    outputChatBox("Welcome to the Fog of War Garden. Press F5 to show/hide controls.", hitElement, 127, 255, 212)
 end
 
 local function onPlayerLeaveGarden(leftElement, matchingDimension)

@@ -1,4 +1,4 @@
-local maxZombies = 10 --Max zombies to chase local player
+local maxZombies = 8 --Max zombies to chase local player
 local minDistance = 10 -- MINIMUM SPAWN DISTANCE
 local maxDistance = 30 -- MAXIMUM SPAWN DISTANCE
 local minInterval = 2000 --Minium time between spawning zombies
@@ -18,7 +18,7 @@ local groundReadyAt = 0
 -- MELEE APPROACH RANGES
 local attackRanges = {[0] = 1.0, [4] = 1.0, [5] = 1.3, [9] = 1.1}
 local stuckDelay = 2000
-local jumpDelay = 1500
+local jumpDelay = 900
 
 local function requestZombieTargets()
 	if getTickCount() < nextTargetRequest then return end
@@ -46,8 +46,11 @@ local function resetZombieChase(zombie,data)
 	data.progressPosition = nil
 	data.progressTick = nil
 	data.nextJumpTick = nil
+	data.recoveryUntil = nil
+	data.recoverySide = nil
+	data.knifeReachTick = nil
 	setPedAnimation(zombie)
-	for _,control in ipairs({"forwards","fire","sprint","jump"}) do
+	for _,control in ipairs({"forwards","backwards","left","right","fire","aim_weapon","sprint","jump"}) do
 		setPedControlState(zombie,control,false)
 	end
 end
@@ -135,7 +138,7 @@ local function arePedLegsBlocked(zombie)
 
 	local upperTorsoVec = Vector3(getPedBonePosition(zombie,4))
 	local legVec = Vector3(getPedBonePosition(zombie,54))
-	local forwardVec = zombie.matrix.position + (zombie.matrix.forward/2)
+	local forwardVec = zombie.matrix.position + zombie.matrix.forward * 1.1
 	
 	local x,y = upperTorsoVec.x,upperTorsoVec.y
 	local x2,y2 = forwardVec.x,forwardVec.y
@@ -199,6 +202,11 @@ local function trackMe()
 			local attackRange = attackRanges[getPedWeapon(zombie)] or 1.0
 			local inReach = getDistanceBetweenPoints3D(zVector,lVector) < attackRange and doesZombieSeePlayer
 			local now = getTickCount()
+			local moveState = getPedMoveState(zombie)
+			local climbing = moveState == "climb" or moveState == "hanging"
+			for _,control in ipairs({"backwards","left","right"}) do
+				setPedControlState(zombie,control,false)
+			end
 
 			-- RETRY A STALLED CHASE WITHOUT REMOVING THE ZOMBIE
 			if data.hunting and not inReach and not data.eating then
@@ -212,6 +220,10 @@ local function trackMe()
 					data.changePathTick = nil
 					data.progressPosition = zVector
 					data.progressTick = now
+					if not climbing and moveState ~= "jump" and moveState ~= "fall" and not zombie.inWater then
+						data.recoveryUntil = now + 650
+						data.recoverySide = data.recoverySide == "left" and "right" or "left"
+					end
 				end
 			else
 				data.progressPosition = nil
@@ -236,9 +248,8 @@ local function trackMe()
 					local nx,ny,nz,jump,sprint = unpack(zombieData[zombie].paths[zombieData[zombie].positions+1])
 					local nVector = Vector3(nx,ny,nz)
 					local isClear = isLineOfSightClear(zVector,nVector,true,true,false,true,false,true,true,zombie)
-					local moveState = getPedMoveState(zombie)
-					local needToJump = not inReach and not zombie.inWater and (jump or arePedLegsBlocked(zombie))
-					if needToJump and moveState ~= "jump" and moveState ~= "climb" and now >= (data.nextJumpTick or 0) then
+					local needToJump = not inReach and not zombie.inWater and (climbing or jump or arePedLegsBlocked(zombie))
+					if needToJump and moveState ~= "jump" and moveState ~= "fall" and not (data.recoveryUntil and now < data.recoveryUntil) and now >= (data.nextJumpTick or 0) then
 						setPedControlState(zombie,"jump",true)
 						data.nextJumpTick = now + jumpDelay
 					else
@@ -303,6 +314,31 @@ local function trackMe()
                 setPedControlState(zombie,"forwards",true)
                 setPedControlState(zombie,"sprint",false)
             end
+			-- STEP BACK AND ASIDE BEFORE TRYING A BLOCKED APPROACH AGAIN
+			if data.recoveryUntil then
+				if now < data.recoveryUntil and not inReach and not climbing and not data.eating then
+					setPedControlState(zombie,"forwards",false)
+					setPedControlState(zombie,"backwards",true)
+					setPedControlState(zombie,data.recoverySide,true)
+					setPedControlState(zombie,"sprint",false)
+					setPedControlState(zombie,"jump",false)
+				else
+					data.recoveryUntil = nil
+					data.nextJumpTick = nil
+					data.progressPosition = zVector
+					data.progressTick = now
+				end
+			end
+			-- GIVE KNIFE ZOMBIES A CLOSE RANGE NECK STAB CHANCE
+			if inReach and getPedWeapon(zombie) == 4 and zombieTarget == localPlayer and not getPedOccupiedVehicle(localPlayer) then
+				data.knifeReachTick = data.knifeReachTick or now
+				if now - data.knifeReachTick >= 800 and now >= (playersDoomed[localPlayer] or 0) then
+					playersDoomed[localPlayer] = now + 3500
+					triggerServerEvent("Zday:murderPlayer",localPlayer,zombie)
+				end
+			else
+				data.knifeReachTick = nil
+			end
 
 		else
 			if data and not data.paused then
