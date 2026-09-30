@@ -2,7 +2,7 @@ local g_PlayerData = {}
 local g_VehicleData = {}
 local PASSIVE_ALPHA = 160
 local PASSIVE_TOGGLE_COOLDOWN = 5000
-local passiveControls = {"fire", "aim_weapon", "next_weapon", "previous_weapon", "action"}
+local passiveControls = {"fire", "aim_weapon", "next_weapon", "previous_weapon", "action", "vehicle_fire", "vehicle_secondary_fire"}
 
 g_ArmedVehicles = {
     [425] = true,

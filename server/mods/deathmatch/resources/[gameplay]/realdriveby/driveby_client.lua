@@ -6,6 +6,10 @@ local block
 lastSlot = 0
 settings = {}
 
+local function isPassive()
+	return getElementData(localPlayer, "freeroam.passive") == true
+end
+
 
 --This function simply sets up the driveby upon vehicle entry
 local function setupDriveby( player, seat )
@@ -87,6 +91,7 @@ addEventHandler("doSendDriveBySettings",localPlayer,
 
 --This function handles the driveby toggling key.
 function toggleDriveby()
+	if isPassive() then return end
 	--If he's not in a vehicle dont bother
 	if not isPedInVehicle( localPlayer ) then return end
 	--If its a blocked vehicle dont allow it
@@ -151,7 +156,7 @@ function toggleDriveby()
 		limitDrivebySpeed ( switchToWeapon )
 		toggleControl ( "vehicle_look_left",true )
 		toggleControl ( "vehicle_look_right",true )
-		toggleControl ( "vehicle_secondary_fire",true )
+		toggleControl ( "vehicle_secondary_fire",not isPassive() )
 		toggleTurningKeys(vehicleID,true)
 		fadeOutHelp()
 		removeEventHandler ( "onClientPlayerVehicleExit",localPlayer,removeKeyToggles )
@@ -162,7 +167,7 @@ addCommandHandler ( "Toggle Driveby", toggleDriveby )
 function removeKeyToggles(vehicle)
 	toggleControl ( "vehicle_look_left",true )
 	toggleControl ( "vehicle_look_right",true )
-	toggleControl ( "vehicle_secondary_fire",true )
+	toggleControl ( "vehicle_secondary_fire",not isPassive() )
 	toggleTurningKeys(getElementModel(vehicle),true)
 	fadeOutHelp()
 	exitingVehicle = false
@@ -172,6 +177,7 @@ end
 
 --This function handles the driveby switch weapon key
 function switchDrivebyWeapon(key2, progress)
+	if isPassive() then return end
 	if block then return end
 	progress = tonumber(progress)
 	if not progress then return end
@@ -229,6 +235,10 @@ addCommandHandler ( "Previous driveby weapon", switchDrivebyWeapon )
 --Here lies the stuff that limits shooting speed (so slow weapons dont shoot ridiculously fast)
 local limiterTimer
 function limitDrivebySpeed ( weaponID )
+	if isPassive() then
+		unbindFire()
+		return
+	end
 	local speed = settings.shotdelay[tostring(weaponID)]
 	if not speed then
 		if not isControlEnabled ( "vehicle_fire" ) then
@@ -248,8 +258,14 @@ function limitDrivebySpeed ( weaponID )
 end
 
 function unbindFire()
+	shooting = false
+	if isTimer(limiterTimer) then killTimer(limiterTimer) end
+	limiterTimer = nil
+	setPedControlState("vehicle_fire", false)
 	unbindKey ( "vehicle_fire", "both", limitedKeyPress )
-	if not isControlEnabled ( "vehicle_fire" ) then
+	if isPassive() then
+		toggleControl("vehicle_fire", false)
+	elseif not isControlEnabled ( "vehicle_fire" ) then
 			toggleControl ( "vehicle_fire", true )
 	end
 	removeEventHandler("onClientPlayerVehicleExit",localPlayer,unbindFire)
@@ -257,6 +273,10 @@ function unbindFire()
 end
 
 function limitedKeyPress (key,keyState,speed)
+	if isPassive() then
+		unbindFire()
+		return
+	end
 	if keyState == "down" then
 		if block == true then return end
 		shooting = true
@@ -273,9 +293,32 @@ function limitedKeyPress (key,keyState,speed)
 end
 
 function pressKey ( controlName )
+	if isPassive() then return end
 	setPedControlState ( controlName, true )
 	setTimer ( setPedControlState, 150, 1, controlName, false )
 end
+
+-- STOP DRIVEBY WHEN PASSIVE MODE STARTS
+local function stopPassiveDriveby()
+	if not isPassive() then return end
+	unbindFire()
+	setPedDoingGangDriveby(localPlayer, false)
+	setPedWeaponSlot(localPlayer, 0)
+	toggleControl("vehicle_fire", false)
+	toggleControl("vehicle_secondary_fire", false)
+	setPedControlState("vehicle_secondary_fire", false)
+	toggleControl("vehicle_look_left", true)
+	toggleControl("vehicle_look_right", true)
+	local vehicle = getPedOccupiedVehicle(localPlayer)
+	if vehicle then toggleTurningKeys(getElementModel(vehicle), true) end
+	removeEventHandler("onClientPlayerVehicleExit", localPlayer, removeKeyToggles)
+end
+
+addEventHandler("onClientElementDataChange", localPlayer, function(name)
+	if name == "freeroam.passive" then stopPassiveDriveby() end
+end)
+addEventHandler("onClientResourceStart", resourceRoot, stopPassiveDriveby)
+addEventHandler("onClientPlayerVehicleEnter", localPlayer, stopPassiveDriveby)
 
 ---Left/right toggling
 local bikes = { [581]=true,[509]=true,[481]=true,[462]=true,[521]=true,[463]=true,

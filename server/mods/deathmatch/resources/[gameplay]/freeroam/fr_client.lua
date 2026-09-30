@@ -2443,7 +2443,7 @@ local cityAbbreviations = {
     ["San Fierro"] = "SF",
     ["Las Venturas"] = "LV"
 }
-local passiveControls = {"fire", "aim_weapon", "next_weapon", "previous_weapon", "action"}
+local passiveControls = {"fire", "aim_weapon", "next_weapon", "previous_weapon", "action", "vehicle_fire", "vehicle_secondary_fire"}
 local perkDisplay = {
     indica = {
         text = "Indica",

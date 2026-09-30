@@ -182,8 +182,13 @@ local function trackMe()
 	local zombies = getElementsByType("ped",resourceRoot,true)
 	
 	for index,zombie in ipairs(zombies) do
-		if math.random(1,40) == 5 and isPedDead(zombie) == false then playSound3D("sounds/mgroan"..tostring(math.random(1,10))..".ogg",zombie.position) end
 		local data = zombieData[zombie]
+		if data and not isPedDead(zombie) and not isElement(data.groanSound) and math.random(1,40) == 5 then
+			local soundIndex = math.random(1,15)
+			if soundIndex == data.lastGroan then soundIndex = soundIndex % 15 + 1 end
+			data.lastGroan = soundIndex
+			data.groanSound = playSound3D("sounds/zombie"..tostring(soundIndex)..".ogg",zombie.position)
+		end
 		local variant = tonumber(getElementData(zombie, "zday.variant")) or 0
 		local zombieTarget = data and data.target
 		if not data or zombieTarget == nil then requestZombieTargets() end

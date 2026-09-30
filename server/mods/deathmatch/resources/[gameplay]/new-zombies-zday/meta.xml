@@ -39,15 +39,20 @@
 	<file src="skins/280.txd" />
 	<file src="skins/287.txd" />
 
-	<file src="sounds/mgroan1.ogg" />
-	<file src="sounds/mgroan2.ogg" />
-	<file src="sounds/mgroan3.ogg" />
-	<file src="sounds/mgroan4.ogg" />
-	<file src="sounds/mgroan5.ogg" />
-	<file src="sounds/mgroan6.ogg" />
-	<file src="sounds/mgroan7.ogg" />
-	<file src="sounds/mgroan8.ogg" />
-	<file src="sounds/mgroan9.ogg" />
-	<file src="sounds/mgroan10.ogg" />
+	<file src="sounds/zombie1.ogg" />
+	<file src="sounds/zombie2.ogg" />
+	<file src="sounds/zombie3.ogg" />
+	<file src="sounds/zombie4.ogg" />
+	<file src="sounds/zombie5.ogg" />
+	<file src="sounds/zombie6.ogg" />
+	<file src="sounds/zombie7.ogg" />
+	<file src="sounds/zombie8.ogg" />
+	<file src="sounds/zombie9.ogg" />
+	<file src="sounds/zombie10.ogg" />
+	<file src="sounds/zombie11.ogg" />
+	<file src="sounds/zombie12.ogg" />
+	<file src="sounds/zombie13.ogg" />
+	<file src="sounds/zombie14.ogg" />
+	<file src="sounds/zombie15.ogg" />
 	
 </meta>
