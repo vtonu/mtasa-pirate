@@ -36,6 +36,13 @@ function createPlayVehicle(vehicleData)
     end
 
     -- Vehicle Settings
+    if modelID == 411 then
+        -- Infernus Speed Tuning
+        setVehicleHandling(vehicleElement, "maxVelocity", 285)
+        setVehicleHandling(vehicleElement, "engineAcceleration", 15)
+        setVehicleHandling(vehicleElement, "dragCoeff", 1.2)
+    end
+
     if modelID == 411 or modelID == 457 then
         setVehicleHeadLightColor(vehicleElement, 127, 255, 212) -- Headlights
         addVehicleUpgrade(vehicleElement, 1010) -- Nitro

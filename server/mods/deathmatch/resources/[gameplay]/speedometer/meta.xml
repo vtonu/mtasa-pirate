@@ -3,6 +3,8 @@
 	<min_mta_version client="1.5.7"></min_mta_version>
 	<file src="images/disc.png" />
 	<file src="images/needle.png" />
+	<file src="images/needle_boost.png" />
+	<file src="images/boost_arc.png" />
 
 	<file src="images/lights_0.png"/>
 	<file src="images/lights_1.png"/>

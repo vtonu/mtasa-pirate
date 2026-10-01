@@ -14,16 +14,22 @@ function drawSpeedo()
     dxDrawImage(dialX, dialY, dialSize, dialSize, "images/disc.png", 0, 0, 0, base_color)
     local speed = getElementSpeed(veh, "mph")
     local mph = math.floor(speed)
+    local boost = speed > 160 and isVehicleNitroActivated(veh)
+    if boost then
+        dxDrawImage(dialX, dialY, dialSize, dialSize, "images/boost_arc.png", 0, 0, 0, base_color)
+    end
     dxDrawText(mph, dialX, dialY + 77 * scale, dialX + dialSize, dialY + 125 * scale,
-        tocolor(255, 255, 255, 245), 2.5 * scale, "default", "center", "center")
+        boost and tocolor(181, 234, 255, 245) or tocolor(255, 255, 255, 245),
+        2.5 * scale, "default", "center", "center")
     dxDrawText("MPH", dialX, dialY + 128 * scale, dialX + dialSize, dialY + 145 * scale,
         tocolor(255, 255, 255, 190), 0.85 * scale, "default", "center", "center")
 
     local image = areVehicleLightsOn(veh) and "images/lights_1.png" or "images/lights_0.png"
     dxDrawImage(dialX + 133 * scale, dialY + 244 * scale, 34 * scale, 34 * scale, image, 0, 0, 0, base_color)
 
-    local needleAngle = -135 + math.min(math.max(speed, 0), 160) / 160 * 270
-    dxDrawImage(dialX, dialY, dialSize, dialSize, "images/needle.png", needleAngle, 0, 0, base_color)
+    local needleAngle = -135 + math.min(math.max(speed, 0), 165) / 160 * 270
+    local needleImage = boost and "images/needle_boost.png" or "images/needle.png"
+    dxDrawImage(dialX, dialY, dialSize, dialSize, needleImage, needleAngle, 0, 0, base_color)
 
     local nitroLevel = getVehicleNitroLevel(veh)
     if nitroLevel then
@@ -33,7 +39,7 @@ function drawSpeedo()
             tocolor(255, 255, 255, 190), 0.7 * scale, "default", "center", "center")
         dxDrawRectangle(barX, barY, barWidth, barHeight, tocolor(255, 255, 255, 40))
         dxDrawRectangle(barX, barY, barWidth * math.min(math.max(nitroLevel, 0), 1), barHeight,
-            tocolor(127, 255, 212, 230))
+            boost and tocolor(181, 234, 255, 230) or tocolor(127, 255, 212, 230))
     end
 end
 
