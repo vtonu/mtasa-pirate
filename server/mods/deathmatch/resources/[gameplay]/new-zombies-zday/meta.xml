@@ -1,5 +1,5 @@
 <meta>
-	<info author="Dutchman101" version="1.1" type="script" />
+	<info name="Lifestyle Zombies" author="Lifestyle" version="1.1" type="script" />
 	<oop>true</oop>
 	<script src="zday_s.lua" type="server" />
 	<script src="zday_c.lua" type="client" />

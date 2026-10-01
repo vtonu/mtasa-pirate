@@ -1,3 +1,8 @@
+-- LIFESTYLE ZOMBIES
+-- CUSTOM VERSION BY LIFESTYLE
+-- CODE ASSISTANCE: OPENAI CODEX
+-- BASE RESOURCE CREDIT: DUTCHMAN101
+
 local maxZombies = 8 --Max zombies to chase local player
 local minDistance = 10 -- MINIMUM SPAWN DISTANCE
 local maxDistance = 30 -- MAXIMUM SPAWN DISTANCE

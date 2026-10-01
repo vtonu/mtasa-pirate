@@ -1,3 +1,8 @@
+-- LIFESTYLE ZOMBIES
+-- CUSTOM VERSION BY LIFESTYLE
+-- CODE ASSISTANCE: OPENAI CODEX
+-- BASE RESOURCE CREDIT: DUTCHMAN101
+
 local maxZombies = 220 --Max zombies in TOTAL
 local zombieTargets = {}
 local zombieProgress = {}
