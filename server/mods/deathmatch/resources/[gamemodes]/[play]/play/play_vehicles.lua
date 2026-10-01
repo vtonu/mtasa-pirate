@@ -38,8 +38,9 @@ function createPlayVehicle(vehicleData)
     -- Vehicle Settings
     if modelID == 411 then
         -- Infernus Speed Tuning
-        setVehicleHandling(vehicleElement, "maxVelocity", 285)
-        setVehicleHandling(vehicleElement, "engineAcceleration", 15)
+        setElementData(vehicleElement, "play.infernusSpeedLimit", true)
+        setVehicleHandling(vehicleElement, "maxVelocity", 350)
+        setVehicleHandling(vehicleElement, "engineAcceleration", 18)
         setVehicleHandling(vehicleElement, "dragCoeff", 1.2)
     end
 

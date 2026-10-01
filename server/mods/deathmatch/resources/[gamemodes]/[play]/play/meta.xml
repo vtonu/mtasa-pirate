@@ -16,6 +16,7 @@
 	<script src="play_players.lua" type="server"/>
 	<script src="play_respawn_prompt.lua" type="client"/>
 	<script src="play_vehicles.lua" type="server"/>
+	<script src="play_vehicle_speed_client.lua" type="client"/>
 	<script src="play_pickups.lua" type="server"/>
 	<script src="play_loco_mission.lua" type="server"/>
 	<script src="play.lua" type="server"/>

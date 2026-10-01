@@ -14,7 +14,7 @@ function drawSpeedo()
     dxDrawImage(dialX, dialY, dialSize, dialSize, "images/disc.png", 0, 0, 0, base_color)
     local speed = getElementSpeed(veh, "mph")
     local mph = math.floor(speed)
-    local boost = speed > 160 and isVehicleNitroActivated(veh)
+    local boost = speed >= 160 and isVehicleNitroActivated(veh)
     if boost then
         dxDrawImage(dialX, dialY, dialSize, dialSize, "images/boost_arc.png", 0, 0, 0, base_color)
     end
@@ -27,7 +27,10 @@ function drawSpeedo()
     local image = areVehicleLightsOn(veh) and "images/lights_1.png" or "images/lights_0.png"
     dxDrawImage(dialX + 133 * scale, dialY + 244 * scale, 34 * scale, 34 * scale, image, 0, 0, 0, base_color)
 
-    local needleAngle = -135 + math.min(math.max(speed, 0), 165) / 160 * 270
+    local needleAngle = -135 + math.min(math.max(speed, 0), 160) / 160 * 270
+    if speed > 160 then
+        needleAngle = 135 + math.min(speed - 160, 40) / 40 * 12
+    end
     local needleImage = boost and "images/needle_boost.png" or "images/needle.png"
     dxDrawImage(dialX, dialY, dialSize, dialSize, needleImage, needleAngle, 0, 0, base_color)
 
