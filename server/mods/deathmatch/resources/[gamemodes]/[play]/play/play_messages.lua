@@ -60,14 +60,29 @@ local MESSAGE_DEFINITIONS = {
 -- ==========================================
 
 local playerNotificationTimers = {}
+local SHIP_WELCOME = "[NOTIFICATION] Welcome aboard, Captain!"
 
 local NOTIFICATION_MESSAGES = {"[NOTIFICATION] Aye Captain, you can always come to us!",
-                               "[NOTIFICATION] Welcome aboard, Captain!",
+                               SHIP_WELCOME,
                                "[NOTIFICATION] The crew awaits your orders, Captain!",
                                "[NOTIFICATION] English only in chat.",
                                "[NOTIFICATION] Found a bug? Use /report to let us know.",
                                "[NOTIFICATION] Got a suggestion? Use /report to let us know.",
                                "[NOTIFICATION] Open beta: expect bugs and things to break. Share feedback with /report."}
+
+local function getPlayerNotification(playerElement)
+    local x, y, z = getElementPosition(playerElement)
+    local onShip = getElementInterior(playerElement) == 0 and getElementDimension(playerElement) == 0
+        and x >= 1985 and x <= 2020 and y >= 1505 and y <= 1555 and z >= 12 and z <= 25
+
+    local messages = {}
+    for _, message in ipairs(NOTIFICATION_MESSAGES) do
+        if message ~= SHIP_WELCOME or onShip then
+            messages[#messages + 1] = message
+        end
+    end
+    return messages[math.random(#messages)]
+end
 
 function startPlayerNotifications(playerElement)
     if not playerElement then
@@ -82,13 +97,13 @@ function startPlayerNotifications(playerElement)
     -- First notification after 10 seconds
     playerNotificationTimers[playerElement] = setTimer(function()
         if isElement(playerElement) then
-            local randomMsg = NOTIFICATION_MESSAGES[math.random(#NOTIFICATION_MESSAGES)]
+            local randomMsg = getPlayerNotification(playerElement)
             outputChatBox(randomMsg, playerElement, NOTIFICATION_COLOR[1], NOTIFICATION_COLOR[2], NOTIFICATION_COLOR[3])
 
             -- Set up repeating notification every 2 minutes (120000 ms)
             playerNotificationTimers[playerElement] = setTimer(function()
                 if isElement(playerElement) then
-                    local randomMsg = NOTIFICATION_MESSAGES[math.random(#NOTIFICATION_MESSAGES)]
+                    local randomMsg = getPlayerNotification(playerElement)
                     outputChatBox(randomMsg, playerElement, NOTIFICATION_COLOR[1], NOTIFICATION_COLOR[2],
                         NOTIFICATION_COLOR[3])
                 end
