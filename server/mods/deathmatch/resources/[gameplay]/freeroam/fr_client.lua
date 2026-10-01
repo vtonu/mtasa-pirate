@@ -1955,6 +1955,20 @@ addCommandHandler('ru', removeUpgradeCommand)
 ---------------------------
 -- Toggle lights
 ---------------------------
+local function toggleVehicleLights()
+    if isChatBoxInputActive() or isConsoleActive() or isMTAWindowActive() then
+        return
+    end
+
+    local vehicle = getPedOccupiedVehicle(localPlayer)
+    if not vehicle or getPedOccupiedVehicleSeat(localPlayer) ~= 0 then
+        return
+    end
+
+    server.setVehicleOverrideLights(vehicle, areVehicleLightsOn(vehicle) and 1 or 2)
+end
+bindKey('l', 'down', toggleVehicleLights)
+
 function forceLightsOn()
     local vehicle = getPedOccupiedVehicle(localPlayer)
 

@@ -48,6 +48,7 @@ local function applySettings(vehicle, data)
     if settings.plate then setVehiclePlateText(vehicle, settings.plate) end
     setVehiclePaintjob(vehicle, 3)
     setVehicleColor(vehicle, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    setVehicleHeadLightColor(vehicle, 127, 255, 212)
     for _, upgrade in ipairs(getVehicleUpgrades(vehicle)) do removeVehicleUpgrade(vehicle, upgrade) end
     for _, upgrade in ipairs(numbers(settings.upgrades)) do addVehicleUpgrade(vehicle, upgrade) end
     local sirens = vehicleSirens[settings.id]
