@@ -6,7 +6,9 @@ local function updateSafeZones()
         local resource = getResourceFromName(name)
         if resource and getResourceState(resource) == "running" then
             for _, circle in ipairs(getElementsByType("colshape", getResourceRootElement(resource))) do
-                table.insert(circles, circle)
+                if getElementData(circle, "play.notificationOnly") ~= true then
+                    table.insert(circles, circle)
+                end
             end
         end
     end

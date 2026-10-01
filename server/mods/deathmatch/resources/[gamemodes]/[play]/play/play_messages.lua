@@ -74,6 +74,7 @@ local NOTIFICATION_MESSAGES = {"[NOTIFICATION] Aye Captain, you can always come 
 addEventHandler("onResourceStart", resourceRoot, function()
     local entrance = createColSphere(2025.07141, 1545.09875, 10.82031, 6)
     if not entrance then return end
+    setElementData(entrance, "play.notificationOnly", true, false)
 
     addEventHandler("onColShapeHit", entrance, function(hitElement, matchingDimension)
         if not matchingDimension or getElementInterior(hitElement) ~= 0 then return end
