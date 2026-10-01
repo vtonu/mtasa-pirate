@@ -231,6 +231,7 @@ local PERK_SETTINGS = {
         healthRegen = 5,
         armorRegen = 25,
         gravity = 0.020,
+        drivingGravity = 0.012,
         gravityLabel = "High",
         speedLabel = "Slow",
         walkingStyle = 120 -- OLD FATMAN
@@ -422,7 +423,11 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
 
     playerPerks[player] = active
 
-    setPedGravity(player, perks.gravity or baseGravity)
+    local gravity = perks.gravity or baseGravity
+    if perks.drivingGravity and isPedInVehicle(player) and getPedOccupiedVehicleSeat(player) == 0 then
+        gravity = perks.drivingGravity
+    end
+    setPedGravity(player, gravity)
     setPedFightingStyle(player, fightingStyle)
 
     giveWeapon(player, perks.weapon, package.flowerAmmo, true)
@@ -656,6 +661,20 @@ addEventHandler("weedGarden:uiClosed", resourceRoot, function()
     if isElement(client) then
         previewState[client] = nil
         playerShopState[client] = nil
+    end
+end)
+
+addEventHandler("onPlayerVehicleEnter", root, function(vehicle, seat)
+    local perks = PERK_SETTINGS[getElementData(source, "weed.perk")]
+    if playerPerks[source] and perks and perks.drivingGravity and seat == 0 then
+        setPedGravity(source, perks.drivingGravity)
+    end
+end)
+
+addEventHandler("onPlayerVehicleExit", root, function(vehicle, seat)
+    local perks = PERK_SETTINGS[getElementData(source, "weed.perk")]
+    if playerPerks[source] and perks and perks.drivingGravity and seat == 0 then
+        setPedGravity(source, perks.gravity)
     end
 end)
 
