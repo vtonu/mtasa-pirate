@@ -61,28 +61,47 @@ local MESSAGE_DEFINITIONS = {
 
 local playerNotificationTimers = {}
 local SHIP_WELCOME = "[NOTIFICATION] Welcome aboard, Captain!"
+local shipWelcomeCooldowns = {}
+local SHIP_WELCOME_COOLDOWN_MS = 120000
 
 local NOTIFICATION_MESSAGES = {"[NOTIFICATION] Aye Captain, you can always come to us!",
-                               SHIP_WELCOME,
                                "[NOTIFICATION] The crew awaits your orders, Captain!",
                                "[NOTIFICATION] English only in chat.",
                                "[NOTIFICATION] Found a bug? Use /report to let us know.",
                                "[NOTIFICATION] Got a suggestion? Use /report to let us know.",
                                "[NOTIFICATION] Open beta: expect bugs and things to break. Share feedback with /report."}
 
-local function getPlayerNotification(playerElement)
-    local x, y, z = getElementPosition(playerElement)
-    local onShip = getElementInterior(playerElement) == 0 and getElementDimension(playerElement) == 0
-        and x >= 1985 and x <= 2020 and y >= 1505 and y <= 1555 and z >= 12 and z <= 25
+addEventHandler("onResourceStart", resourceRoot, function()
+    local entrance = createColSphere(2025.07141, 1545.09875, 10.82031, 6)
+    if not entrance then return end
 
-    local messages = {}
-    for _, message in ipairs(NOTIFICATION_MESSAGES) do
-        if message ~= SHIP_WELCOME or onShip then
-            messages[#messages + 1] = message
+    addEventHandler("onColShapeHit", entrance, function(hitElement, matchingDimension)
+        if not matchingDimension or getElementInterior(hitElement) ~= 0 then return end
+
+        local players = {}
+        if getElementType(hitElement) == "player" then
+            players[1] = hitElement
+        elseif getElementType(hitElement) == "vehicle" then
+            for _, player in pairs(getVehicleOccupants(hitElement)) do
+                players[#players + 1] = player
+            end
         end
-    end
-    return messages[math.random(#messages)]
-end
+
+        local now = getTickCount()
+        for _, player in ipairs(players) do
+            if getElementDimension(player) == 0 and getElementInterior(player) == 0
+                and not isPedDead(player)
+                and (not shipWelcomeCooldowns[player] or now >= shipWelcomeCooldowns[player]) then
+                shipWelcomeCooldowns[player] = now + SHIP_WELCOME_COOLDOWN_MS
+                outputChatBox(SHIP_WELCOME, player, NOTIFICATION_COLOR[1], NOTIFICATION_COLOR[2], NOTIFICATION_COLOR[3])
+            end
+        end
+    end)
+end)
+
+addEventHandler("onPlayerQuit", root, function()
+    shipWelcomeCooldowns[source] = nil
+end)
 
 function startPlayerNotifications(playerElement)
     if not playerElement then
@@ -97,13 +116,13 @@ function startPlayerNotifications(playerElement)
     -- First notification after 10 seconds
     playerNotificationTimers[playerElement] = setTimer(function()
         if isElement(playerElement) then
-            local randomMsg = getPlayerNotification(playerElement)
+            local randomMsg = NOTIFICATION_MESSAGES[math.random(#NOTIFICATION_MESSAGES)]
             outputChatBox(randomMsg, playerElement, NOTIFICATION_COLOR[1], NOTIFICATION_COLOR[2], NOTIFICATION_COLOR[3])
 
             -- Set up repeating notification every 2 minutes (120000 ms)
             playerNotificationTimers[playerElement] = setTimer(function()
                 if isElement(playerElement) then
-                    local randomMsg = getPlayerNotification(playerElement)
+                    local randomMsg = NOTIFICATION_MESSAGES[math.random(#NOTIFICATION_MESSAGES)]
                     outputChatBox(randomMsg, playerElement, NOTIFICATION_COLOR[1], NOTIFICATION_COLOR[2],
                         NOTIFICATION_COLOR[3])
                 end
