@@ -5,6 +5,8 @@ local pickupTimers = {}
 local pickupsToSpawn = {}
 
 local RESPAWN_MS = 5000
+local LOCO_RESPAWN_MS = 30000
+local LOCO_AMMO_LIMIT = 1000
 
 -- ==========================================
 -- CREATION
@@ -132,9 +134,18 @@ local function onPickupHit(playerElement)
         -- Loco Skull Pickup
     elseif pickupInfo.type == "loco" then
 
-        giveWeapon(playerElement, 18, 10, true)
+        local ammo = 0
+        if getPedWeapon(playerElement, 8) == 18 then
+            ammo = getPedTotalAmmo(playerElement, 8)
+        end
 
-        playMessage(playerElement, "locoPickup")
+        local grant = math.min(10, math.max(0, LOCO_AMMO_LIMIT - ammo))
+        if grant > 0 then
+            giveWeapon(playerElement, 18, grant, true)
+            playMessage(playerElement, "locoPickup")
+        else
+            playMessage(playerElement, "locoAmmoLimit")
+        end
 
         setElementData(playerElement, "locoMissionActive", true)
 
@@ -144,6 +155,7 @@ local function onPickupHit(playerElement)
     end
 
     local spawnData = pickupInfo.spawnData
+    local respawnMs = pickupInfo.type == "loco" and LOCO_RESPAWN_MS or RESPAWN_MS
 
     destroyPickup(source)
 
@@ -156,7 +168,7 @@ local function onPickupHit(playerElement)
     pickupTimers[spawnData] = setTimer(function()
         createPlayPickup(spawnData)
         pickupTimers[spawnData] = nil
-    end, RESPAWN_MS, 1)
+    end, respawnMs, 1)
 end
 
 addEventHandler("onPickupHit", root, onPickupHit)

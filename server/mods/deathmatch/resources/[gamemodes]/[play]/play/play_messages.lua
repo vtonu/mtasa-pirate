@@ -20,7 +20,11 @@ local MESSAGE_DEFINITIONS = {
         color = JOIN_COLOR
     },
     locoPickup = {
-        text = "Molotovs granted! Head to the ship deck mission marker to spawn a vehicle, then destroy it.",
+        text = "Head to the deck blip. Spawn a vehicle, then destroy it.",
+        color = PLAY_COLOR
+    },
+    locoAmmoLimit = {
+        text = "Molotov limit reached (1,000). Use some first.",
         color = PLAY_COLOR
     },
     locoReward = {
@@ -61,7 +65,9 @@ local NOTIFICATION_MESSAGES = {"[NOTIFICATION] Aye Captain, you can always come 
                                "[NOTIFICATION] Welcome aboard, Captain!",
                                "[NOTIFICATION] The crew awaits your orders, Captain!",
                                "[NOTIFICATION] English only in chat.",
-                               "[NOTIFICATION] Found a bug? Use /report to let us know."}
+                               "[NOTIFICATION] Found a bug? Use /report to let us know.",
+                               "[NOTIFICATION] Got a suggestion? Use /report to let us know.",
+                               "[NOTIFICATION] Open beta: expect bugs and things to break. Share feedback with /report."}
 
 function startPlayerNotifications(playerElement)
     if not playerElement then

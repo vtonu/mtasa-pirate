@@ -31,11 +31,20 @@ local MISSION_TARGET_SPAWNS = {{
     y = 1440.0999755859,
     z = 16.89999961853,
     rotation = 0
-}}
+},
+    {x = 1966.03345, y = 1558.66223, z = 10.42952, rotation = 270},
+    {x = 1955.70142, y = 1556.81750, z = 10.54303, rotation = 270},
+    {x = 1936.82861, y = 1559.64563, z = 10.82031, rotation = 270},
+    {x = 1909.17017, y = 1563.96765, z = 10.82031, rotation = 270},
+    {x = 2019.42017, y = 1494.60742, z = 10.57590, rotation = 0},
+    {x = 1975.62463, y = 1441.14209, z = 10.64909, rotation = 0},
+    {x = 1962.58691, y = 1445.77600, z = 10.64898, rotation = 0},
+    {x = 1943.02319, y = 1468.93982, z = 10.57814, rotation = 0}
+}
 
 -- VEHICLE LIFETIME
 local MISSION_VEHICLE_LIFE_MS = 180000 -- 3 min
-local MISSION_ACCESS_TIMEOUT_MS = 10000 -- 10 sec
+local MISSION_ACCESS_TIMEOUT_MS = 30000 -- 30 sec
 
 -- VEHICLE MODELS THAT SPAWN
 local MISSION_VEHICLE_MODELS = {579, -- Huntley
@@ -50,6 +59,20 @@ local missionTimers = {}
 local missionState = {}
 local missionCooldown = {}
 local accessTimers = {}
+local deckBlips = {}
+local blinkingBlips = {}
+local blinkVisible = true
+
+local function removeDeckBlip(player)
+    local blip = deckBlips[player]
+    if blip then
+        blinkingBlips[blip] = nil
+        if isElement(blip) then
+            destroyElement(blip)
+        end
+        deckBlips[player] = nil
+    end
+end
 
 local spawnMissionVehicle
 
@@ -59,6 +82,14 @@ function refreshLocoMissionAccess(player)
     end
 
     setElementData(player, "locoMissionActive", true)
+
+    if not (missionState[player] and missionState[player].active) and not isElement(deckBlips[player]) then
+        local blip = createBlip(MARKER_X, MARKER_Y, MARKER_Z, 0, 2, 127, 255, 212, 255, 0, 16383, player)
+        if blip then
+            deckBlips[player] = blip
+            blinkingBlips[blip] = true
+        end
+    end
 
     if accessTimers[player] and isTimer(accessTimers[player]) then
         killTimer(accessTimers[player])
@@ -70,6 +101,7 @@ function refreshLocoMissionAccess(player)
         end
 
         accessTimers[p] = nil
+        removeDeckBlip(p)
     end, MISSION_ACCESS_TIMEOUT_MS, 1, player)
 
     return true
@@ -81,6 +113,7 @@ local function clearLocoMissionAccess(player)
     end
 
     setElementData(player, "locoMissionActive", false)
+    removeDeckBlip(player)
 
     if accessTimers[player] and isTimer(accessTimers[player]) then
         killTimer(accessTimers[player])
@@ -112,6 +145,7 @@ local function destroyMissionVehicle(player)
     activeMissionVehicles[player] = nil
 
     if isElement(blip) then
+        blinkingBlips[blip] = nil
         destroyElement(blip)
     end
 
@@ -225,6 +259,10 @@ spawnMissionVehicle = function(player)
         vehicle = vehicle,
         blip = blip
     }
+    if blip then
+        blinkingBlips[blip] = true
+    end
+    removeDeckBlip(player)
 
     local state = missionState[player]
     state.targetCount = (state.targetCount or 0) + 1
@@ -268,6 +306,17 @@ end)
 
 -- START
 addEventHandler("onResourceStart", resourceRoot, function()
+
+    setTimer(function()
+        blinkVisible = not blinkVisible
+        for blip in pairs(blinkingBlips) do
+            if isElement(blip) then
+                setBlipVisibleDistance(blip, blinkVisible and 16383 or 0)
+            else
+                blinkingBlips[blip] = nil
+            end
+        end
+    end, 600, 0)
 
     createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 127, 255, 212, 150)
 
