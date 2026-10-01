@@ -12,18 +12,29 @@ function drawSpeedo()
     local dialY = screenH - dialSize - 145 * scale
 
     dxDrawImage(dialX, dialY, dialSize, dialSize, "images/disc.png", 0, 0, 0, base_color)
-    local speed = getElementSpeed(veh, "km/h")
-    local kmh = math.floor(speed)
-    dxDrawText(kmh, dialX, dialY + 77 * scale, dialX + dialSize, dialY + 125 * scale,
+    local speed = getElementSpeed(veh, "mph")
+    local mph = math.floor(speed)
+    dxDrawText(mph, dialX, dialY + 77 * scale, dialX + dialSize, dialY + 125 * scale,
         tocolor(255, 255, 255, 245), 2.5 * scale, "default", "center", "center")
-    dxDrawText("KM/H", dialX, dialY + 128 * scale, dialX + dialSize, dialY + 145 * scale,
+    dxDrawText("MPH", dialX, dialY + 128 * scale, dialX + dialSize, dialY + 145 * scale,
         tocolor(255, 255, 255, 190), 0.85 * scale, "default", "center", "center")
 
     local image = areVehicleLightsOn(veh) and "images/lights_1.png" or "images/lights_0.png"
     dxDrawImage(dialX + 133 * scale, dialY + 244 * scale, 34 * scale, 34 * scale, image, 0, 0, 0, base_color)
 
-    local needleAngle = -135 + math.min(math.max(speed, 0), 240) / 240 * 270
+    local needleAngle = -135 + math.min(math.max(speed, 0), 160) / 160 * 270
     dxDrawImage(dialX, dialY, dialSize, dialSize, "images/needle.png", needleAngle, 0, 0, base_color)
+
+    local nitroLevel = getVehicleNitroLevel(veh)
+    if nitroLevel then
+        local barX, barY = dialX + 100 * scale, dialY + 207 * scale
+        local barWidth, barHeight = 100 * scale, 4 * scale
+        dxDrawText("NITRO", barX, barY - 17 * scale, barX + barWidth, barY - 3 * scale,
+            tocolor(255, 255, 255, 190), 0.7 * scale, "default", "center", "center")
+        dxDrawRectangle(barX, barY, barWidth, barHeight, tocolor(255, 255, 255, 40))
+        dxDrawRectangle(barX, barY, barWidth * math.min(math.max(nitroLevel, 0), 1), barHeight,
+            tocolor(127, 255, 212, 230))
+    end
 end
 
 function getElementSpeed(theElement, unit)
