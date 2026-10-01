@@ -227,6 +227,7 @@ local HARVEST_SPRAYCAN_AMMO_LIMIT = 3000
 local PERK_SETTINGS = {
     indica = {
         weapon = FLOWER_WEAPON,
+        fightingStyle = 15,
         healthRegen = 5,
         armorRegen = 25,
         gravity = 0.020,
@@ -236,6 +237,7 @@ local PERK_SETTINGS = {
     },
     sativa = {
         weapon = FLOWER_WEAPON,
+        fightingStyle = 5,
         healthRegen = 10,
         armorRegen = 10,
         gravityLabel = "Normal",
@@ -244,6 +246,7 @@ local PERK_SETTINGS = {
     },
     hybrid = {
         weapon = FLOWER_WEAPON,
+        fightingStyle = 7,
         healthRegen = 25,
         armorRegen = 5,
         gravity = 0.003, -- LOW GRAVITY JUMP
@@ -361,6 +364,7 @@ local function restorePlayerPerks(player)
 
         setPedGravity(player, active.baseGravity or 0.008)
         setPedWalkingStyle(player, active.baseWalkingStyle or 0)
+        setPedFightingStyle(player, active.baseFightingStyle or 4)
 
         setElementData(player, "weed.perk", false)
         setElementData(player, "weed.strain", false)
@@ -399,17 +403,27 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
     end
 
     local baseWalkingStyle = previous and previous.baseWalkingStyle or getPedWalkingStyle(player)
+    local baseFightingStyle = previous and previous.baseFightingStyle or getPedFightingStyle(player)
+    local fightingStyleRoll = math.random(1, 100)
+    local fightingStyle = perks.fightingStyle
+    if fightingStyleRoll <= 5 then
+        fightingStyle = 6
+    elseif fightingStyleRoll <= 10 then
+        fightingStyle = 16
+    end
 
     local active = {
         duration = package.duration,
         weapon = perks.weapon,
         baseGravity = baseGravity,
-        baseWalkingStyle = baseWalkingStyle
+        baseWalkingStyle = baseWalkingStyle,
+        baseFightingStyle = baseFightingStyle
     }
 
     playerPerks[player] = active
 
     setPedGravity(player, perks.gravity or baseGravity)
+    setPedFightingStyle(player, fightingStyle)
 
     giveWeapon(player, perks.weapon, package.flowerAmmo, true)
 
