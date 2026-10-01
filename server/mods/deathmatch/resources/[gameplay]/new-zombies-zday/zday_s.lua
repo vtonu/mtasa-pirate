@@ -6,6 +6,7 @@
 local maxZombies = 220 --Max zombies in TOTAL
 local zombieTargets = {}
 local zombieProgress = {}
+local zombieDeathGrace = {}
 local knifeAttempts = {}
 local setZombieTarget
 
@@ -84,6 +85,7 @@ function destroyZombie(zombie)
 	
 	if not zombie then return end
 	zombieProgress[zombie] = nil
+	zombieDeathGrace[zombie] = nil
 	
 	if isElement(zombie) then
 		destroyElement(zombie)
@@ -100,6 +102,7 @@ local function cleanZombieChasers()
 		if not isElement(zombie) then
 			zombieTargets[zombie] = nil
 			zombieProgress[zombie] = nil
+			zombieDeathGrace[zombie] = nil
 		elseif not isPedDead(zombie) then
 			local x,y,z = getElementPosition(zombie)
 			local nearest,nearestDistance
@@ -115,7 +118,9 @@ local function cleanZombieChasers()
 				end
 			end
 			local progress = zombieProgress[zombie]
-			if not nearestDistance or nearestDistance > 120 then
+			if now < (zombieDeathGrace[zombie] or 0) then
+				zombieProgress[zombie] = nil
+			elseif not nearestDistance or nearestDistance > 120 then
 				destroyZombie(zombie)
 			elseif not isZombieWeather() or isElementFrozen(zombie) then
 				zombieProgress[zombie] = nil
@@ -220,6 +225,17 @@ end
 
 addEventHandler("onResourceStart",resourceRoot,initScript)
 addEventHandler("onPlayerQuit",root,function() knifeAttempts[source] = nil end)
+-- KEEP LIVING CHASERS FOR THIRTY SECONDS AFTER THEIR TARGET DIES
+addEventHandler("onPlayerWasted",root,function()
+	local expires = getTickCount() + 30000
+	for zombie,target in pairs(zombieTargets) do
+		if target == source and isElement(zombie) and not isPedDead(zombie) then
+			zombieDeathGrace[zombie] = expires
+			zombieProgress[zombie] = nil
+		end
+	end
+end)
+
 addEventHandler("onPlayerSpawn",root,function() knifeAttempts[source] = nil end)
 
 -- UPDATE TARGETS WHEN PASSIVE MODE CHANGES
