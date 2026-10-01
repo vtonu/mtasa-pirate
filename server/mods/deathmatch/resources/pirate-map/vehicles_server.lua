@@ -46,11 +46,8 @@ local function applySettings(vehicle, data)
     setVehicleLocked(vehicle, settings.locked == "true")
     setElementHealth(vehicle, tonumber(settings.health) or 1000)
     if settings.plate then setVehiclePlateText(vehicle, settings.plate) end
-    if settings.paintjob then setVehiclePaintjob(vehicle, tonumber(settings.paintjob) or 3) end
-    local colors = numbers(settings.color)
-    if #colors == 3 or #colors == 4 or #colors == 6 or #colors == 9 or #colors == 12 then
-        setVehicleColor(vehicle, unpack(colors))
-    end
+    setVehiclePaintjob(vehicle, 3)
+    setVehicleColor(vehicle, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     for _, upgrade in ipairs(getVehicleUpgrades(vehicle)) do removeVehicleUpgrade(vehicle, upgrade) end
     for _, upgrade in ipairs(numbers(settings.upgrades)) do addVehicleUpgrade(vehicle, upgrade) end
     local sirens = vehicleSirens[settings.id]
