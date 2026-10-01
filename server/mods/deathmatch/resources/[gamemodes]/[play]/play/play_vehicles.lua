@@ -5,6 +5,12 @@ local vehicleTimers = {}
 local playerVehicles = {}
 local vehicleOwners = {}
 local vehiclesToSpawn = {}
+local sportsCarModels = {
+    [402] = true, [411] = true, [415] = true, [429] = true, [451] = true,
+    [477] = true, [480] = true, [502] = true, [506] = true, [541] = true,
+    [555] = true, [558] = true, [559] = true, [560] = true, [562] = true,
+    [565] = true, [587] = true, [602] = true, [603] = true
+}
 
 -- ==========================================
 -- VEHICLE CREATION
@@ -36,12 +42,13 @@ function createPlayVehicle(vehicleData)
     end
 
     -- Vehicle Settings
-    if modelID == 411 then
-        -- Infernus Speed Tuning
-        setElementData(vehicleElement, "play.infernusSpeedLimit", true)
+    if sportsCarModels[modelID] then
+        -- SPORTS CAR SPEED TUNING
+        setElementData(vehicleElement, "play.sportsCarSpeedLimit", true)
         setVehicleHandling(vehicleElement, "maxVelocity", 350)
         setVehicleHandling(vehicleElement, "engineAcceleration", 18)
         setVehicleHandling(vehicleElement, "dragCoeff", 1.2)
+        addVehicleUpgrade(vehicleElement, 1010)
     end
 
     if modelID == 411 or modelID == 457 then

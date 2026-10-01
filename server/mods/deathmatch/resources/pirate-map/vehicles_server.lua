@@ -3,6 +3,13 @@ local vehicles = {}
 local stopping = false
 local idleDelay = 60000
 local wreckDelay = 5000
+local respawnDelay = 10000
+local sportsCarModels = {
+    [402] = true, [411] = true, [415] = true, [429] = true, [451] = true,
+    [477] = true, [480] = true, [502] = true, [506] = true, [541] = true,
+    [555] = true, [558] = true, [559] = true, [560] = true, [562] = true,
+    [565] = true, [587] = true, [602] = true, [603] = true
+}
 -- LIGHT POINTS: X, Y, Z, RED, GREEN, BLUE, ALPHA, MINIMUM ALPHA
 local vehicleSirens = {
     vehicleStafford = {
@@ -51,6 +58,13 @@ local function applySettings(vehicle, data)
     setVehicleHeadLightColor(vehicle, 127, 255, 212)
     for _, upgrade in ipairs(getVehicleUpgrades(vehicle)) do removeVehicleUpgrade(vehicle, upgrade) end
     for _, upgrade in ipairs(numbers(settings.upgrades)) do addVehicleUpgrade(vehicle, upgrade) end
+    if sportsCarModels[getElementModel(vehicle)] then
+        setElementData(vehicle, "play.sportsCarSpeedLimit", true)
+        setVehicleHandling(vehicle, "maxVelocity", 350)
+        setVehicleHandling(vehicle, "engineAcceleration", 18)
+        setVehicleHandling(vehicle, "dragCoeff", 1.2)
+        addVehicleUpgrade(vehicle, 1010)
+    end
     local sirens = vehicleSirens[settings.id]
     if sirens then
         removeVehicleSirens(vehicle)
@@ -140,6 +154,7 @@ addEventHandler("onVehicleExplode", resourceRoot, function()
     local data = vehicles[source]
     if not data then return end
     clearTimer(data)
+    data.exploded = true
     data.timer = setTimer(function()
         if isElement(data.vehicle) then destroyElement(data.vehicle) end
     end, wreckDelay, 1)
@@ -152,7 +167,9 @@ addEventHandler("onElementDestroy", resourceRoot, function()
     vehicles[source] = nil
     clearTimer(data)
     data.vehicle = nil
-    if not stopping then data.timer = setTimer(restoreVehicle, 50, 1, data) end
+    local delay = data.exploded and respawnDelay or 50
+    data.exploded = nil
+    if not stopping then data.timer = setTimer(restoreVehicle, delay, 1, data) end
 end)
 
 addEventHandler("onResourceStop", resourceRoot, function()

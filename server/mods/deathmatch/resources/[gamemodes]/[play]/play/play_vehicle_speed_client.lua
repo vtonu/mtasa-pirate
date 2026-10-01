@@ -1,4 +1,4 @@
--- INFERNUS SPEED LIMITS
+-- SPORTS CAR SPEED LIMITS
 local mphFactor = 111.84681456
 local lastVehicle = nil
 local lastSpeed = 0
@@ -6,8 +6,8 @@ local lastSpeed = 0
 addEventHandler("onClientPreRender", root, function(timeSlice)
     local vehicle = getPedOccupiedVehicle(localPlayer)
     if not vehicle or getPedOccupiedVehicleSeat(localPlayer) ~= 0
-        or getElementModel(vehicle) ~= 411
-        or not getElementData(vehicle, "play.infernusSpeedLimit") then
+        or not (getElementData(vehicle, "play.sportsCarSpeedLimit")
+            or getElementData(vehicle, "play.infernusSpeedLimit")) then
         lastVehicle = nil
         lastSpeed = 0
         return
