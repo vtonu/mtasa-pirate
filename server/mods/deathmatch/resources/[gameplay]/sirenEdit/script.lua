@@ -67,6 +67,15 @@ guiComboBoxSetSelected ( sirens, 0 )
 guiComboBoxSetSelected ( numberOfSirens, 0 )
 
 function sirenCmd()
+	if guiGetVisible(myWindow) then
+		guiSetVisible(myWindow, false)
+		showCursor(false)
+		return
+	end
+	triggerServerEvent("sirens_requestEditor", resourceRoot)
+end
+
+local function openSirenEditor()
 	local veh = getPedOccupiedVehicle ( localPlayer )
 	if ( guiGetVisible ( myWindow ) == false ) then
 		if ( veh ~= false ) then
@@ -84,6 +93,8 @@ function sirenCmd()
 		showCursor ( false )
 	end
 end
+addEvent("sirens_openEditor", true)
+addEventHandler("sirens_openEditor", resourceRoot, openSirenEditor)
 addCommandHandler("sirens", sirenCmd)
 
 bindKey (DEF_KeyBind, "down", function ( ) sirenCmd ( ) end)

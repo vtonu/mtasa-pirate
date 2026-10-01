@@ -3,9 +3,22 @@ local vehicles = {}
 local stopping = false
 local idleDelay = 60000
 local wreckDelay = 5000
-local vipSirens = {
-    vehicleStafford = 0.85,
-    vehicleHuntley = 1.05,
+-- LIGHT POINTS: X, Y, Z, RED, GREEN, BLUE, ALPHA, MINIMUM ALPHA
+local vehicleSirens = {
+    vehicleStafford = {
+        type = 2, allDirections = true, checkVisible = true, randomise = false, silent = false,
+        points = {
+            { -0.3, 0, 0.85, 255, 0, 0, 255, 128 },
+            { 0.3, 0, 0.85, 0, 0, 255, 255, 128 },
+        },
+    },
+    vehicleHuntley = {
+        type = 2, allDirections = true, checkVisible = true, randomise = false, silent = false,
+        points = {
+            { -0.3, 0, 1.05, 255, 0, 0, 255, 128 },
+            { 0.3, 0, 1.05, 0, 0, 255, 255, 128 },
+        },
+    },
 }
 
 local function numbers(value)
@@ -40,14 +53,18 @@ local function applySettings(vehicle, data)
     end
     for _, upgrade in ipairs(getVehicleUpgrades(vehicle)) do removeVehicleUpgrade(vehicle, upgrade) end
     for _, upgrade in ipairs(numbers(settings.upgrades)) do addVehicleUpgrade(vehicle, upgrade) end
-    local sirenHeight = vipSirens[settings.id]
-    if sirenHeight then
+    local sirens = vehicleSirens[settings.id]
+    if sirens then
         removeVehicleSirens(vehicle)
-        addVehicleSirens(vehicle, 2, 2, true, true, false, false)
-        setVehicleSirens(vehicle, 1, -0.3, 0, sirenHeight, 255, 0, 0, 255, 128)
-        setVehicleSirens(vehicle, 2, 0.3, 0, sirenHeight, 0, 0, 255, 255, 128)
+        addVehicleSirens(vehicle, #sirens.points, sirens.type, sirens.allDirections,
+            sirens.checkVisible, sirens.randomise, sirens.silent)
+        for point, values in ipairs(sirens.points) do
+            setVehicleSirens(vehicle, point, unpack(values))
+        end
+        setVehicleSirensOn(vehicle, getVehicleOccupant(vehicle, 0) ~= false)
+    else
+        setVehicleSirensOn(vehicle, settings.sirens == "true")
     end
-    setVehicleSirensOn(vehicle, settings.sirens == "true")
     setVehicleLandingGearDown(vehicle, settings.landingGearDown == "true")
 end
 
@@ -100,15 +117,22 @@ addEventHandler("onResourceStart", resourceRoot, function()
     xmlUnloadFile(map)
 end)
 
-addEventHandler("onVehicleEnter", resourceRoot, function()
-    local data = vehicles[source]
-    if data then clearTimer(data) end
-end)
-
-addEventHandler("onVehicleExit", resourceRoot, function()
+addEventHandler("onVehicleEnter", resourceRoot, function(player, seat)
     local data = vehicles[source]
     if not data then return end
     clearTimer(data)
+    if seat == 0 and vehicleSirens[data.settings.id] then
+        setVehicleSirensOn(source, true)
+    end
+end)
+
+addEventHandler("onVehicleExit", resourceRoot, function(player, seat)
+    local data = vehicles[source]
+    if not data then return end
+    clearTimer(data)
+    if seat == 0 and vehicleSirens[data.settings.id] then
+        setVehicleSirensOn(source, false)
+    end
     if not next(getVehicleOccupants(source)) then
         data.timer = setTimer(restoreVehicle, idleDelay, 1, data)
     end
