@@ -133,8 +133,22 @@ function onPlayerJoin()
     initPlayerStats(source)
     playMessage(source, "joinWelcome")
     playMessage(source, "joinHelp")
+    local screenResource = getResourceFromName("spawn-screen")
+    if screenResource and getResourceState(screenResource) == "running" then
+        if call(screenResource, "showSpawnScreen", source, playerSpawn.x, playerSpawn.y, playerSpawn.z) then
+            return
+        end
+    end
+
     playSpawnPlayer(source, playerSpawn)
 end
+
+addEvent("spawnScreenSpawn", false)
+addEventHandler("spawnScreenSpawn", root, function()
+    if getElementType(source) == "player" then
+        playSpawnPlayer(source, playerSpawn)
+    end
+end)
 
 function onPlayerWasted(totalAmmo, killerElement)
     onPlayerStatsWasted(killerElement)
