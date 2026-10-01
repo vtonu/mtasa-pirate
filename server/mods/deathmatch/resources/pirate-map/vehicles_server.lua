@@ -6,17 +6,17 @@ local wreckDelay = 5000
 -- LIGHT POINTS: X, Y, Z, RED, GREEN, BLUE, ALPHA, MINIMUM ALPHA
 local vehicleSirens = {
     vehicleStafford = {
-        type = 2, allDirections = true, checkVisible = true, randomise = false, silent = false,
+        type = 2, allDirections = true, checkVisible = false, randomise = true, silent = true,
         points = {
-            { -0.3, 0, 0.85, 255, 0, 0, 255, 128 },
-            { 0.3, 0, 0.85, 0, 0, 255, 255, 128 },
+            { -0.3, -1.5, 0.8, 255, 0, 0, 255, 255 },
+            { 0.3, -1.5, 0.8, 0, 0, 255, 255, 255 },
         },
     },
     vehicleHuntley = {
-        type = 2, allDirections = true, checkVisible = true, randomise = false, silent = false,
+        type = 3, allDirections = true, checkVisible = false, randomise = true, silent = false,
         points = {
-            { -0.3, 0, 1.05, 255, 0, 0, 255, 128 },
-            { 0.3, 0, 1.05, 0, 0, 255, 255, 128 },
+            { -0.3, 0, 1.05, 255, 0, 0, 255, 255 },
+            { 0.3, 0, 1.05, 0, 0, 255, 255, 255 },
         },
     },
 }
