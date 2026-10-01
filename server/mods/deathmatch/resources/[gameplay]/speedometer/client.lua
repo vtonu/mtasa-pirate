@@ -1,27 +1,29 @@
 local screenW, screenH = guiGetScreenSize()
-local base_color = tocolor(255, 255, 255, 235)
+local base_color = tocolor(255, 255, 255, 255)
 local baseW, baseH = 1920, 1080
 
 function drawSpeedo()
     local veh = getPedOccupiedVehicle(localPlayer)
     if not veh then return end
 
-    local velx, vely, velz = getElementVelocity(veh)
-    local speed = (velx ^ 2 + vely ^ 2 + velz ^ 2) ^ (0.5)
-
     local scale = math.min(screenW / baseW, screenH / baseH)
-    local dialX, dialY = screenW * 0.82, screenH * 0.65
     local dialSize = 300 * scale
+    local dialX = screenW - dialSize - 45 * scale
+    local dialY = screenH - dialSize - 145 * scale
 
     dxDrawImage(dialX, dialY, dialSize, dialSize, "images/disc.png", 0, 0, 0, base_color)
-    local kmh = math.floor(getElementSpeed(veh, "km/h"))
-    dxDrawText(kmh, dialX, dialY + 65 * scale, dialX + dialSize, dialY + 173 * scale,
-        tocolor(255, 255, 255), 1.5 * scale, "default-bold", "center", "center")
+    local speed = getElementSpeed(veh, "km/h")
+    local kmh = math.floor(speed)
+    dxDrawText(kmh, dialX, dialY + 77 * scale, dialX + dialSize, dialY + 125 * scale,
+        tocolor(255, 255, 255, 245), 2.5 * scale, "default", "center", "center")
+    dxDrawText("KM/H", dialX, dialY + 128 * scale, dialX + dialSize, dialY + 145 * scale,
+        tocolor(255, 255, 255, 190), 0.85 * scale, "default", "center", "center")
 
     local image = areVehicleLightsOn(veh) and "images/lights_1.png" or "images/lights_0.png"
-    dxDrawImage(dialX + 130 * scale, dialY + 216 * scale, 40 * scale, 40 * scale, image, 0, 0, 0, base_color)
+    dxDrawImage(dialX + 133 * scale, dialY + 244 * scale, 34 * scale, 34 * scale, image, 0, 0, 0, base_color)
 
-    dxDrawImage(dialX, dialY, dialSize, dialSize, "images/needle.png", -145-(1.5-(speed/1.5) * 305), 0, 0, base_color)
+    local needleAngle = -135 + math.min(math.max(speed, 0), 240) / 240 * 270
+    dxDrawImage(dialX, dialY, dialSize, dialSize, "images/needle.png", needleAngle, 0, 0, base_color)
 end
 
 function getElementSpeed(theElement, unit)
