@@ -281,7 +281,7 @@ local WEAPONS = {
         description = "A powerful handgun with high damage and substantial recoil."
     },
     tec_9 = {
-        name = "Tec-9",
+        name = "Dual Tec-9",
         symbol = "T9",
         category = "ballistics",
         price = 15000,
@@ -300,7 +300,7 @@ local WEAPONS = {
         description = "A compact automatic weapon favoring mobility and volume of fire."
     },
     micro_smg = {
-        name = "Double UZI",
+        name = "Dual Uzi",
         symbol = "UZI",
         category = "ballistics",
         price = 15000,
@@ -579,7 +579,7 @@ local WEAPONS = {
         name = "Minigun",
         symbol = "MIN",
         category = "heavy",
-        price = 90000,
+        price = 100000,
         weapon = 38,
         ammo = 500,
         winningRate = 99,
@@ -682,8 +682,8 @@ local WEAPONS = {
         name = "Jetpack",
         symbol = "JET",
         category = "heavy",
-        price = 100000,
-        available = false,
+        price = 1000000,
+        available = true,
         winningRate = 99,
         stealth = 8,
         ballistics = 0,
@@ -799,7 +799,9 @@ local function purchaseWeapon(player, weaponId)
 
     local granted = false
 
-    if weapon.weapon == 0 then
+    if weaponId == "jetpack" then
+        granted = not isPedWearingJetpack(player) and setPedWearingJetpack(player, true) == true
+    elseif weapon.weapon == 0 then
         setPedWeaponSlot(player, 0)
         granted = true
     else
