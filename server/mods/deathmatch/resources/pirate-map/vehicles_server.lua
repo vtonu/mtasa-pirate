@@ -4,6 +4,11 @@ local stopping = false
 local idleDelay = 60000
 local wreckDelay = 5000
 local respawnDelay = 10000
+local paintjobCounts = {
+    [483] = 1, [534] = 3, [535] = 3, [536] = 3, [558] = 3,
+    [559] = 3, [560] = 3, [561] = 3, [562] = 3, [565] = 3,
+    [567] = 3, [575] = 2, [576] = 3
+}
 local sportsCarModels = {
     [402] = true, [411] = true, [415] = true, [429] = true, [451] = true,
     [477] = true, [480] = true, [502] = true, [506] = true, [541] = true,
@@ -53,7 +58,8 @@ local function applySettings(vehicle, data)
     setVehicleLocked(vehicle, settings.locked == "true")
     setElementHealth(vehicle, tonumber(settings.health) or 1000)
     if settings.plate then setVehiclePlateText(vehicle, settings.plate) end
-    setVehiclePaintjob(vehicle, 3)
+    local paintjobCount = paintjobCounts[getElementModel(vehicle)]
+    setVehiclePaintjob(vehicle, paintjobCount and math.random(0, paintjobCount - 1) or 3)
     setVehicleColor(vehicle, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     setVehicleHeadLightColor(vehicle, 127, 255, 212)
     for _, upgrade in ipairs(getVehicleUpgrades(vehicle)) do removeVehicleUpgrade(vehicle, upgrade) end
