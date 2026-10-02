@@ -127,6 +127,29 @@ addEventHandler("onResourceStart", resourceRoot, function()
         end
     end
     xmlUnloadFile(map)
+
+    -- CATCH EMPTY MAP CARS THAT MISSED THE EXIT TIMER
+    setTimer(function()
+        for vehicle, data in pairs(vehicles) do
+            if isElement(vehicle) and not data.exploded then
+                if next(getVehicleOccupants(vehicle)) then
+                    clearTimer(data)
+                elseif not (data.timer and isTimer(data.timer)) then
+                    local settings = data.settings
+                    local x, y, z = getElementPosition(vehicle)
+                    local distance = getDistanceBetweenPoints3D(x, y, z,
+                        tonumber(settings.posX), tonumber(settings.posY), tonumber(settings.posZ))
+                    local moved = distance > 3
+                        or getElementInterior(vehicle) ~= (tonumber(settings.interior) or 0)
+                        or getElementDimension(vehicle) ~= (tonumber(settings.dimension) or 0)
+                    local damaged = getElementHealth(vehicle) < (tonumber(settings.health) or 1000)
+                    if moved or damaged then
+                        data.timer = setTimer(restoreVehicle, idleDelay, 1, data)
+                    end
+                end
+            end
+        end
+    end, 10000, 0)
 end)
 
 addEventHandler("onVehicleEnter", resourceRoot, function(player, seat)
