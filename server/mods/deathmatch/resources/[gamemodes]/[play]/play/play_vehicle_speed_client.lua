@@ -25,9 +25,12 @@ addEventHandler("onClientPreRender", root, function(timeSlice)
     if isVehicleNitroActivated(vehicle) then
         -- SLOW BOOST GAIN ABOVE 160 MPH
         limit = math.min(200, math.max(160, lastSpeed + 0.6 * seconds))
+    elseif lastSpeed > 160 then
+        -- EASE BACK TO 160 MPH AFTER BOOST
+        limit = math.max(160, lastSpeed - 8 * seconds)
     else
-        -- EASE BACK TO 140 MPH AFTER BOOST
-        limit = math.max(140, lastSpeed - 8 * seconds)
+        -- SLOW SPEED GAIN FROM 140 TO 160 MPH
+        limit = math.min(160, math.max(140, lastSpeed + seconds))
     end
 
     if isVehicleOnGround(vehicle) and speed > limit and speed > 0 then
