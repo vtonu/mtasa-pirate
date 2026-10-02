@@ -6,6 +6,11 @@ local color = get("*blip_color")
 local blipRange = get("*blip_range")
 local colors = {}
 local blips = {}
+local perkBlipIcons = {
+	Hybrid = 62,
+	Sativa = 60,
+	Indica = 59
+}
 local playerHasDefaultNametagColor
 local outputDebugStringTypePlayerColors = "playerColors"
 local outputDebugStringTypeUseTeamsAndNametagIsFalse = "useTeamsAndNametagsIsFalse"
@@ -47,6 +52,7 @@ end
 
 function createPlayerBlip(player)
 	if (not player or not isElement(player) or player.type ~= "player") then return false end
+	local icon = perkBlipIcons[getElementData(player, "weed.perk")] or 58
 	local r, g, b
 	if (useTeams and player.team) then
 		r, g, b = player.team:getColor()
@@ -63,9 +69,10 @@ function createPlayerBlip(player)
 		r, g, b = color[1], color[2], color[3]
 	end
 	if isElement(blips[player]) then
+		setBlipIcon(blips[player], icon)
 		blips[player]:setColor(r, g, b, blipAlpha)
 	else
-		blips[player] = Blip.createAttachedTo(player, 0, blipSize, r, g, b, blipAlpha, 0, blipRange)
+		blips[player] = Blip.createAttachedTo(player, icon, blipSize, r, g, b, blipAlpha, 0, blipRange)
 		clearElementVisibleTo(blips[player])
 
 		for _, v in pairs(getElementsByType("player")) do
@@ -117,6 +124,12 @@ addEventHandler("onPlayerSpawn", root, function()
 end)
 addEventHandler("onPlayerTeamChange", root, function()
 	createPlayerBlip(source)
+end)
+
+addEventHandler("onElementDataChange", root, function(dataName)
+	if dataName == "weed.perk" and getElementType(source) == "player" and isElement(blips[source]) then
+		createPlayerBlip(source)
+	end
 end)
 
 addEventHandler("onSettingChange", root,
