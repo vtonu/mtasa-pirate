@@ -9,6 +9,10 @@ local paintjobCounts = {
     [559] = 3, [560] = 3, [561] = 3, [562] = 3, [565] = 3,
     [567] = 3, [575] = 2, [576] = 3
 }
+local fixedPaintjobs = {
+    [534] = 0, [536] = 2, [575] = 1, [483] = 0
+}
+local remingtonUpgrades = {1086, 1124, 1180, 1179, 1010, 1100, 1127}
 local sportsCarModels = {
     [402] = true, [411] = true, [415] = true, [429] = true, [451] = true,
     [477] = true, [480] = true, [502] = true, [506] = true, [541] = true,
@@ -58,12 +62,25 @@ local function applySettings(vehicle, data)
     setVehicleLocked(vehicle, settings.locked == "true")
     setElementHealth(vehicle, tonumber(settings.health) or 1000)
     if settings.plate then setVehiclePlateText(vehicle, settings.plate) end
-    local paintjobCount = paintjobCounts[getElementModel(vehicle)]
-    setVehiclePaintjob(vehicle, paintjobCount and math.random(0, paintjobCount - 1) or 3)
-    setVehicleColor(vehicle, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    local model = getElementModel(vehicle)
+    local paintjobCount = paintjobCounts[model]
+    local paintjob = fixedPaintjobs[model]
+    if paintjob == nil then
+        paintjob = paintjobCount and math.random(0, paintjobCount - 1) or 3
+    end
+    setVehiclePaintjob(vehicle, paintjob)
+    if paintjobCount then
+        setVehicleColor(vehicle, 219, 7, 47, 219, 7, 47, 219, 7, 47, 219, 7, 47)
+    else
+        setVehicleColor(vehicle, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    end
     setVehicleHeadLightColor(vehicle, 127, 255, 212)
     for _, upgrade in ipairs(getVehicleUpgrades(vehicle)) do removeVehicleUpgrade(vehicle, upgrade) end
     for _, upgrade in ipairs(numbers(settings.upgrades)) do addVehicleUpgrade(vehicle, upgrade) end
+    if model == 534 then
+        for _, upgrade in ipairs(remingtonUpgrades) do addVehicleUpgrade(vehicle, upgrade) end
+    end
+    if paintjobCount then addVehicleUpgrade(vehicle, 1080) end
     if sportsCarModels[getElementModel(vehicle)] then
         setElementData(vehicle, "play.sportsCarSpeedLimit", true)
         setVehicleHandling(vehicle, "maxVelocity", 350)
