@@ -130,6 +130,7 @@ end
 -- PLAYER EVENTS
 -- ==========================================
 function onPlayerJoin()
+    givePlayerMoney(source, 100000)
     initPlayerStats(source)
     playMessage(source, "joinWelcome")
     playMessage(source, "joinHelp")

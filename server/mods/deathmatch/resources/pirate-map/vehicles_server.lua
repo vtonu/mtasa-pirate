@@ -4,6 +4,8 @@ local stopping = false
 local idleDelay = 60000
 local wreckDelay = 5000
 local respawnDelay = 10000
+local spawnDistance = 30
+local aircraftSpawnDistance = 50
 local paintjobCounts = {
     [483] = 1, [534] = 3, [535] = 3, [536] = 3, [558] = 3,
     [559] = 3, [560] = 3, [561] = 3, [562] = 3, [565] = 3,
@@ -106,6 +108,12 @@ end
 local function restoreVehicle(data)
     clearTimer(data)
     local vehicle = data.vehicle
+    if not data.isSpawn then
+        if isElement(vehicle) and not next(getVehicleOccupants(vehicle)) then
+            destroyElement(vehicle)
+        end
+        return
+    end
     if isElement(vehicle) then
         if next(getVehicleOccupants(vehicle)) then return end
         respawnVehicle(vehicle)
@@ -118,6 +126,7 @@ local function restoreVehicle(data)
             return
         end
         setElementParent(vehicle, resourceRoot)
+        toggleVehicleRespawn(vehicle, false)
         if s.id then setElementID(vehicle, s.id) end
         data.vehicle = vehicle
         vehicles[vehicle] = data
@@ -140,7 +149,7 @@ addEventHandler("onResourceStart", resourceRoot, function()
             local settings = xmlNodeGetAttributes(node)
             local vehicle = settings.id and mapVehicles[settings.id]
             if isElement(vehicle) then
-                local data = { settings = settings, vehicle = vehicle }
+                local data = { settings = settings, vehicle = vehicle, isSpawn = true }
                 vehicles[vehicle] = data
                 toggleVehicleRespawn(vehicle, false)
                 setVehicleRespawnPosition(vehicle, tonumber(settings.posX), tonumber(settings.posY), tonumber(settings.posZ))
@@ -182,6 +191,25 @@ addEventHandler("onVehicleEnter", resourceRoot, function(player, seat)
     if seat == 0 and vehicleSirens[data.settings.id] then
         setVehicleSirensOn(source, true)
     end
+    if not data.isSpawn or (data.spawnTimer and isTimer(data.spawnTimer)) then return end
+    local vehicle = source
+    local vehicleType = getVehicleType(vehicle)
+    local distanceRequired = (vehicleType == "Plane" or vehicleType == "Helicopter")
+        and aircraftSpawnDistance or spawnDistance
+    -- KEEP THE TAKEN VEHICLE AND REFILL ITS SPAWN SPOT
+    data.spawnTimer = setTimer(function()
+        if not isElement(vehicle) or data.exploded then return end
+        local settings = data.settings
+        local x, y, z = getElementPosition(vehicle)
+        local distance = getDistanceBetweenPoints3D(x, y, z,
+            tonumber(settings.posX), tonumber(settings.posY), tonumber(settings.posZ))
+        if distance <= distanceRequired then return end
+        killTimer(data.spawnTimer)
+        data.spawnTimer = nil
+        data.isSpawn = false
+        setElementID(vehicle, "")
+        restoreVehicle({ settings = settings, isSpawn = true })
+    end, 3000, 0)
 end)
 
 addEventHandler("onVehicleExit", resourceRoot, function(player, seat)
@@ -212,13 +240,18 @@ addEventHandler("onElementDestroy", resourceRoot, function()
     if not data then return end
     vehicles[source] = nil
     clearTimer(data)
+    if data.spawnTimer and isTimer(data.spawnTimer) then killTimer(data.spawnTimer) end
+    data.spawnTimer = nil
     data.vehicle = nil
     local delay = data.exploded and respawnDelay or 50
     data.exploded = nil
-    if not stopping then data.timer = setTimer(restoreVehicle, delay, 1, data) end
+    if not stopping and data.isSpawn then data.timer = setTimer(restoreVehicle, delay, 1, data) end
 end)
 
 addEventHandler("onResourceStop", resourceRoot, function()
     stopping = true
-    for _, data in pairs(vehicles) do clearTimer(data) end
+    for _, data in pairs(vehicles) do
+        clearTimer(data)
+        if data.spawnTimer and isTimer(data.spawnTimer) then killTimer(data.spawnTimer) end
+    end
 end)

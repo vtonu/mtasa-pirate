@@ -5,6 +5,8 @@ local vehicleTimers = {}
 local playerVehicles = {}
 local vehicleOwners = {}
 local vehiclesToSpawn = {}
+local spawnDistance = 30
+local aircraftSpawnDistance = 50
 local sportsCarModels = {
     [402] = true, [411] = true, [415] = true, [429] = true, [451] = true,
     [477] = true, [480] = true, [502] = true, [506] = true, [541] = true,
@@ -152,6 +154,9 @@ function onVehicleEnter(playerElement)
 
     local _, spawnX, spawnY, spawnZ = unpack(vehicleData)
     local vehicleElement = source
+    local vehicleType = getVehicleType(vehicleElement)
+    local distanceRequired = (vehicleType == "Plane" or vehicleType == "Helicopter")
+        and aircraftSpawnDistance or spawnDistance
 
     -- Wait Until The Vehicle Leaves The Spawn Pad
     local checkTimer
@@ -170,7 +175,7 @@ function onVehicleEnter(playerElement)
 
         local distance = getDistanceBetweenPoints3D(spawnX, spawnY, spawnZ, currentX, currentY, currentZ)
 
-        if distance > 6 then
+        if distance > distanceRequired then
             createPlayVehicle(vehicleData)
 
             if isTimer(checkTimer) then
