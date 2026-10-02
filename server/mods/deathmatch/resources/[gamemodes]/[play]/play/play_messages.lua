@@ -69,7 +69,7 @@ local NOTIFICATION_MESSAGES = {"[NOTIFICATION] Aye Captain, you can always come 
                                "[NOTIFICATION] English only in chat.",
                                "[NOTIFICATION] Found a bug? Use /report to let us know.",
                                "[NOTIFICATION] Got a suggestion? Use /report to let us know.",
-                               "[NOTIFICATION] Open beta: expect bugs and things to break. Share feedback with /report."}
+                               "[NOTIFICATION] Open beta: expect bugs. Use /report for feedback."}
 
 addEventHandler("onResourceStart", resourceRoot, function()
     local entrance = createColSphere(2025.07141, 1545.09875, 10.82031, 6)
