@@ -1,4 +1,9 @@
 local nametagconfig = NametagConfig
+local perkColors = {
+    indica = {184, 140, 255},
+    sativa = {255, 230, 109},
+    hybrid = {0, 255, 157}
+}
 
 local screenW, screenH = guiGetScreenSize()
 
@@ -43,8 +48,16 @@ local function renderNameTags()
                     dxDrawRectangle(sx - halfWidth, sy, nametagconfig.width, 6, tocolor(0, 0, 0, 150))
 
                     -- Health Bar
+                    local fullColor = perkColors[getElementData(player, "weed.perk")]
+                        or nametagconfig.colors.healthFull
+                    local lowColor = nametagconfig.colors.healthLow
+                    local healthFraction = math.max(0, math.min(health / 100, 1))
                     dxDrawRectangle(sx - halfWidth, sy, barWidth, 6,
-                        tocolor(255 - (health * 2.55), health * 2.55, 0, 200))
+                        tocolor(
+                            lowColor[1] + (fullColor[1] - lowColor[1]) * healthFraction,
+                            lowColor[2] + (fullColor[2] - lowColor[2]) * healthFraction,
+                            lowColor[3] + (fullColor[3] - lowColor[3]) * healthFraction,
+                            200))
                 end
             end
         end
