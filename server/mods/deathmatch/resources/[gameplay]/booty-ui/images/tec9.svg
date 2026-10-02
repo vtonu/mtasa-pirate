@@ -1,5 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150">
-  <defs><linearGradient id="metal" x2="0" y2="1"><stop stop-color="#899b98"/><stop offset=".5" stop-color="#485855"/><stop offset="1" stop-color="#27332f"/></linearGradient></defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 175">
+  <defs><linearGradient id="metal" x2="0" y2="1"><stop stop-color="#899b98"/><stop offset=".5" stop-color="#485855"/><stop offset="1" stop-color="#27332f"/></linearGradient>
+  <g id="tec9">
   <g stroke="#b0c1bc" stroke-width="2" stroke-linejoin="round">
     <path d="M47 40h10v18H47zM57 36h86v27H57zM143 39h57v21h-57zM200 44h20v12h-20z" fill="url(#metal)"/>
     <path d="M65 63h30l-13 61H56l10-46-7-6z" fill="#3c4c46"/>
@@ -9,4 +10,7 @@
     <path d="M69 83h16M67 91h16M65 99h16M63 107h16M61 115h16M123 74l3 53" fill="none" stroke="#a0b1a8"/>
   </g>
   <g fill="#17201c"><circle cx="154" cy="45" r="3"/><circle cx="168" cy="45" r="3"/><circle cx="182" cy="45" r="3"/><circle cx="154" cy="55" r="3"/><circle cx="168" cy="55" r="3"/><circle cx="182" cy="55" r="3"/></g>
+  </g></defs>
+  <use href="#tec9" transform="translate(46 -10) scale(.88)" opacity=".55"/>
+  <use href="#tec9" transform="translate(3 19)"/>
 </svg>
