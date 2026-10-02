@@ -59,8 +59,10 @@ local function applySettings(vehicle, data)
     setElementInterior(vehicle, tonumber(settings.interior) or 0)
     setElementDimension(vehicle, tonumber(settings.dimension) or 0)
     setElementAlpha(vehicle, tonumber(settings.alpha) or 255)
-    setElementCollisionsEnabled(vehicle, settings.collisions ~= "false")
-    setElementFrozen(vehicle, settings.frozen == "true")
+    data.used = false
+    setElementCollisionsEnabled(vehicle, false)
+    setElementFrozen(vehicle, true)
+    setVehicleDamageProof(vehicle, true)
     setVehicleLocked(vehicle, settings.locked == "true")
     setElementHealth(vehicle, tonumber(settings.health) or 1000)
     if settings.plate then setVehiclePlateText(vehicle, settings.plate) end
@@ -71,7 +73,10 @@ local function applySettings(vehicle, data)
         paintjob = paintjobCount and math.random(0, paintjobCount - 1) or 3
     end
     setVehiclePaintjob(vehicle, paintjob)
-    if paintjobCount then
+    local vehicleType = getVehicleType(vehicle)
+    if vehicleType == "Plane" or vehicleType == "Helicopter" then
+        setVehicleColor(vehicle, 3, 0, 0, 217, 5, 60, 0, 0, 0, 0, 0, 0)
+    elseif paintjobCount then
         setVehicleColor(vehicle, 219, 7, 47, 219, 7, 47, 219, 7, 47, 219, 7, 47)
     else
         setVehicleColor(vehicle, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -82,7 +87,19 @@ local function applySettings(vehicle, data)
     if model == 534 then
         for _, upgrade in ipairs(remingtonUpgrades) do addVehicleUpgrade(vehicle, upgrade) end
     end
-    if paintjobCount then addVehicleUpgrade(vehicle, 1080) end
+    if paintjobCount then
+        addVehicleUpgrade(vehicle, 1080)
+    elseif model ~= 411 and vehicleType == "Automobile" then
+        local x, y = tonumber(settings.posX), tonumber(settings.posY)
+        if x >= 2095 and x <= 2190 and y >= 1380 and y <= 1425 then
+            for _, upgrade in ipairs(getVehicleCompatibleUpgrades(vehicle, 12)) do
+                if upgrade == 1085 then
+                    addVehicleUpgrade(vehicle, 1085)
+                    break
+                end
+            end
+        end
+    end
     if sportsCarModels[getElementModel(vehicle)] then
         setElementData(vehicle, "play.sportsCarSpeedLimit", true)
         setVehicleHandling(vehicle, "maxVelocity", 350)
@@ -188,6 +205,12 @@ addEventHandler("onVehicleEnter", resourceRoot, function(player, seat)
     local data = vehicles[source]
     if not data then return end
     clearTimer(data)
+    if not data.used then
+        data.used = true
+        setElementCollisionsEnabled(source, true)
+        setElementFrozen(source, false)
+        setVehicleDamageProof(source, false)
+    end
     if seat == 0 and vehicleSirens[data.settings.id] then
         setVehicleSirensOn(source, true)
     end

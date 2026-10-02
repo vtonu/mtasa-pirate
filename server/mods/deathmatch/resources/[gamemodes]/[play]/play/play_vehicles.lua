@@ -37,9 +37,13 @@ function createPlayVehicle(vehicleData)
 
     setVehicleDamageProof(vehicleElement, true)
     setElementFrozen(vehicleElement, true)
+    setElementCollisionsEnabled(vehicleElement, false)
 
     -- Vehicle Color (Aquamarine)
-    if modelID == 411 or modelID == 539 or modelID == 457 or modelID == 476 then
+    local vehicleType = getVehicleType(vehicleElement)
+    if vehicleType == "Plane" or vehicleType == "Helicopter" then
+        setVehicleColor(vehicleElement, 3, 0, 0, 217, 5, 60, 0, 0, 0, 0, 0, 0)
+    elseif modelID == 411 or modelID == 539 or modelID == 457 then
         setVehicleColor(vehicleElement, 127, 255, 212, 127, 255, 212, 127, 255, 212, 127, 255, 212)
     end
 
@@ -149,6 +153,7 @@ function onVehicleEnter(playerElement)
 
     setVehicleDamageProof(source, false)
     setElementFrozen(source, false)
+    setElementCollisionsEnabled(source, true)
 
     assignVehicleToPlayer(playerElement, source)
 
