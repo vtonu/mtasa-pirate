@@ -198,7 +198,10 @@ local function trackMe()
 		local variant = tonumber(getElementData(zombie, "zday.variant")) or 0
 		local zombieTarget = data and data.target
 		if not data or zombieTarget == nil then requestZombieTargets() end
-		if isZombieWeather() and isElement(zombieTarget) and not isPassive(zombieTarget) and not isPedDead(zombieTarget) and not isPedDead(zombie) then
+		if isZombieWeather() and isElement(zombieTarget) and not isPassive(zombieTarget)
+			and getElementInterior(zombieTarget) == 0 and getElementInterior(zombie) == 0
+			and getElementDimension(zombieTarget) == getElementDimension(zombie)
+			and not isPedDead(zombieTarget) and not isPedDead(zombie) then
 			if data.paused then
 				resetZombieChase(zombie,data)
 				data.paused = nil
@@ -396,7 +399,8 @@ end
 
 local function spawnZombie()
 
-	if not isZombieWeather() or isPedDead(localPlayer) or getLocalZombieCount() >= maxZombies then
+	if not isZombieWeather() or isPedDead(localPlayer) or getElementInterior(localPlayer) ~= 0
+		or getLocalZombieCount() >= maxZombies then
 		setTimer(spawnZombie,math.random(minInterval,maxInterval),1)
 		return
 	end

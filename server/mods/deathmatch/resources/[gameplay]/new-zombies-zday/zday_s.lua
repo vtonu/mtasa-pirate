@@ -12,6 +12,7 @@ local setZombieTarget
 
 local function targetDistance(zombie,player)
 	if not isElement(player) or isPedDead(player) or getElementData(player,"freeroam.passive") == true then return math.huge end
+	if getElementInterior(player) ~= 0 or getElementInterior(zombie) ~= 0 then return math.huge end
 	if getElementDimension(player) ~= getElementDimension(zombie) or getElementInterior(player) ~= getElementInterior(zombie) then return math.huge end
 	local x,y,z = getElementPosition(zombie)
 	local px,py,pz = getElementPosition(player)
@@ -103,6 +104,8 @@ local function cleanZombieChasers()
 			zombieTargets[zombie] = nil
 			zombieProgress[zombie] = nil
 			zombieDeathGrace[zombie] = nil
+		elseif getElementInterior(zombie) ~= 0 then
+			destroyZombie(zombie)
 		elseif not isPedDead(zombie) then
 			local x,y,z = getElementPosition(zombie)
 			local nearest,nearestDistance
@@ -164,6 +167,7 @@ local function spawnZombie(s,zx,zy,zz,r)
 	if #getElementsByType("ped",resourceRoot) >= maxZombies then return end
 	if client ~= source then return end
 	if not isZombieWeather() or isPedDead(client) then return end
+	if getElementInterior(client) ~= 0 then return end
 	
 	local zombie = Ped(s,zx,zy,zz,r,true)
 	if not isElement(zombie) then return end

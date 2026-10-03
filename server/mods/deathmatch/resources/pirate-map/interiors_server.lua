@@ -1,4 +1,46 @@
 local rooms = {
+    ammuOld = {
+        entrances = {"markerAmmuOld", "markerAmmuOld2", "markerAmmuOld3"},
+        exitID = "ammuOldExitMarker", interior = 6, dimension = 12020,
+        x = 297.446, y = -109.968, z = 1001.516, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        blip = "markerAmmuOld", blipIcon = 6
+    },
+    ammuLS = {
+        entrances = {"ammuNationLSOG"},
+        exitID = "ammuLSExitMarker", interior = 6, dimension = 12021,
+        x = 297.446, y = -109.968, z = 1001.516, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        blip = "ammuNationLSOG", blipIcon = 6
+    },
+    ammuSouthLS = {
+        entrances = {"ammuNationSouthLS"},
+        exitID = "ammuSouthLSExitMarker", interior = 1, dimension = 12022,
+        x = 289.787, y = -35.719, z = 1003.516, spawnX = 289.787, spawnY = -33.219, rotation = 0,
+        blip = "ammuNationSouthLS", blipIcon = 6
+    },
+    ammuSF = {
+        entrances = {"ammuNationSF"},
+        exitID = "ammuSFExitMarker", interior = 6, dimension = 12023,
+        x = 297.446, y = -109.968, z = 1001.516, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        blip = "ammuNationSF", blipIcon = 6
+    },
+    ammuTR = {
+        entrances = {"ammuNationTR"},
+        exitID = "ammuTRExitMarker", interior = 1, dimension = 12024,
+        x = 289.787, y = -35.719, z = 1003.516, spawnX = 289.787, spawnY = -33.219, rotation = 0,
+        blip = "ammuNationTR", blipIcon = 6
+    },
+    ammuBC = {
+        entrances = {"ammuNationBC"},
+        exitID = "ammuBCExitMarker", interior = 7, dimension = 12025,
+        x = 315.385, y = -142.242, z = 999.601, spawnX = 315.385, spawnY = -139.742, rotation = 0,
+        blip = "ammuNationBC", blipIcon = 6
+    },
+    ammuEastBC = {
+        entrances = {"ammuNationEastBC"},
+        exitID = "ammuEastBCExitMarker", interior = 6, dimension = 12026,
+        x = 317.238, y = -168.052, z = 999.593, spawnX = 317.238, spawnY = -165.552, rotation = 0,
+        blip = "ammuNationEastBC", blipIcon = 6
+    },
     royal = {
         entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"},
         exitID = "royalCasinoExitMarker", interior = 12, dimension = 12012,

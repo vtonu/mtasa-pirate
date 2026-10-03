@@ -1,4 +1,11 @@
 local rooms = {
+    {id = "ammuOld", entrances = {"markerAmmuOld", "markerAmmuOld2", "markerAmmuOld3"}, exitID = "ammuOldExitMarker"},
+    {id = "ammuLS", entrances = {"ammuNationLSOG"}, exitID = "ammuLSExitMarker"},
+    {id = "ammuSouthLS", entrances = {"ammuNationSouthLS"}, exitID = "ammuSouthLSExitMarker"},
+    {id = "ammuSF", entrances = {"ammuNationSF"}, exitID = "ammuSFExitMarker"},
+    {id = "ammuTR", entrances = {"ammuNationTR"}, exitID = "ammuTRExitMarker"},
+    {id = "ammuBC", entrances = {"ammuNationBC"}, exitID = "ammuBCExitMarker"},
+    {id = "ammuEastBC", entrances = {"ammuNationEastBC"}, exitID = "ammuEastBCExitMarker"},
     {id = "royal", entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"}, exitID = "royalCasinoExitMarker"},
     {id = "highRoller", entrances = {"theHighRollerMarker"}, exitID = "highRollerExitMarker"},
     {id = "highRollerLounge", entrances = {"markerHighRollerLounge"}, exitID = "highRollerLoungeExitMarker"},
