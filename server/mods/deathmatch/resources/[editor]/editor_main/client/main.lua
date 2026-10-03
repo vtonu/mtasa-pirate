@@ -43,8 +43,18 @@ local g_mouseOver = true
 local DISTANCE_DECIMAL_PLACES = 3
 local INFO_COLOR = -3618561
 local INFO_SCALE,INFO_FONT = 1,"default"
-local START_X, START_Y, START_Z = 2483, -1666, 21
-local START_LOOKX, START_LOOKY, START_LOOKZ = 2483, -1566, 21
+local START_X, START_Y, START_Z = 1955.56812, 1567.76343, 35.48182
+local START_LOOKX, START_LOOKY, START_LOOKZ = 2005, 1535, 20
+
+addEvent("editor:setPirateCamera", true)
+addEventHandler("editor:setPirateCamera", resourceRoot, function()
+    if g_suspended then return end
+    dropElement()
+    setWorkingInterior(0)
+    setMode(CAMERA_MODE)
+    freecam.setFreecamDisabled()
+    freecam.setFreecamEnabled(START_X, START_Y, START_Z, START_LOOKX, START_LOOKY, START_LOOKZ)
+end)
 
 local g_dragPosition = { }
 local g_dragElement
@@ -307,6 +317,8 @@ function startEditor()
 	createCrosshair()
 	setCameraMatrix(START_X, START_Y, START_Z,START_LOOKX, START_LOOKY, START_LOOKZ)
 	setMode(CAMERA_MODE)
+	freecam.setFreecamDisabled()
+	freecam.setFreecamEnabled(START_X, START_Y, START_Z, START_LOOKX, START_LOOKY, START_LOOKZ)
 
 
 	fadeCamera(true, 2)

@@ -302,13 +302,22 @@ function getFreecamVelocity()
 end
 
 -- params: x, y, z  sets camera's position (optional)
-function setFreecamEnabled (x, y, z)
+function setFreecamEnabled (x, y, z, lookX, lookY, lookZ)
 	if isFreecamEnabled() then
 		return false
 	end
 
 	if (x and y and z) then
-	    setCameraMatrix ( x, y, z, nil, nil, nil, 0, options.fov )
+	    if type(lookX) == "number" and type(lookY) == "number" and type(lookZ) == "number" then
+            local dx, dy, dz = lookX - x, lookY - y, lookZ - z
+            rotX = math.atan2(dx, dy)
+            rotY = math.atan2(dz, math.sqrt(dx * dx + dy * dy))
+            speed, strafespeed = 0, 0
+            velocityX, velocityY, velocityZ = 0, 0, 0
+            setCameraMatrix(x, y, z, lookX, lookY, lookZ, 0, options.fov)
+        else
+	        setCameraMatrix ( x, y, z, nil, nil, nil, 0, options.fov )
+        end
 	end
 	lastFrameTick = false
 	addEventHandler("onClientRender", root, freecamFrame)

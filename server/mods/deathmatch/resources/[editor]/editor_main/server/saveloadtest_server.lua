@@ -193,6 +193,10 @@ function handleOpenResource()
 		lastTestGamemodeName = nil
 
 		triggerEvent("onMapOpened", mapContainer, openingResource)
+        if openingResourceName == "pirate-map" then
+            local cameraPlayer = isElement(openingSource) and openingSource or root
+            triggerClientEvent(cameraPlayer, "editor:setPirateCamera", resourceRoot)
+        end
 		flattenTreeRuns = 0
 		triggerClientEvent(root, "saveLoadProgressBar", root, true)
 
