@@ -542,7 +542,8 @@
     <vehicle id="vehicle (S.W.A.T.) (1)" sirens="false" landingGearDown="false" locked="false" plate="YRDNJF5" paintjob="3" dimension="0" interior="0" health="1000" alpha="255" model="601" collisions="false" frozen="true" color="245,245,245,245,245,245,0,0,0,0,0,0" posX="279.60001" posY="2024" posZ="17.6" rotX="0" rotY="0" rotZ="270" scale="1"></vehicle>
     <marker id="theHighRollerMarker" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="1932.4" posY="1345.4" posZ="11.4" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="markerHighRollerLounge" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="1953.4004" posY="1342.9004" posZ="16.4" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
-    <marker id="markerCamelEntrance" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="2236.3999" posY="1285.7" posZ="11.7" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="markerCamelEntrance" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="2237.8" posY="1285.7" posZ="11.7" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="markerAutoBahn" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="2200.8" posY="1394.5" posZ="11.7" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="mainCasinoSpawn" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="2196.2" posY="1677.2" posZ="12.9" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="markerCovealot" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="2184.3999" posY="1114.5" posZ="13.5" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
 </map>
