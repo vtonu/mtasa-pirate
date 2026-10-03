@@ -38,7 +38,7 @@ local MESSAGE_DEFINITIONS = {
         color = PLAY_COLOR
     },
     locoRequired = {
-        text = "TIMER HAS EXPIRED. LOCO SKULL REQUIRED TO START.",
+        text = "LOCO SKULL REQUIRED TO START.",
         color = PLAY_COLOR
     },
     locoTargetSpawned = {
