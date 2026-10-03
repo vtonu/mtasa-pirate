@@ -1,11 +1,25 @@
-local CASINO_INTERIOR = 12
-local CASINO_DIMENSION = 12012
-local EXIT_X, EXIT_Y, EXIT_Z = 1133.25, -15.26, 1000.68
-local entranceIDs = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"}
+local rooms = {
+    royal = {
+        entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"},
+        exitID = "royalCasinoExitMarker", interior = 12, dimension = 12012,
+        x = 1133.25, y = -15.26, z = 1000.68, spawnX = 1133.25, spawnY = -12.76, rotation = 0,
+        blip = "royalCasinoMarker"
+    },
+    highRoller = {
+        entrances = {"theHighRollerMarker"},
+        exitID = "highRollerExitMarker", interior = 1, dimension = 12013,
+        x = 2233.94, y = 1714.58, z = 1012.39, spawnX = 2233.94, spawnY = 1711.5, rotation = 180,
+        blip = "theHighRollerMarker"
+    },
+    highRollerLounge = {
+        entrances = {"markerHighRollerLounge"},
+        exitID = "highRollerLoungeExitMarker", interior = 17, dimension = 12014,
+        x = 493.39, y = -24.92, z = 1000.68, spawnX = 493.39, spawnY = -21.92, rotation = 0
+    }
+}
 local returnPoints = {}
 local doorCooldowns = {}
 local doorTransitions = {}
-local exitMarker
 
 local function isNearDoor(player, marker)
     if not isElement(marker) or isPedDead(player) or getPedOccupiedVehicle(player) then return false end
@@ -37,12 +51,12 @@ local function clearDoorTransition(player)
 end
 
 -- MOVE WHILE BLACK, THEN GIVE THE ROOM TIME TO LOAD
-local function useDoor(player, marker, destination, entering)
+local function useDoor(player, marker, destination, entering, roomID)
     local x, y, z = getElementPosition(player)
     local _, _, rotation = getElementRotation(player)
     local origin = {
         x = x, y = y, z = z, rotation = rotation,
-        interior = getElementInterior(player), dimension = getElementDimension(player)
+        interior = getElementInterior(player), dimension = getElementDimension(player), roomID = roomID
     }
     local transition = {timers = {}, frozen = isElementFrozen(player)}
     doorTransitions[player] = transition
@@ -73,32 +87,38 @@ local function useDoor(player, marker, destination, entering)
     end, 250, 1)
 end
 
--- SHARED CASINO ROOM AND EXIT
+-- SHARED ROOMS AND EXITS
 addEventHandler("onResourceStart", resourceRoot, function()
-    local entrance = getElementByID("royalCasinoMarker")
-    if isElement(entrance) then
-        local blip = createBlipAttachedTo(entrance, 44, 2, 255, 255, 255, 255, 0, 65535)
-        if isElement(blip) then
-            setElementInterior(blip, getElementInterior(entrance))
-            setElementDimension(blip, getElementDimension(entrance))
+    for _, room in pairs(rooms) do
+        local entrance = room.blip and getElementByID(room.blip)
+        if isElement(entrance) then
+            local blip = createBlipAttachedTo(entrance, 44, 2, 255, 255, 255, 255, 0, 65535)
+            if isElement(blip) then
+                setElementInterior(blip, getElementInterior(entrance))
+                setElementDimension(blip, getElementDimension(entrance))
+            end
+        end
+        room.exitMarker = createMarker(room.x, room.y, room.z + 0.6, "arrow", 1, 4, 210, 193, 255)
+        if isElement(room.exitMarker) then
+            setElementID(room.exitMarker, room.exitID)
+            setElementInterior(room.exitMarker, room.interior)
+            setElementDimension(room.exitMarker, room.dimension)
         end
     end
-    exitMarker = createMarker(EXIT_X, EXIT_Y, EXIT_Z + 0.6, "arrow", 1, 4, 210, 193, 255)
-    if not isElement(exitMarker) then return end
-    setElementID(exitMarker, "royalCasinoExitMarker")
-    setElementInterior(exitMarker, CASINO_INTERIOR)
-    setElementDimension(exitMarker, CASINO_DIMENSION)
 end)
 
 -- CHECK BOTH DOORS ON THE SERVER
 addEvent("royalCasino:useDoor", true)
-addEventHandler("royalCasino:useDoor", resourceRoot, function(door)
+addEventHandler("royalCasino:useDoor", resourceRoot, function(door, roomID)
     if not client or source ~= resourceRoot then return end
+    roomID = roomID or "royal"
+    local room = rooms[roomID]
+    if not room or not isElement(room.exitMarker) then return end
     local now = getTickCount()
     if doorTransitions[client] or now < (doorCooldowns[client] or 0) then return end
     if door == "enter" then
         local entrance
-        for _, id in ipairs(entranceIDs) do
+        for _, id in ipairs(room.entrances) do
             local marker = getElementByID(id)
             if isNearDoor(client, marker) then
                 entrance = marker
@@ -107,14 +127,14 @@ addEventHandler("royalCasino:useDoor", resourceRoot, function(door)
         end
         if not entrance then return end
         useDoor(client, entrance, {
-            x = EXIT_X, y = EXIT_Y + 2.5, z = EXIT_Z, rotation = 0,
-            interior = CASINO_INTERIOR, dimension = CASINO_DIMENSION
-        }, true)
+            x = room.spawnX, y = room.spawnY, z = room.z, rotation = room.rotation,
+            interior = room.interior, dimension = room.dimension
+        }, true, roomID)
     elseif door == "exit" then
         local point = returnPoints[client]
-        if not isNearDoor(client, exitMarker) then return end
-        if not point then return end
-        useDoor(client, exitMarker, point, false)
+        if not isNearDoor(client, room.exitMarker) then return end
+        if not point or point.roomID ~= roomID then return end
+        useDoor(client, room.exitMarker, point, false, roomID)
     end
 end)
 
@@ -138,9 +158,10 @@ end)
 addEventHandler("onResourceStop", resourceRoot, function()
     for player in pairs(doorTransitions) do clearDoorTransition(player) end
     for player, point in pairs(returnPoints) do
+        local room = rooms[point.roomID]
         if isElement(player) and not isPedDead(player)
-            and getElementInterior(player) == CASINO_INTERIOR
-            and getElementDimension(player) == CASINO_DIMENSION then
+            and room and getElementInterior(player) == room.interior
+            and getElementDimension(player) == room.dimension then
             returnPlayer(player, point)
         end
     end

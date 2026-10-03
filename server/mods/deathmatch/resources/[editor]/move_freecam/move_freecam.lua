@@ -110,6 +110,7 @@ local function zoomWithMouseWheel(key, keyState)
 end
 
 local function onClientRender_freecam()
+	if guiGetInputEnabled() or isMTAWindowActive() or getCommandState("mod_rotate") or getCommandState("mod_rotate_local") then return end
 	if (selectedElement and isElement(selectedElement)) then
 
 	    camX, camY, camZ, targetX, targetY, targetZ = getCameraMatrix()

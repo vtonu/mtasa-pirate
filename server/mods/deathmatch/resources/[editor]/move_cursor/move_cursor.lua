@@ -53,6 +53,7 @@ local function getCoordsWithBoundingBox(origX, origY, origZ)
 end
 
 local function processCursorMove(absoluteX, absoluteY)
+	if guiGetInputEnabled() or isMTAWindowActive() or getCommandState("mod_rotate") or getCommandState("mod_rotate_local") then return end
 	if not absoluteX or not absoluteY then
 		local relX, relY = getCursorPosition()
 		-- brief cursor fix

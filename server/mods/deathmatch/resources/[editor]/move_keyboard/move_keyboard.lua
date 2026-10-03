@@ -86,7 +86,7 @@ function getCommandTogSTATE(cmd)
 end
 
 local function onClientRender_keyboard()
-	if isMTAWindowActive() then
+	if guiGetInputEnabled() or isMTAWindowActive() then
 		return
 	end
 	if (selectedElement) then

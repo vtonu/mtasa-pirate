@@ -84,6 +84,12 @@ end
 
 --Turn all controls into commands
 addEvent ( "onControlPressed" )
+local rotationControls = {
+	mod_rotate = true, mod_rotate_local = true, mod_fast_speed = true, mod_slow_speed = true,
+	element_move_right = true, element_move_left = true, element_move_forward = true,
+	element_move_backward = true, element_move_upwards = true, element_move_downwards = true,
+	quick_rotate_increase = true, quick_rotate_decrease = true, reset_rotation = true,
+}
 local function parseControls ( command, keyState )
 	--Get the key name
 	local key = ""
@@ -93,6 +99,20 @@ local function parseControls ( command, keyState )
 		end
 	end
 	keyState = keyState or "down"
+	if keyState == "down" then
+		if guiGetInputEnabled() or isMTAWindowActive() then return end
+		local rotating = getSelectedElement() and (getKeyState(cc.mod_rotate) or getKeyState(cc.mod_rotate_local))
+		if rotating then
+			if key == "mod_rotate" or key == "mod_rotate_local" then
+				for _, control in ipairs(defaultControls) do
+					if not rotationControls[control.name] then
+						triggerEvent("onControlPressed", localPlayer, control.name, "up")
+					end
+				end
+			end
+			if not rotationControls[key] then return end
+		end
+	end
 	triggerEvent ( "onControlPressed", localPlayer, key, keyState )
 end
 

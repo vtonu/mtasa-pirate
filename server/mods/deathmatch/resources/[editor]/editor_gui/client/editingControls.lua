@@ -914,6 +914,15 @@ eC.coord3d = {
 		local infoY = setmetatable( {value=info.value[2], x=info.x + 14, height = heightThird, width = info.width - 14, y=info.y + 25 }, info_mt )
 		local labelZ = guiCreateLabel ( info.x, info.y + 48, 10, 23, "z:", false, info.parent )
 		local infoZ = setmetatable( {value=info.value[3], x=info.x + 14, height = heightThird, width = info.width - 14, y=info.y + 48 }, info_mt )
+		if info.horizontal then
+			local cellWidth = info.width / 3
+			for index, pair in ipairs({{labelX, infoX}, {labelY, infoY}, {labelZ, infoZ}}) do
+				local x = info.x + (index - 1) * cellWidth
+				guiSetPosition(pair[1], x, info.y + 3, false)
+				pair[2].x, pair[2].y = x + 14, info.y
+				pair[2].width, pair[2].height = cellWidth - 20, info.height
+			end
+		end
 		self.children.numberX = eC.number:create( infoX )
 		self.children.numberY = eC.number:create( infoY )
 		self.children.numberZ = eC.number:create( infoZ )
@@ -1574,23 +1583,22 @@ eC.vehicleupgrades = {
 
 		self.selectedUpgrades = {}
 
-		local gridlistHeight = info.height - info.buttonHeight
+		local gridlistHeight = info.height
+		self.columns = info.columns or 1
 
 		self.GUI.list = guiCreateGridList(info.x, info.y, info.width, gridlistHeight, info.relative, info.parent)
 		guiGridListSetSortingEnabled(self.GUI.list, false)
-		guiGridListSetSelectionMode(self.GUI.list, 0)
-		guiGridListAddColumn(self.GUI.list, "Upgrade",  .4)
-		guiGridListAddColumn(self.GUI.list, "Installed?", .2)
+		for column = 1, self.columns do
+			guiGridListAddColumn(self.GUI.list, "Upgrade", 0.94 / self.columns)
+		end
+		guiGridListSetSelectionMode(self.GUI.list, 2)
 
 		self:addCompatibleUpgrades(vehicleID)
 		self:setValue(info.value)
 
-		--add a handler to update the caption when the selected item changes
-		self:addHandler("onClientGUIClick", self.GUI.list, self.changeCaptionOnClick)
-		self:addHandler("onClientGUIDoubleClick", self.GUI.list, self.toggleUpgrade)
-
-		self.GUI.button = guiCreateButton(info.x, info.y + gridlistHeight, info.buttonWidth, info.buttonHeight, "Add", info.relative, info.parent)
-		self:addHandler("onClientGUIClick", self.GUI.button, self.toggleUpgrade)
+		self:addHandler("onClientGUIClick", self.GUI.list, function(control, button)
+			if button == "left" then control:toggleUpgrade() end
+		end)
 
 		return self
 	end,
@@ -1600,19 +1608,27 @@ eC.vehicleupgrades = {
 
 		--populate list with compatible upgrades
 		self.upgradeItemRows = {}
+		local columnRows = {}
+		for column = 1, self.columns do columnRows[column] = 0 end
 		if compatibleUpgrades[vehicleID] then
 			for upgradeSlot=0,16 do
 				local compatList = compatibleUpgrades[vehicleID][upgradeSlot]
 				if compatList then
-					guiGridListSetItemText(self.GUI.list, guiGridListAddRow(self.GUI.list), 1,
-					                       getVehicleUpgradeSlotName(upgradeSlot), true, false) --!
-					for i, upgradeID in ipairs(compatList) do
-						local itemRow = guiGridListAddRow(self.GUI.list)
-						self.upgradeItemRows[upgradeID] = itemRow
-						guiGridListSetItemText(self.GUI.list, itemRow, 1, getVehicleUpgradeName(upgradeID), false, true)
-						guiGridListSetItemData(self.GUI.list, itemRow, 1, tostring(upgradeID))
-						guiGridListSetItemText(self.GUI.list, itemRow, 2, " ", false, false)
+					local column = 1
+					for candidate = 2, self.columns do
+						if columnRows[candidate] < columnRows[column] then column = candidate end
 					end
+					local row = columnRows[column]
+					while guiGridListGetRowCount(self.GUI.list) <= row + #compatList do guiGridListAddRow(self.GUI.list) end
+					guiGridListSetItemText(self.GUI.list, row, column, getVehicleUpgradeSlotName(upgradeSlot), false, false)
+					guiGridListSetItemColor(self.GUI.list, row, column, 170, 170, 170)
+					for i, upgradeID in ipairs(compatList) do
+						local itemRow = row + i
+						self.upgradeItemRows[upgradeID] = {itemRow, column}
+						guiGridListSetItemText(self.GUI.list, itemRow, column, getVehicleUpgradeName(upgradeID), false, false)
+						guiGridListSetItemData(self.GUI.list, itemRow, column, tostring(upgradeID))
+					end
+					columnRows[column] = row + #compatList + 2
 				end
 			end
 		end
@@ -1624,6 +1640,12 @@ eC.vehicleupgrades = {
 	end,
 	getCurrentModel = function ( self )
 		return self.currentModel
+	end,
+	markUpgrade = function(self, upgradeID, installed)
+		local cell = self.upgradeItemRows[upgradeID]
+		if not cell then return end
+		guiGridListSetItemText(self.GUI.list, cell[1], cell[2], (installed and "X  " or "") .. getVehicleUpgradeName(upgradeID), false, false)
+		guiGridListSetItemColor(self.GUI.list, cell[1], cell[2], installed and 145 or 255, 255, installed and 170 or 255)
 	end,
 	setValue = function( self, ... )
 		local arg = {...}
@@ -1646,7 +1668,7 @@ eC.vehicleupgrades = {
 
 		--remove current selection marks
 		for i, upgradeID in ipairs(self.selectedUpgrades) do
-			guiGridListSetItemText(self.GUI.list, self.upgradeItemRows[upgradeID], 2, "", false, false)
+			self:markUpgrade(upgradeID, false)
 		end
 
 		self.selectedUpgrades = {}
@@ -1654,14 +1676,16 @@ eC.vehicleupgrades = {
 		--only take last upgrade of the same slot
 		local upgradeOnSlot = {}
 		for i, selectedUpgrade in ipairs(newSelectedUpgrades) do
-			local slotName = getVehicleUpgradeSlotName( selectedUpgrade )
-			upgradeOnSlot[slotName] = selectedUpgrade
+			if self.upgradeItemRows[selectedUpgrade] then
+				local slotName = getVehicleUpgradeSlotName( selectedUpgrade )
+				upgradeOnSlot[slotName] = selectedUpgrade
+			end
 		end
 
 		--add them to list and update selection marks
 		for k, upgradeID in pairs(upgradeOnSlot) do
 			table.insert(self.selectedUpgrades, upgradeID)
-			guiGridListSetItemText(self.GUI.list, self.upgradeItemRows[upgradeID], 2, "X", false, false)
+			self:markUpgrade(upgradeID, true)
 		end
 
 		---[[!w
@@ -1676,56 +1700,35 @@ eC.vehicleupgrades = {
 	getValue = function( self )
 		return table.copy(self.selectedUpgrades)
 	end,
-	changeCaptionOnClick = function( self )
-		local selectedItem = guiGridListGetSelectedItem( self.GUI.list )
-		if not selectedItem then return end
-
-		local upgradeID = tonumber(guiGridListGetItemData( self.GUI.list, selectedItem, 1 ))
-		if not upgradeID then return end
-
-		local buttonCaption
-		if table.find(self.selectedUpgrades, upgradeID) then
-			buttonCaption = "Remove"
-		else
-			buttonCaption = "Add"
-		end
-		guiSetText(self.GUI.button, buttonCaption)
-	end,
 	toggleUpgrade = function( self )
-		local selectedItem = guiGridListGetSelectedItem( self.GUI.list )
-		if not selectedItem then return end
+		local selectedItem, column = guiGridListGetSelectedItem( self.GUI.list )
+		if selectedItem == -1 or column == -1 then return end
 
-		local upgradeID = tonumber(guiGridListGetItemData( self.GUI.list, selectedItem, 1 ))
+		local upgradeID = tonumber(guiGridListGetItemData( self.GUI.list, selectedItem, column ))
 		if not upgradeID then return end
 
-		local buttonCaption
 		local pos = table.find(self.selectedUpgrades, upgradeID)
 		if pos then
 			table.remove(self.selectedUpgrades, pos)
-			guiGridListSetItemText(self.GUI.list, self.upgradeItemRows[upgradeID], 2, " ", false, false)
-			buttonCaption = "Add"
+			self:markUpgrade(upgradeID, false)
 		else
 			--remove the currently selected upgrade for the same slot
 			local slotName = getVehicleUpgradeSlotName(upgradeID)
 			for i, selectedUpgrade in ipairs(self.selectedUpgrades) do
 				if getVehicleUpgradeSlotName(selectedUpgrade) == slotName then
-					guiGridListSetItemText(self.GUI.list, self.upgradeItemRows[selectedUpgrade], 2, " ", false, false)
+					self:markUpgrade(selectedUpgrade, false)
 					table.remove(self.selectedUpgrades, i)
 					break
 				end
 			end
 
 			table.insert(self.selectedUpgrades, upgradeID)
-			guiGridListSetItemText(self.GUI.list, self.upgradeItemRows[upgradeID], 2, "X", false, false)
-			buttonCaption = "Remove"
+			self:markUpgrade(upgradeID, true)
 		end
 
 		---[[!w
-		guiGridListSetSelectedItem( self.GUI.list, selectedItem, 2 )
-		guiGridListSetSelectedItem( self.GUI.list, selectedItem, 1 )
+		guiGridListSetSelectedItem( self.GUI.list, selectedItem, column )
 		---]]
-		guiSetText(self.GUI.button, buttonCaption)
-
 		self:callChangeHandlers()
 	end,
 }

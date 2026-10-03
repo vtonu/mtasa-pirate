@@ -1,16 +1,22 @@
-local entranceIDs = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"}
+local rooms = {
+    {id = "royal", entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"}, exitID = "royalCasinoExitMarker"},
+    {id = "highRoller", entrances = {"theHighRollerMarker"}, exitID = "highRollerExitMarker"},
+    {id = "highRollerLounge", entrances = {"markerHighRollerLounge"}, exitID = "highRollerLoungeExitMarker"}
+}
 local casinoMarkers = {}
-local exitMarker
 local nextDoorTick = 0
 
 local function getNearbyDoor()
     if isPedDead(localPlayer) or getPedOccupiedVehicle(localPlayer)
         or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
-    if not isElement(exitMarker) then exitMarker = getElementByID("royalCasinoExitMarker") end
-    local doors = {{exitMarker, "exit"}}
-    for _, id in ipairs(entranceIDs) do
-        if not isElement(casinoMarkers[id]) then casinoMarkers[id] = getElementByID(id) end
-        doors[#doors + 1] = {casinoMarkers[id], "enter"}
+    local doors = {}
+    for _, room in ipairs(rooms) do
+        if not isElement(casinoMarkers[room.exitID]) then casinoMarkers[room.exitID] = getElementByID(room.exitID) end
+        doors[#doors + 1] = {casinoMarkers[room.exitID], "exit", room.id}
+        for _, id in ipairs(room.entrances) do
+            if not isElement(casinoMarkers[id]) then casinoMarkers[id] = getElementByID(id) end
+            doors[#doors + 1] = {casinoMarkers[id], "enter", room.id}
+        end
     end
     local x, y, z = getElementPosition(localPlayer)
     for _, door in ipairs(doors) do
@@ -19,17 +25,17 @@ local function getNearbyDoor()
             and getElementInterior(localPlayer) == getElementInterior(marker) then
             local mx, my, mz = getElementPosition(marker)
             if getDistanceBetweenPoints2D(x, y, mx, my) <= 1.8 and math.abs(z - mz) <= 2 then
-                return door[2]
+                return door[2], door[3]
             end
         end
     end
 end
 
 bindKey("h", "down", function()
-    local door = getNearbyDoor()
+    local door, roomID = getNearbyDoor()
     if not door or getTickCount() < nextDoorTick then return end
     nextDoorTick = getTickCount() + 1500
-    triggerServerEvent("royalCasino:useDoor", resourceRoot, door)
+    triggerServerEvent("royalCasino:useDoor", resourceRoot, door, roomID)
 end)
 
 -- ROYAL CASINO DOOR PROMPT

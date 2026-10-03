@@ -157,7 +157,9 @@ function dumpMeta ( xml, extraNodes, resource, filename, test )
 	settings["#weather"] = toJSON(currentMapSettings.weather or mapSettingDefaults.weather)
 	settings["#waveheight"] = toJSON(currentMapSettings.waveheight or mapSettingDefaults.waveheight)
 	settings["#locked_time"] = toJSON(currentMapSettings.locked_time or mapSettingDefaults.locked_time)
-	settings["#useLODs"] = toJSON(currentMapSettings.useLODs or mapSettingDefaults.useLODs)
+	local useLODs = currentMapSettings.useLODs
+	if useLODs == nil then useLODs = mapSettingDefaults.useLODs end
+	settings["#useLODs"] = toJSON(useLODs)
 	settings["#minplayers"] = toJSON(currentMapSettings.minplayers or mapSettingDefaults.minplayers)
 	settings["#maxplayers"] = toJSON(currentMapSettings.maxplayers or mapSettingDefaults.maxplayers)
 

@@ -21,11 +21,12 @@ layout.label = {
 	B = 255,
 }
 layout.window = {
-	x = 50, --px
-	y = math.min(100, math.floor(screenY * 0.075)), --px
-	width  = 290, --px
-	height = math.floor(screenY * 0.85), --px
+	x = 20, --px
+	y = 20, --px
+	width  = math.min(1000, screenX - 40), --px
+	height = math.min(screenY - 40, 650), --px
 }
+layout.window.y = math.min(100, math.floor((screenY - layout.window.height) / 2))
 layout.button = {
 	width =  80, --px
 	height = 20, --px
@@ -57,7 +58,7 @@ layout.pane = {
 }
 layout.control = {
 	-- baseY: take the type/elementID labels and parent control into account
-	baseY = layout.padding.top + layout.label.height * 2 + editingControl.element.default.height,
+	baseY = 180,
 	x = layout.padding.left + layout.label.width,
 }
 layout.control.width = layout.pane.width - layout.control.x - scrollbarThumbSize - layout.padding.right
@@ -105,6 +106,41 @@ local tooltipShowing = nil
 local descriptionTooltips = {}
 local createdTooltips = {}
 local pulloutAction = {}
+local actionButtons = {}
+
+local function propertyPlacement(field)
+	local width = layout.pane.width
+	local elementType = selectedElement and getElementType(selectedElement) or newElementType
+	if field == "model" then
+		return {x = width * 0.72, y = 25, width = width * 0.28 - 15, labelX = width * 0.66, labelY = 25, height = 23}
+	elseif field == "position" or field == "rotation" then
+		local x = field == "position" and 10 or math.floor(width / 2)
+		return {x = x + 65, y = 60, width = width / 2 - 80, labelX = x, labelY = 60, height = 23, horizontal = true}
+	elseif elementType == "vehicle" then
+		local color = tonumber(field:match("^color(%d)$"))
+		if color or field == "paintjob" then
+			local x = 10 + (color and color - 1 or 4) * (width - 20) / 5
+			return {x = x, y = 110, width = (width - 20) / 5 - 10, labelX = x, labelY = 87, height = 23}
+		elseif field == "upgrades" then
+			local _, paneHeight = guiGetSize(spnProperties, false)
+			return {x = 10, y = 165, width = width * 0.6 - 25, labelX = 10, labelY = 142, height = math.max(150, paneHeight - 175), columns = 3}
+		else
+			local fields = {plate = 0, sirens = 1, health = 2, interior = 3, dimension = 4, alpha = 5, frozen = 6, collisions = 7, locked = 8, landingGearDown = 9, ["locked-s"] = 10}
+			if fields[field] then
+				local x = math.floor(width * 0.6)
+				if field == "plate" then
+					return {x = x, y = 185, width = width - x - 15, labelX = x, labelY = 162, height = 23}
+				end
+				local index = fields[field] - 1
+				local cellWidth = (width - x - 15) / 2
+				x = x + (index % 2) * cellWidth
+				local y = 220 + math.floor(index / 2) * 50
+				return {x = x, y = y + 20, width = cellWidth - 10, labelX = x, labelY = y, height = 23}
+			end
+		end
+	end
+	return {x = 110, y = propertiesYPos, width = math.min(300, width - 130), labelX = 10, labelY = propertiesYPos}
+end
 
 local commonApplier = {
 	position = function (control)
@@ -151,7 +187,7 @@ function createPropertiesBox()
 		layout.relative,
 		wndProperties
 	)
-	guiScrollPaneSetScrollBars(spnProperties, false, true)
+	guiScrollPaneSetScrollBars(spnProperties, false, false)
 	guiSetProperty(spnProperties, "ContentPaneAutoSized", "False")
 	guiSetProperty(spnProperties, "VertStepSize", "0.15")
 
@@ -194,9 +230,9 @@ function createPropertiesBox()
 	guiLabelSetColor( lblIDCaption, layout.label.R, layout.label.G, layout.label.B )
 
 	edtID = guiCreateEdit(
-		layout.padding.left + layout.label.width,
-		layout.padding.top + layout.label.height,
-		layout.control.width,
+		100,
+		layout.padding.top,
+		layout.pane.width * 0.25 - 100,
 		layout.label.height,
 		"",
 		layout.relative,
@@ -219,13 +255,20 @@ function createPropertiesBox()
 	guiLabelSetColor( lblParentCaption, layout.label.R, layout.label.G, layout.label.B )
 
 	cntParent = editingControl.element:create{
-		x = layout.control.x,
-		y = layout.padding.top + layout.label.height*2,
-		width = layout.control.width,
+		x = layout.pane.width * 0.33,
+		y = layout.padding.top,
+		width = layout.pane.width * 0.31,
 		relative = layout.relative,
 		parent = spnProperties,
 	}
 	cntParent:addChangeHandler(function () setPropertiesChanged(true) end)
+	guiSetVisible(lblTypeCaption, false)
+	guiSetSize(lblType, 70, 23, false)
+	guiSetPosition(lblType, 10, 25, false)
+	guiSetPosition(lblIDCaption, 75, 25, false)
+	guiSetSize(lblIDCaption, 25, 23, false)
+	guiSetPosition(lblParentCaption, layout.pane.width * 0.26, 25, false)
+	guiSetSize(lblParentCaption, layout.pane.width * 0.07, 23, false)
 
 	tooltipParent = tooltip.Create(0, 0, DEFAULT_PARENT_TEXT)
 
@@ -297,6 +340,15 @@ function createPropertiesBox()
 	guiSetVisible(btnApply, false)
 	guiSetVisible(btnCancel, false)
 	guiSetVisible(btnOK, false)
+	guiSetVisible(btnPullout, false)
+	for index, name in ipairs(layout.pullout.items) do
+		local buttonWidth = (layout.pane.width * 0.4 - 15) / 3
+		local button = guiCreateButton(layout.pane.width * 0.6 + (index - 1) * buttonWidth, 485, buttonWidth - 5, 23, name, false, spnProperties)
+		actionButtons[index] = button
+		addEventHandler("onClientGUIClick", button, function(mouseButton)
+			if mouseButton == "left" then pulloutAction[name]() end
+		end, false)
+	end
 
 	--tutorial globals
 	properties_btnOK = btnOK
@@ -393,9 +445,7 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 			end
 		end
 
-		-- calculate the base Y position for the next control now, in case it overflows
-		local newPropertiesYPos = propertiesYPos + controlPrototype.default.height + layout.margin.bottom --!addedParameters.height
-
+		local placement = propertyPlacement(addedParameters and addedParameters.datafield or controlLabelName)
 		local parameters = {
 			x = layout.control.x,
 			y = propertiesYPos,
@@ -412,12 +462,18 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 		-- TODO: This should be done in some proper way...
 		if controlPrototype == editingControl.vehicleupgrades then
 			parameters.vehicle = selectedElement
+			if not parameters.vehicle then
+				for _, control in ipairs(addedControls) do
+					if control:getDataField() == "model" then parameters.vehicle = control:getValue() break end
+				end
+			end
 		end
 
 		addedParameters = addedParameters or {}
 		for name, value in pairs(addedParameters) do
 			parameters[name] = value
 		end
+		for name, value in pairs(placement) do parameters[name] = value end
 		if controlType == "selection" and parameters.validvalues then
 			parameters.dropHeight = math.min(200, (#parameters.validvalues + 0.5) * controlPrototype.default.height)
 		end
@@ -480,10 +536,10 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 
 		-- create the caption label indicating the editing control's name
 		local controlLabel = guiCreateLabel(
-			layout.padding.left,
-			propertiesYPos,
-			layout.label.width,
-			parameters.height or controlPrototype.default.height,
+			placement.labelX,
+			placement.labelY,
+			placement.x > placement.labelX and placement.x - placement.labelX or parameters.width,
+			23,
 			controlLabelName,
 			layout.relative,
 			spnProperties
@@ -503,12 +559,12 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 		end
 
 		-- store the new base Y position for the next control
-		propertiesYPos = newPropertiesYPos
+		propertiesYPos = math.max(propertiesYPos, parameters.y + (parameters.height or controlPrototype.default.height) + layout.margin.bottom)
 		local lastPadding = endPadding[controlType] or 0
 		if controlType == "selection" and parameters.validvalues then
 			lastPadding = parameters.dropHeight + layout.margin.bottom
 		end
-		projPropertiesYPos = math.max( propertiesYPos + lastPadding, projPropertiesYPos )
+		projPropertiesYPos = math.max(parameters.y + (parameters.height or controlPrototype.default.height) + lastPadding, projPropertiesYPos)
 		return true
 	else
 		outputDebugString( "eC."..tostring(controlType).." doesn't exist.", 2 )
@@ -840,7 +896,14 @@ function openPropertiesBox( element, resourceName, shortcut )
 	addEventHandler( "onClientGUIClick", btnCancel, cancelProperties, false )
 	addEventHandler( "onClientGUIClick", btnApply, syncPropertiesCallback, false )
 	addEventHandler( "onClientGUIClick", btnPullout, openPullout, false )
-	addEventHandler( "onClientMouseMove", root, tooltipsCheckMouseMove )
+	local elementType = selectedElement and getElementType(selectedElement) or newElementType
+	local vehicleLayout = elementType == "vehicle"
+	for _, button in ipairs(actionButtons) do
+		guiSetVisible(button, not creatingNewElement)
+		local x = guiGetPosition(button, false)
+		guiSetPosition(button, x, vehicleLayout and 485 or 180, false)
+	end
+	if not creatingNewElement then propertiesYPos = math.max(propertiesYPos, vehicleLayout and 513 or 208) end
 
 
 	guiSetInputEnabled(true)
@@ -874,6 +937,7 @@ function openPropertiesBox( element, resourceName, shortcut )
 		       "r:" .. string.format("%.06f", layout.pane.width - layout.padding.right) .. " " ..
 		       "b:" .. string.format("%.06f", math.max(propertiesYPos,projPropertiesYPos)))
 	projPropertiesYPos = 0
+	guiScrollPaneSetVerticalScrollPosition(spnProperties, 0)
 end
 
 function toggleProperties(hold)
@@ -905,7 +969,7 @@ function setPropertiesChanged(newState)
 		guiSetVisible(btnOK, true)
 	end
 
-	propertiesChanged = newstate
+	propertiesChanged = newState
 end
 
 function cancelProperties()
@@ -934,6 +998,8 @@ end
 --Resize
 function propertiesResize()
 	local windowWidth,windowHeight = guiGetSize ( source, layout.relative )
+	local x, y = guiGetPosition(wndProperties, false)
+	guiSetPosition(wndProperties, x, math.max(0, math.min(y, screenY - windowHeight)), false)
 	--Resize the scrollpane
 	local spnWidth = guiGetSize ( spnProperties, layout.relative )
 	guiSetSize (
@@ -942,6 +1008,15 @@ function propertiesResize()
 		windowHeight - layout.button.height - scrollbarThumbSize - layout.padding.bottom + 2,
 		layout.relative
 	)
+	for _, control in ipairs(addedControls) do
+		if control:getDataField() == "upgrades" then
+			local _, paneHeight = guiGetSize(spnProperties, false)
+			local height = math.max(150, paneHeight - 175)
+			guiSetSize(control.GUI.list, layout.pane.width * 0.6 - 25, height, false)
+			propertiesYPos = math.max(525, 165 + height + layout.margin.bottom)
+			guiSetProperty(spnProperties, "ContentArea", "l:10 t:25 r:" .. layout.pane.width .. " b:" .. propertiesYPos)
+		end
+	end
 	--Reposition the line
 	guiSetPosition (
 		lineImg,

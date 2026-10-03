@@ -80,8 +80,23 @@ end
 
 -- PRIVATE
 
+local function editorInputBlocked()
+	local editor = getResourceFromName("editor_main")
+	local blocked = guiGetInputEnabled() or isMTAWindowActive()
+	if editor and getResourceState(editor) == "running" and exports.editor_main:getSelectedElement() then
+		local controls = exports.editor_main:getControls()
+		blocked = blocked or mta_getKeyState(controls.mod_rotate) or mta_getKeyState(controls.mod_rotate_local)
+	end
+	return blocked
+end
+
 local function freecamFrame ()
     local frameFactor = getFrameFactor()
+	if editorInputBlocked() then
+		speed, strafespeed = 0, 0
+		velocityX, velocityY, velocityZ = 0, 0, 0
+		return
+	end
 
     -- work out an angle in radians based on the number of pixels the cursor has moved (ever)
     local cameraAngleX = rotX
@@ -239,7 +254,7 @@ local function freecamMouse (cX,cY,aX,aY)
 	--ignore mouse movement if the cursor or MTA window is on
 	--and do not resume it until at least 5 frames after it is toggled off
 	--(prevents cursor mousemove data from reaching this handler)
-	if isCursorShowing() or isMTAWindowActive() or (not isMTAWindowFocused()) then
+    if isCursorShowing() or editorInputBlocked() or (not isMTAWindowFocused()) then
 		mouseFrameDelay = 5
 		return
 	elseif mouseFrameDelay > 0 then
