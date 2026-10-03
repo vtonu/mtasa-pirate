@@ -33,7 +33,6 @@ end
 
 addEventHandler("onResourceStart", resourceRoot, function()
     createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 127, 255, 212, 150)
-    createBlip(MARKER_X, MARKER_Y, MARKER_Z, 18, 2, 255, 255, 255, 255, 0, 65535)
     shopCol = createColSphere(MARKER_X, MARKER_Y, MARKER_Z, SHOP_COL_RADIUS)
     addEventHandler("onColShapeHit", shopCol, onPlayerEnterShop)
     addEventHandler("onColShapeLeave", shopCol, onPlayerLeaveShop)

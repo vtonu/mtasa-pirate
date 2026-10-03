@@ -1,4 +1,5 @@
 local rooms = {
+    {id = "ammuNorthLV", entrances = {"ammuNationNorthLV", "ammuNationNorthLV2", "ammuNationNorthLV3"}, exitID = "ammuNorthLVExitMarker"},
     {id = "ammuOld", entrances = {"markerAmmuOld", "markerAmmuOld2", "markerAmmuOld3"}, exitID = "ammuOldExitMarker"},
     {id = "ammuLS", entrances = {"ammuNationLSOG"}, exitID = "ammuLSExitMarker"},
     {id = "ammuSouthLS", entrances = {"ammuNationSouthLS"}, exitID = "ammuSouthLSExitMarker"},

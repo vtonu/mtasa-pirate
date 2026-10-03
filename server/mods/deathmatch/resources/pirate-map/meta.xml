@@ -6,7 +6,7 @@
     <script src="interiors_client.lua" type="client"></script>
     <script src="interiors_server.lua" type="server"></script>
     <script src="vehicles_server.lua" type="server"></script>
-    <info gamemodes="play" type="map" name="pirate-map" author="lifestyle" version="1.1.4" description="October 2026, GTA VI Vibes."></info>
+    <info gamemodes="play" type="map" name="pirate-map" author="lifestyle" version="1.1.5" description="October 2026, GTA VI Vibes."></info>
     <map src="pirate-map.map" dimension="0"></map>
     <settings>
         <setting name="#maxplayers" value="[ 128 ]"></setting>

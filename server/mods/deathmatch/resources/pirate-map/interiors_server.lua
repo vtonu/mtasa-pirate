@@ -1,4 +1,10 @@
 local rooms = {
+    ammuNorthLV = {
+        entrances = {"ammuNationNorthLV", "ammuNationNorthLV2", "ammuNationNorthLV3"},
+        exitID = "ammuNorthLVExitMarker", interior = 6, dimension = 12027,
+        x = 297.446, y = -109.968, z = 1001.516, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        blip = "ammuNationNorthLV", blipIcon = 6
+    },
     ammuOld = {
         entrances = {"markerAmmuOld", "markerAmmuOld2", "markerAmmuOld3"},
         exitID = "ammuOldExitMarker", interior = 6, dimension = 12020,
@@ -14,7 +20,7 @@ local rooms = {
     ammuSouthLS = {
         entrances = {"ammuNationSouthLS"},
         exitID = "ammuSouthLSExitMarker", interior = 1, dimension = 12022,
-        x = 289.787, y = -35.719, z = 1003.516, spawnX = 289.787, spawnY = -33.219, rotation = 0,
+        x = 286.45490, y = -40.92108, z = 1001.5162, spawnX = 286.45490, spawnY = -38.42108, rotation = 0,
         blip = "ammuNationSouthLS", blipIcon = 6
     },
     ammuSF = {
@@ -26,7 +32,7 @@ local rooms = {
     ammuTR = {
         entrances = {"ammuNationTR"},
         exitID = "ammuTRExitMarker", interior = 1, dimension = 12024,
-        x = 289.787, y = -35.719, z = 1003.516, spawnX = 289.787, spawnY = -33.219, rotation = 0,
+        x = 286.12119, y = -30.32537, z = 1001.5162, spawnX = 286.12119, spawnY = -32.82537, rotation = 180,
         blip = "ammuNationTR", blipIcon = 6
     },
     ammuBC = {
