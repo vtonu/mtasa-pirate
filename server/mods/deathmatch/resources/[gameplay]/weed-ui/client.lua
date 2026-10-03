@@ -9,8 +9,8 @@ local dragOffsetX = 0
 local dragOffsetY = 0
 local previousInputMode = nil
 
-local UI_WIDTH = math.floor(screenW * 0.52)
-local UI_HEIGHT = math.floor(screenH * 0.66)
+local UI_WIDTH = math.floor(math.min(screenW - 32, math.max(960, screenW * 0.52)))
+local UI_HEIGHT = math.floor(math.min(screenH - 32, math.max(680, screenH * 0.66)))
 local uiX = math.floor((screenW - UI_WIDTH) / 2)
 local uiY = math.floor((screenH - UI_HEIGHT) / 2)
 

@@ -1,4 +1,4 @@
-# Project Details (mtasa-pirate v1.3.4)
+# Project Details (mtasa-pirate v1.3.5)
 
 <img width="1920" height="1080" alt="mtasa-pirate-openbeta" src="https://github.com/user-attachments/assets/bee0cba0-5b55-4744-9ff9-d74f14e8e4cc" />
 
@@ -16,11 +16,11 @@ MTA:SA freeroam server for custom gameplay, content creation, and playing with f
 
 ## Controls
 
-| Key   | Action                                                                 |
-| ----- | ---------------------------------------------------------------------- |
-| F1    | Player, vehicle, and passive options                                   |
+| Key   | Action                                                                                                                            |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------- |
+| F1    | Player, vehicle, and passive options                                                                                              |
 | H     | Open the Garden or Booty Desk shop, enter/exit interiors, start Airyard at the ship capsule, or equip a parachute at the loot box |
-| Space | Respawn when prompted                                                  |
+| Space | Respawn when prompted                                                                                                             |
 
 Rustler bombs use the vehicle fire control.
 
