@@ -15,9 +15,11 @@ local statsTable = {
 	[230] = 999  -- Cycling
 }
 
-local function applyStatsForPlayer(playerElement)
+local function applyStatsForPlayer(playerElement, keepHigherStats)
 	for statName, statValue in pairs(statsTable) do
-		setPedStat(playerElement, statName, statValue)
+		if not keepHigherStats or getPedStat(playerElement, statName) < statValue then
+			setPedStat(playerElement, statName, statValue)
+		end
 	end
 end
 
@@ -27,17 +29,12 @@ end
 addEventHandler("onPlayerJoin", root, applyStatsForSource)
 
 local function applyStatsForEveryone(loadedResource)
-	local resourceType = getResourceInfo(loadedResource, "type")
-	local isGamemodeResource = resourceType == "gamemode"
-	local isMapResource = resourceType == "map"
-
-	if not (loadedResource == resource or isGamemodeResource or isMapResource) then return end
+	if loadedResource ~= getThisResource() then return end
 
 	local playersTable = getElementsByType("player")
 
 	for playerID = 1, #playersTable do
-		applyStatsForPlayer(playersTable[playerID])
+		applyStatsForPlayer(playersTable[playerID], true)
 	end
 end
 addEventHandler("onResourceStart", root, applyStatsForEveryone)
-addEventHandler("onGamemodeMapStart", root, applyStatsForEveryone)
