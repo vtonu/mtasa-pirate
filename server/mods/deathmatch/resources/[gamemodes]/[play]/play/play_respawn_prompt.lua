@@ -8,6 +8,12 @@ local promptFont = "default-bold"
 local promptScale = 2
 local promptText = "PRESS SPACE TO RESPAWN"
 
+-- CLOSE ON-FOOT VIEW ON EACH SPAWN
+addEventHandler("onClientPlayerSpawn", localPlayer, function()
+    local vehicleView = getCameraViewMode()
+    setCameraViewMode(vehicleView, 1)
+end)
+
 local function drawRespawnPrompt()
     dxDrawText(promptText, 0, screenH - 100, screenW, screenH, promptColor, promptScale, promptFont,
         "center", "top")
