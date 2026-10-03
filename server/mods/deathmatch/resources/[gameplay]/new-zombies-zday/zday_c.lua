@@ -94,6 +94,7 @@ end
 
 local function onDamage(attacker,weapon,bodypart,loss)
 
+	if type(loss) ~= "number" or loss ~= loss or loss <= 0 or loss == math.huge then return end
 	if attacker and isElement(attacker) and attacker == localPlayer then
 		triggerServerEvent("Zday:damageZombie",source,attacker,weapon,bodypart,loss)
 	end

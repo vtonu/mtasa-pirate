@@ -145,7 +145,7 @@ end
 local function damageZombie(attacker,weapon,bodypart,loss)
 
 	if not client or attacker ~= client or isPassive(client) then return end
-	if type(loss) ~= "number" or loss <= 0 then return end
+	if type(loss) ~= "number" or loss ~= loss or loss <= 0 or loss == math.huge then return end
 	if (source.health - loss) <= 0 then
 		killPed(source,attacker,weapon,bodypart)
 	else

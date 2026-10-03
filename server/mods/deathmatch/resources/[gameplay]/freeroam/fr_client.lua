@@ -2547,15 +2547,32 @@ local function updatePassiveCollisions(forceCollidable)
     end
 end
 
+local function syncPassiveMode()
+    local state = getElementData(localPlayer, "freeroam.passive") == true
+    local playerData = g_PlayerData and g_PlayerData[localPlayer]
+    if not playerData then return end
+    local changed = playerData.passive ~= state
+    playerData.passive = state
+    local checkbox = getControl(wndMain, 'passive')
+    if checkbox and isElement(checkbox) then
+        guiCheckBoxSetSelected(checkbox, state)
+    end
+    if changed then
+        setPassiveControls(state)
+        updateModeDisplay(state)
+        updatePassiveCollisions()
+    end
+end
+
 function togglePassiveMode()
     local checkbox = getControl(wndMain, 'passive')
     local state = guiCheckBoxGetSelected(checkbox)
-    local currentState = g_PlayerData[localPlayer] and g_PlayerData[localPlayer].passive == true
-    guiCheckBoxSetSelected(checkbox, currentState == true)
+    syncPassiveMode()
     triggerServerEvent("onFreeroamLocalSettingChange", localPlayer, "passive", state)
 end
 
 function updateGUI()
+    syncPassiveMode()
     guiSetVisible(getControl(wndMain, 'removejetpack'), isPedWearingJetpack(localPlayer))
     -- UPDATE LOCATION
     local x, y, z = getElementPosition(localPlayer)
@@ -2778,8 +2795,7 @@ addEventHandler('onClientResourceStart', resourceRoot, function()
     hideAllWindows()
     bindKey('f1', 'down', toggleFRWindow)
     --[[ bindKey('f2', 'down', toggleMap) ]]
-    guiCheckBoxSetSelected(getControl(wndMain, 'passive'), false)
-    updateModeDisplay(false)
+    syncPassiveMode()
     updatePerkDisplay()
 end)
 
@@ -2941,7 +2957,9 @@ addEventHandler("onClientElementStreamIn", root, function()
 end)
 
 addEventHandler("onClientElementDataChange", localPlayer, function(dataName)
-    if dataName == "weed.perk" then
+    if dataName == "freeroam.passive" then
+        syncPassiveMode()
+    elseif dataName == "weed.perk" then
         updatePerkDisplay()
     end
 end)
