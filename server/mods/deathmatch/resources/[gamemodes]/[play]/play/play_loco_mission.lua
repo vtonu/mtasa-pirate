@@ -39,7 +39,13 @@ local MISSION_TARGET_SPAWNS = {{
     {x = 2019.42017, y = 1494.60742, z = 10.57590, rotation = 0},
     {x = 1975.62463, y = 1441.14209, z = 10.64909, rotation = 0},
     {x = 1962.58691, y = 1445.77600, z = 10.64898, rotation = 0},
-    {x = 1943.02319, y = 1468.93982, z = 10.57814, rotation = 0}
+    {x = 1943.02319, y = 1468.93982, z = 10.57814, rotation = 0},
+    {x = 2035.35510, y = 1624.16931, z = 10.34069, rotation = 0},
+    {x = 2035.17981, y = 1470.13904, z = 10.33864, rotation = 0},
+    {x = 1944.16052, y = 1445.17871, z = 10.33863, rotation = 0},
+    {x = 1896.74951, y = 1592.18103, z = 10.19048, rotation = 0},
+    {x = 1862.28357, y = 1573.97388, z = 10.33864, rotation = 0},
+    {x = 2092.10962, y = 1540.20068, z = 10.33864, rotation = 0}
 }
 
 -- VEHICLE LIFETIME
@@ -56,6 +62,7 @@ local MISSION_VEHICLE_MODELS = {579, -- Huntley
 -- STATE
 local activeMissionVehicles = {}
 local missionTimers = {}
+local spawnTimers = {}
 local missionState = {}
 local missionCooldown = {}
 local accessTimers = {}
@@ -75,6 +82,42 @@ local function removeDeckBlip(player)
 end
 
 local spawnMissionVehicle
+
+-- KEEP DELAYED SPAWNS WITH THEIR CURRENT SESSION
+local function queueMissionVehicle(player, delay)
+    if isTimer(spawnTimers[player]) then return end
+    local state = missionState[player]
+    spawnTimers[player] = setTimer(function()
+        spawnTimers[player] = nil
+        if isElement(player) and not isPedDead(player) and missionState[player] == state
+            and state and state.active then
+            spawnMissionVehicle(player)
+        end
+    end, delay, 1)
+end
+
+-- SKIP VEHICLES AND PLAYERS AT EACH SPAWN
+local function getClearTargetSpawn()
+    local nearbyElements = getElementsByType("vehicle")
+    for _, player in ipairs(getElementsByType("player")) do
+        nearbyElements[#nearbyElements + 1] = player
+    end
+    local clearSpawns = {}
+    for _, spot in ipairs(MISSION_TARGET_SPAWNS) do
+        local clear = true
+        for _, element in ipairs(nearbyElements) do
+            if getElementInterior(element) == 0 and getElementDimension(element) == 0 then
+                local x, y, z = getElementPosition(element)
+                if math.abs(z - spot.z) < 4 and getDistanceBetweenPoints2D(x, y, spot.x, spot.y) < 6 then
+                    clear = false
+                    break
+                end
+            end
+        end
+        if clear then clearSpawns[#clearSpawns + 1] = spot end
+    end
+    if #clearSpawns > 0 then return clearSpawns[math.random(#clearSpawns)] end
+end
 
 function refreshLocoMissionAccess(player)
     if not isElement(player) then
@@ -155,6 +198,8 @@ local function destroyMissionVehicle(player)
 end
 
 local function clearMission(player)
+    if isTimer(spawnTimers[player]) then killTimer(spawnTimers[player]) end
+    spawnTimers[player] = nil
     destroyMissionVehicle(player)
 
     if missionTimers[player] and isTimer(missionTimers[player]) then
@@ -195,17 +240,13 @@ local function completeMissionTarget(player)
         return
     end
 
-    setTimer(function()
-        if isElement(player) and missionState[player] and missionState[player].active then
-            spawnMissionVehicle(player)
-        end
-    end, 2000, 1)
+    queueMissionVehicle(player, 2000)
 end
 
 -- SPAWN (HARD GATE INSIDE)
 spawnMissionVehicle = function(player)
 
-    if not isElement(player) then
+    if not isElement(player) or isPedDead(player) then
         return
     end
 
@@ -216,7 +257,11 @@ spawnMissionVehicle = function(player)
     end
 
     if missionState[player] and missionState[player].active then
-        if activeMissionVehicles[player] then
+        if activeMissionVehicles[player] or isTimer(spawnTimers[player]) then
+            return
+        end
+        if getTickCount() >= missionState[player].expiresAt then
+            failMission(player)
             return
         end
     else
@@ -242,10 +287,15 @@ spawnMissionVehicle = function(player)
     end
 
     local model = MISSION_VEHICLE_MODELS[math.random(#MISSION_VEHICLE_MODELS)]
-    local spawnData = MISSION_TARGET_SPAWNS[math.random(#MISSION_TARGET_SPAWNS)]
+    local spawnData = getClearTargetSpawn()
+    if not spawnData then
+        queueMissionVehicle(player, 1000)
+        return
+    end
 
     local vehicle = createVehicle(model, spawnData.x, spawnData.y, spawnData.z, 0, 0, spawnData.rotation)
     if not vehicle then
+        queueMissionVehicle(player, 1000)
         return
     end
 
@@ -253,7 +303,7 @@ spawnMissionVehicle = function(player)
     setElementVelocity(vehicle, 0, 0, -0.04)
     setVehicleColor(vehicle, 0, 0, 0)
 
-    local blip = createBlipAttachedTo(vehicle, 0, 1, 127, 255, 212, 255)
+    local blip = createBlipAttachedTo(vehicle, 0, 1, 127, 255, 212, 255, 0, 16383, player)
 
     activeMissionVehicles[player] = {
         vehicle = vehicle,
@@ -298,6 +348,12 @@ addEventHandler("onVehicleExplode", root, function()
 end)
 
 -- CLEANUP
+addEventHandler("onPlayerWasted", root, function()
+    missionCooldown[source] = nil
+    clearLocoMissionAccess(source)
+    clearMission(source)
+end)
+
 addEventHandler("onPlayerQuit", root, function()
     missionCooldown[source] = nil
     clearLocoMissionAccess(source)
