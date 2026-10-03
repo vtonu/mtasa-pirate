@@ -31,6 +31,12 @@ local rooms = {
         entrances = {"markerAutoBahn"},
         exitID = "autoBahnExitMarker", interior = 3, dimension = 12017,
         x = 620.06232, y = -120.61650, z = 998.84753, spawnX = 617.06232, spawnY = -120.61650, rotation = 90
+    },
+    covealot = {
+        entrances = {"markerCovealot"},
+        exitID = "covealotExitMarker", interior = 5, dimension = 12018,
+        x = 1260.58, y = -785.31, z = 1090.96, spawnX = 1263.58, spawnY = -785.31, rotation = 270,
+        blip = "markerCovealot"
     }
 }
 local returnPoints = {}
@@ -105,6 +111,16 @@ end
 
 -- SHARED ROOMS AND EXITS
 addEventHandler("onResourceStart", resourceRoot, function()
+    -- BLOCK THE GARAGE SHUTTER WITHOUT COVERING THE EXIT MARKER
+    local barrier = createObject(3095, 621.8, -125.390625, 1001, 0, 90, 0)
+    if isElement(barrier) then
+        setElementID(barrier, "autoBahnShutterBarrier")
+        setElementInterior(barrier, rooms.autoBahn.interior)
+        setElementDimension(barrier, rooms.autoBahn.dimension)
+        setElementAlpha(barrier, 0)
+        setElementFrozen(barrier, true)
+        setElementCollisionsEnabled(barrier, true)
+    end
     for _, room in pairs(rooms) do
         local entrance = room.blip and getElementByID(room.blip)
         if isElement(entrance) then
