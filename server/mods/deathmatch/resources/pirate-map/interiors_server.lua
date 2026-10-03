@@ -32,6 +32,12 @@ local rooms = {
         exitID = "autoBahnExitMarker", interior = 3, dimension = 12017,
         x = 620.06232, y = -120.61650, z = 998.84753, spawnX = 617.06232, spawnY = -120.61650, rotation = 90
     },
+    cjHouse = {
+        entrances = {"markerCJHouse"},
+        exitID = "cjHouseExitMarker", interior = 3, dimension = 12019,
+        x = 2496.05, y = -1692.73, z = 1014.75, spawnX = 2496.05, spawnY = -1695.73, rotation = 180,
+        blip = "markerCJHouse", blipIcon = 15
+    },
     covealot = {
         entrances = {"markerCovealot"},
         exitID = "covealotExitMarker", interior = 12, dimension = 12018,
@@ -124,7 +130,7 @@ addEventHandler("onResourceStart", resourceRoot, function()
     for _, room in pairs(rooms) do
         local entrance = room.blip and getElementByID(room.blip)
         if isElement(entrance) then
-            local blip = createBlipAttachedTo(entrance, 44, 2, 255, 255, 255, 255, 0, 65535)
+            local blip = createBlipAttachedTo(entrance, room.blipIcon or 44, 2, 255, 255, 255, 255, 0, 65535)
             if isElement(blip) then
                 setElementInterior(blip, getElementInterior(entrance))
                 setElementDimension(blip, getElementDimension(entrance))

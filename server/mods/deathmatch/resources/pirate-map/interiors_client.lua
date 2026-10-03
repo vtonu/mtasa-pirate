@@ -5,7 +5,8 @@ local rooms = {
     {id = "caligula", entrances = {"mainCasinoSpawn"}, exitID = "caligulaExitMarker"},
     {id = "camelToe", entrances = {"markerCamelEntrance"}, exitID = "camelToeExitMarker"},
     {id = "autoBahn", entrances = {"markerAutoBahn"}, exitID = "autoBahnExitMarker"},
-    {id = "covealot", entrances = {"markerCovealot"}, exitID = "covealotExitMarker"}
+    {id = "covealot", entrances = {"markerCovealot"}, exitID = "covealotExitMarker"},
+    {id = "cjHouse", entrances = {"markerCJHouse"}, exitID = "cjHouseExitMarker"}
 }
 local casinoMarkers = {}
 local nextDoorTick = 0
