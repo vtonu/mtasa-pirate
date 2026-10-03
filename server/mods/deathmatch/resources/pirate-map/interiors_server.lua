@@ -15,6 +15,21 @@ local rooms = {
         entrances = {"markerHighRollerLounge"},
         exitID = "highRollerLoungeExitMarker", interior = 17, dimension = 12014,
         x = 493.39, y = -24.92, z = 1000.68, spawnX = 493.39, spawnY = -21.92, rotation = 0
+    },
+    caligula = {
+        entrances = {"mainCasinoSpawn"},
+        exitID = "caligulaExitMarker", interior = 1, dimension = 12015,
+        x = 2233.94, y = 1714.58, z = 1012.39, spawnX = 2233.94, spawnY = 1711.5, rotation = 180
+    },
+    camelToe = {
+        entrances = {"markerCamelEntrance"},
+        exitID = "camelToeExitMarker", interior = 10, dimension = 12016,
+        x = 2018.95, y = 1017.09, z = 996.875, spawnX = 2015.95, spawnY = 1017.09, rotation = 90
+    },
+    autoBahn = {
+        entrances = {"markerAutoBahn"},
+        exitID = "autoBahnExitMarker", interior = 3, dimension = 12017,
+        x = 614.389, y = -124.099, z = 997.995, spawnX = 614.389, spawnY = -121.099, rotation = 0
     }
 }
 local returnPoints = {}

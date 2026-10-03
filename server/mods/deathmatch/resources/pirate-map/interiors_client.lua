@@ -1,7 +1,10 @@
 local rooms = {
     {id = "royal", entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"}, exitID = "royalCasinoExitMarker"},
     {id = "highRoller", entrances = {"theHighRollerMarker"}, exitID = "highRollerExitMarker"},
-    {id = "highRollerLounge", entrances = {"markerHighRollerLounge"}, exitID = "highRollerLoungeExitMarker"}
+    {id = "highRollerLounge", entrances = {"markerHighRollerLounge"}, exitID = "highRollerLoungeExitMarker"},
+    {id = "caligula", entrances = {"mainCasinoSpawn"}, exitID = "caligulaExitMarker"},
+    {id = "camelToe", entrances = {"markerCamelEntrance"}, exitID = "camelToeExitMarker"},
+    {id = "autoBahn", entrances = {"markerAutoBahn"}, exitID = "autoBahnExitMarker"}
 }
 local casinoMarkers = {}
 local nextDoorTick = 0
