@@ -93,6 +93,7 @@ local isPropertiesOpen
 local syncPropertiesCallback
 local propertiesChanged
 local creatingNewElement
+local lastPropertiesType
 
 local addedControls = {} -- table containing all added editing-controls
 local previousValues = {} -- table containing previously applied values for all editing-controls
@@ -116,14 +117,22 @@ local function propertyPlacement(field)
 	elseif field == "position" or field == "rotation" then
 		local x = field == "position" and 10 or math.floor(width / 2)
 		return {x = x + 65, y = 60, width = width / 2 - 80, labelX = x, labelY = 60, height = 23, horizontal = true}
+	elseif elementType == "object" then
+		local left = {interior = 0, dimension = 1, alpha = 2, collisions = 3, frozen = 4, ["locked-s"] = 5, scale = 6}
+		local right = {doublesided = 0, breakable = 1, moveX = 2, moveY = 3, moveZ = 4, moveSpeed = 5, moveDelay = 6}
+		local row = left[field] or right[field]
+		if row then
+			local x = left[field] and 10 or math.floor(width / 2)
+			return {x = x + 100, y = 125 + row * 28, width = math.min(130, width / 2 - 120), labelX = x, labelY = 125 + row * 28, height = 23}
+		end
 	elseif elementType == "vehicle" then
 		local color = tonumber(field:match("^color(%d)$"))
 		if color or field == "paintjob" then
 			local x = 10 + (color and color - 1 or 4) * (width - 20) / 5
-			return {x = x, y = 110, width = (width - 20) / 5 - 10, labelX = x, labelY = 87, height = 23}
+			return {x = x, y = 143, width = (width - 20) / 5 - 10, labelX = x, labelY = 120, height = 23}
 		elseif field == "upgrades" then
 			local _, paneHeight = guiGetSize(spnProperties, false)
-			return {x = 10, y = 165, width = width * 0.6 - 25, labelX = 10, labelY = 142, height = math.max(150, paneHeight - 175), columns = 3}
+			return {x = 10, y = 200, width = width * 0.6 - 25, labelX = 10, labelY = 177, height = math.max(150, paneHeight - 210), columns = 3}
 		else
 			local fields = {plate = 0, sirens = 1, health = 2, interior = 3, dimension = 4, alpha = 5, frozen = 6, collisions = 7, locked = 8, landingGearDown = 9, ["locked-s"] = 10}
 			if fields[field] then
@@ -175,7 +184,7 @@ function createPropertiesBox()
 		layout.relative
 	)
 	guiWindowSetSizable(wndProperties, true)
-	guiSetProperty ( wndProperties, "AbsoluteMinSize", "w:"..layout.window.width.." h:"..math.min(450, layout.window.height) )
+	guiSetProperty ( wndProperties, "AbsoluteMinSize", "w:"..layout.window.width.." h:"..math.min(350, layout.window.height) )
 	guiSetProperty ( wndProperties, "AbsoluteMaxSize", "w:"..layout.window.width.." h:"..(screenY - 20) )
 	addEventHandler ( "onClientGUISize", wndProperties, propertiesResize, false )
 
@@ -342,8 +351,10 @@ function createPropertiesBox()
 	guiSetVisible(btnOK, false)
 	guiSetVisible(btnPullout, false)
 	for index, name in ipairs(layout.pullout.items) do
-		local buttonWidth = (layout.pane.width * 0.4 - 15) / 3
-		local button = guiCreateButton(layout.pane.width * 0.6 + (index - 1) * buttonWidth, 485, buttonWidth - 5, 23, name, false, spnProperties)
+		local copyPosition = name == "CopyPOS"
+		local x = copyPosition and 10 or layout.window.width - (3 - index) * 85 - 10
+		local y = copyPosition and 90 or layout.window.height - layout.padding.bottom
+		local button = guiCreateButton(x, y, 80, 20, name, false, copyPosition and spnProperties or wndProperties)
 		actionButtons[index] = button
 		addEventHandler("onClientGUIClick", button, function(mouseButton)
 			if mouseButton == "left" then pulloutAction[name]() end
@@ -836,6 +847,11 @@ function openPropertiesBox( element, resourceName, shortcut )
 	end
 
 	selectedElement = nil
+	local openingType = resourceName and element or getElementType(element)
+	if openingType ~= lastPropertiesType then
+		guiSetSize(wndProperties, layout.window.width, math.min(screenY - 40, openingType == "object" and 440 or 650), false)
+		lastPropertiesType = openingType
+	end
 	--Tutorial hook
 	if tutorialVars.detectPropertiesBox then
 		tutorialNext()
@@ -896,14 +912,9 @@ function openPropertiesBox( element, resourceName, shortcut )
 	addEventHandler( "onClientGUIClick", btnCancel, cancelProperties, false )
 	addEventHandler( "onClientGUIClick", btnApply, syncPropertiesCallback, false )
 	addEventHandler( "onClientGUIClick", btnPullout, openPullout, false )
-	local elementType = selectedElement and getElementType(selectedElement) or newElementType
-	local vehicleLayout = elementType == "vehicle"
 	for _, button in ipairs(actionButtons) do
 		guiSetVisible(button, not creatingNewElement)
-		local x = guiGetPosition(button, false)
-		guiSetPosition(button, x, vehicleLayout and 485 or 180, false)
 	end
-	if not creatingNewElement then propertiesYPos = math.max(propertiesYPos, vehicleLayout and 513 or 208) end
 
 
 	guiSetInputEnabled(true)
@@ -998,6 +1009,11 @@ end
 --Resize
 function propertiesResize()
 	local windowWidth,windowHeight = guiGetSize ( source, layout.relative )
+	for index = 1, 2 do
+		if isElement(actionButtons[index]) then
+			guiSetPosition(actionButtons[index], windowWidth - (3 - index) * 85 - 10, windowHeight - layout.padding.bottom, false)
+		end
+	end
 	local x, y = guiGetPosition(wndProperties, false)
 	guiSetPosition(wndProperties, x, math.max(0, math.min(y, screenY - windowHeight)), false)
 	--Resize the scrollpane
@@ -1011,9 +1027,9 @@ function propertiesResize()
 	for _, control in ipairs(addedControls) do
 		if control:getDataField() == "upgrades" then
 			local _, paneHeight = guiGetSize(spnProperties, false)
-			local height = math.max(150, paneHeight - 175)
+			local height = math.max(150, paneHeight - 210)
 			guiSetSize(control.GUI.list, layout.pane.width * 0.6 - 25, height, false)
-			propertiesYPos = math.max(525, 165 + height + layout.margin.bottom)
+			propertiesYPos = math.max(525, 200 + height + layout.margin.bottom)
 			guiSetProperty(spnProperties, "ContentArea", "l:10 t:25 r:" .. layout.pane.width .. " b:" .. propertiesYPos)
 		end
 	end
