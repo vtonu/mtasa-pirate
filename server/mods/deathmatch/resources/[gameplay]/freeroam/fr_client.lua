@@ -2556,6 +2556,7 @@ function togglePassiveMode()
 end
 
 function updateGUI()
+    guiSetVisible(getControl(wndMain, 'removejetpack'), isPedWearingJetpack(localPlayer))
     -- UPDATE LOCATION
     local x, y, z = getElementPosition(localPlayer)
     local zone = getZoneName(x, y, z, false)
@@ -2618,6 +2619,12 @@ end
 addEventHandler('onClientPlayerVehicleExit', root, onExitVehicle)
 addEventHandler("onClientElementDestroy", root, onExitVehicle)
 
+function removeLocalJetpack()
+    if isPedWearingJetpack(localPlayer) then
+        triggerServerEvent('onFreeroamRemoveJetpack', localPlayer)
+    end
+end
+
 function killLocalPlayer()
     if g_settings["kill"] then
         if (not isPedDead(localPlayer)) then
@@ -2658,6 +2665,12 @@ wndMain = {
         onclick = killLocalPlayer,
         text = 'KILL',
         width = 65
+    }, {
+        'btn',
+        id = 'removejetpack',
+        onclick = removeLocalJetpack,
+        text = 'REMOVE JETPACK',
+        width = 125
     }, {'br'}, {'br'}, -- PERKS
     {
         'lbl',

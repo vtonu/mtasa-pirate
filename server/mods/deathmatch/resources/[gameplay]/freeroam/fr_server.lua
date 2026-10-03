@@ -797,3 +797,11 @@ function handleSuicide()
 end
 addEvent('onFreeroamSuicide', true)
 addEventHandler('onFreeroamSuicide', root, handleSuicide)
+
+addEvent('onFreeroamRemoveJetpack', true)
+addEventHandler('onFreeroamRemoveJetpack', root, function()
+    if not client or source ~= client or not isPedWearingJetpack(client) then
+        return
+    end
+    setPedWearingJetpack(client, false)
+end)
