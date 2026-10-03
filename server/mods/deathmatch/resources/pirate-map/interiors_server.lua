@@ -34,8 +34,8 @@ local rooms = {
     },
     covealot = {
         entrances = {"markerCovealot"},
-        exitID = "covealotExitMarker", interior = 5, dimension = 12018,
-        x = 1260.58, y = -785.31, z = 1090.96, spawnX = 1263.58, spawnY = -785.31, rotation = 270,
+        exitID = "covealotExitMarker", interior = 12, dimension = 12018,
+        x = 1133.25, y = -15.26, z = 1000.68, spawnX = 1133.25, spawnY = -12.76, rotation = 0,
         blip = "markerCovealot"
     }
 }
