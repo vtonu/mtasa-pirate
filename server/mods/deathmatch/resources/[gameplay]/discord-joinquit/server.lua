@@ -31,7 +31,7 @@ sendNext = function()
     busy = true
     local entry = queue[1]
     local payload = toJSON({
-        content = "```text\n" .. entry.message .. "\n```",
+        content = entry.message,
         allowed_mentions = { parse = {} }
     }, true)
     local request = fetchRemote(DISCORD_WEBHOOK_URL, {
@@ -90,7 +90,7 @@ local function enqueue(message)
         logError("log queue full; dropped a new log")
         return
     end
-    queue[#queue + 1] = { message = message, attempts = 0 }
+    queue[#queue + 1] = { message = utf8.sub(message, 1, 1900), attempts = 0 }
     sendNext()
 end
 
@@ -105,11 +105,84 @@ addEventHandler("onResourceStart", resourceRoot, function()
         return
     end
     ready = true
+    for _, player in ipairs(getElementsByType("player")) do
+        resendPlayerACInfo(player)
+    end
 end)
 
 addEventHandler("onPlayerJoin", root, function()
     enqueue(timestamp() .. " JOIN: " .. cleanText(getPlayerName(source))
         .. " joined the game (IP: " .. cleanText(getPlayerIP(source)) .. ")")
+end)
+
+local alertTimes = {}
+local alertCount = 0
+
+setTimer(function()
+    local now = getTickCount()
+    for key, time in pairs(alertTimes) do
+        if now - time >= 30000 then
+            alertTimes[key] = nil
+        end
+    end
+    alertCount = 0
+end, 60000, 0)
+
+local function alert(category, key, message)
+    if not ready or alertCount >= 30 then
+        return
+    end
+    local now = getTickCount()
+    if alertTimes[key] and now - alertTimes[key] < 30000 then
+        return
+    end
+    alertTimes[key] = now
+    alertCount = alertCount + 1
+    enqueue(timestamp() .. " " .. category .. ": " .. cleanText(message))
+end
+
+local function suspicious(player, kind, details)
+    alert("SUSPICIOUS", getPlayerSerial(player) .. ":" .. kind,
+        cleanText(getPlayerName(player)) .. " - " .. kind .. " (" .. details .. ")")
+end
+
+addEventHandler("onPlayerACInfo", root, function(codes)
+    if type(codes) == "table" and #codes > 0 then
+        suspicious(source, "anti-cheat report", "codes: " .. table.concat(codes, ", "))
+    end
+end)
+
+local version = getVersion().sortable
+if version >= "1.6.0-9.22459" then
+    addEventHandler("onPlayerTriggerInvalidEvent", root, function(eventName, isAdded, isRemote)
+        suspicious(source, "invalid event", cleanText(eventName)
+            .. "; registered: " .. tostring(isAdded) .. "; remote: " .. tostring(isRemote))
+    end)
+end
+
+if version >= "1.6.0-9.22313" then
+    addEventHandler("onPlayerTriggerEventThreshold", root, function(eventName)
+        suspicious(source, "event spam", "last event: " .. cleanText(eventName or "unknown"))
+    end)
+end
+
+if version >= "1.6.0-9.22790" then
+    addEventHandler("onPlayerChangesProtectedData", root, function(element, key)
+        suspicious(source, "protected data change", "key: " .. cleanText(key))
+    end)
+end
+
+addEventHandler("onDebugMessage", root, function(message, level, file, line)
+    if level ~= 1 and level ~= 2 then
+        return
+    end
+    if tostring(message):find("[discord-joinquit]", 1, true)
+        or tostring(file):find("discord-joinquit", 1, true) then
+        return
+    end
+    local location = file and (cleanText(file) .. ":" .. tostring(line or "?")) or "server"
+    alert(level == 1 and "ERROR" or "WARNING", location .. ":" .. tostring(message),
+        location .. " - " .. cleanText(message))
 end)
 
 addEventHandler("onPlayerQuit", root, function(quitType)
