@@ -1,5 +1,30 @@
 local WAIT_LOAD_INTERVAL = 100 --ms
 
+function isSafeEditorDeleteTarget(element)
+    if not isElement(element) or not isElement(mapContainer) then return false end
+    local elementType = getElementType(element)
+    if element == mapContainer or elementType == "root" or elementType == "resource"
+        or elementType == "map" or elementType == "mapContainer" or elementType == "player" then
+        return false
+    end
+    local parent = getElementParent(element)
+    while parent and parent ~= mapContainer do
+        parent = getElementParent(parent)
+    end
+    if parent ~= mapContainer or getElementData(element, "edf:rep", false) then return false end
+
+    local function hasOtherMapItems(base)
+        for _, child in ipairs(getElementChildren(base)) do
+            local representation = getElementData(child, "edf:rep", false)
+            local lod = getElementType(base) == "object" and getLowLODElement(base) == child
+            if not representation and not lod then return true end
+            if hasOtherMapItems(child) then return true end
+        end
+        return false
+    end
+    return not hasOtherMapItems(element)
+end
+
 function makeElementStatic(element)
 	if getElementType(element) == "vehicle" then
 		triggerClientEvent(root, "doSetVehicleStatic", element)
@@ -84,6 +109,10 @@ addEventHandler ( "doCloneElement", root,
 
 addEventHandler ( "doDestroyElement", root,
 	function (forced)
+        if not isSafeEditorDeleteTarget(source) then
+            if client then editor_gui.outputMessage("Delete blocked: select one map item without other map items inside it.", client, 255, 0, 0) end
+            return
+        end
 		if client and not isPlayerAllowedToDoEditorAction(client,"deleteElement") then
 			editor_gui.outputMessage ("You don't have permissions to delete an element!", client,255,0,0)
 			return

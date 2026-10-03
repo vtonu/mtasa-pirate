@@ -214,6 +214,7 @@ local function getElementsWithParent(element, base, res)
 	return res
 end
 function ActionDestroy:setElement(element)
+	if not isSafeEditorDeleteTarget(element) then return false end
 	if (element and isElement(element)) then
 		self.element = element
 		local setDimension = edf.edfSetElementDimension(self.element, DESTROYED_ELEMENT_DIMENSION)
@@ -263,6 +264,7 @@ function ActionDestroy:performUndo()
 end
 
 function ActionDestroy:performRedo()
+	if not isSafeEditorDeleteTarget(self.element) then return false end
 	if (self.element and isElement(self.element)) then
 		edf.edfSetElementDimension(self.element, DESTROYED_ELEMENT_DIMENSION)
 		triggerEvent("onElementDestroy", self.element)

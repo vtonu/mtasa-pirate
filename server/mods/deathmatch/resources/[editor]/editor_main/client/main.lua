@@ -999,6 +999,12 @@ function destroySelectedElement(key)
 	end
 	if g_selectedElement then
 		local element = g_selectedElement
+		local elementType = getElementType(element)
+		if elementType == "root" or elementType == "resource" or elementType == "map"
+			or elementType == "mapContainer" or elementType == "player" then
+			outputDebugString("Delete blocked: select one map item.")
+			return false
+		end
 		dropElement(false)
 
 		-- fix for local elements
