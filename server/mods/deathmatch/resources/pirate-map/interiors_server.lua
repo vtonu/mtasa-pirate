@@ -24,12 +24,13 @@ local rooms = {
     camelToe = {
         entrances = {"markerCamelEntrance"},
         exitID = "camelToeExitMarker", interior = 10, dimension = 12016,
-        x = 2018.95, y = 1017.09, z = 996.875, spawnX = 2015.95, spawnY = 1017.09, rotation = 90
+        x = 2018.95, y = 1017.09, z = 996.875, spawnX = 2015.95, spawnY = 1017.09, rotation = 90,
+        blip = "markerCamelEntrance"
     },
     autoBahn = {
         entrances = {"markerAutoBahn"},
         exitID = "autoBahnExitMarker", interior = 3, dimension = 12017,
-        x = 614.389, y = -124.099, z = 997.995, spawnX = 614.389, spawnY = -121.099, rotation = 0
+        x = 620.06232, y = -120.61650, z = 998.84753, spawnX = 617.06232, spawnY = -120.61650, rotation = 90
     }
 }
 local returnPoints = {}
