@@ -30,7 +30,8 @@ local function onPlayerLeaveGarden(leftElement, matchingDimension)
 end
 
 addEventHandler("onResourceStart", resourceRoot, function()
-    createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 127, 255, 212, 150)
+    local gardenMarker = createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 127, 255, 212, 150)
+    createBlipAttachedTo(gardenMarker, 63, 2, 255, 255, 255, 255, 0, 65535)
     gardenCol = createColSphere(MARKER_X, MARKER_Y, MARKER_Z, SHOP_COL_RADIUS)
     addEventHandler("onColShapeHit", gardenCol, onPlayerEnterGarden)
     addEventHandler("onColShapeLeave", gardenCol, onPlayerLeaveGarden)

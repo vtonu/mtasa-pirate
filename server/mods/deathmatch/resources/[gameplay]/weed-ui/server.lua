@@ -341,7 +341,7 @@ local function sendShopMessage(player, message, resetSelection)
 end
 
 local function sendWeedNotification(player, message)
-    triggerClientEvent(player, "weedGarden:notification", resourceRoot, message)
+    outputChatBox(message, player, 127, 255, 212)
 end
 
 local function restorePlayerPerks(player)
