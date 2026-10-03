@@ -1,0 +1,8 @@
+<meta>
+    <info name="discord-joinquit" description="Discord join and quit logs" type="script" version="1.0.0" />
+    <script src="config.lua" type="server" />
+    <script src="server.lua" type="server" />
+    <aclrequest>
+        <right name="function.fetchRemote" access="true" />
+    </aclrequest>
+</meta>
