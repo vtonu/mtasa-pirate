@@ -354,7 +354,7 @@ end
 
 local function sendSettings(player, settingPlayer, settings)
 
-    if not player and isElement(player) then
+    if not isElement(player) or not isElement(settingPlayer) then
         return
     end
 
