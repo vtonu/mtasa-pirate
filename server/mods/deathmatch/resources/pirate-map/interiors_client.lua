@@ -3,6 +3,8 @@ local rooms = {
     {id = "ammuOld", entrances = {"markerAmmuOld", "markerAmmuOld2", "markerAmmuOld3"}, exitID = "ammuOldExitMarker"},
     {id = "ammuLS", entrances = {"ammuNationLSOG"}, exitID = "ammuLSExitMarker"},
     {id = "ammuSouthLS", entrances = {"ammuNationSouthLS"}, exitID = "ammuSouthLSExitMarker"},
+    {id = "ammuSouthLSRange", entrances = {"ammuSouthLSRangeEntrance"}, exitID = "ammuSouthLSRangeExit"},
+    {id = "ammuSouthLSFloor", entrances = {"ammuSouthLSFloorEntrance"}, exitID = "ammuSouthLSFloorExit"},
     {id = "ammuSF", entrances = {"ammuNationSF"}, exitID = "ammuSFExitMarker"},
     {id = "ammuTR", entrances = {"ammuNationTR"}, exitID = "ammuTRExitMarker"},
     {id = "ammuBC", entrances = {"ammuNationBC"}, exitID = "ammuBCExitMarker"},
@@ -27,7 +29,9 @@ local function getNearbyDoor()
     local doors = {}
     for _, room in ipairs(rooms) do
         if not isElement(casinoMarkers[room.exitID]) then casinoMarkers[room.exitID] = getElementByID(room.exitID) end
-        local distance = (room.id == "ammuBCRange" or room.id == "ammuBCFloor") and 0.7 or 1.8
+        local distance = (room.id == "ammuBCRange" or room.id == "ammuBCFloor"
+            or room.id == "ammuSouthLS" or room.id == "ammuSouthLSRange"
+            or room.id == "ammuSouthLSFloor") and 0.7 or 1.8
         doors[#doors + 1] = {casinoMarkers[room.exitID], "exit", room.id, distance}
         for _, id in ipairs(room.entrances) do
             if not isElement(casinoMarkers[id]) then casinoMarkers[id] = getElementByID(id) end
@@ -35,16 +39,20 @@ local function getNearbyDoor()
         end
     end
     local x, y, z = getElementPosition(localPlayer)
+    local nearestDoor, nearestDistance
     for _, door in ipairs(doors) do
         local marker = door[1]
         if isElement(marker) and getElementDimension(localPlayer) == getElementDimension(marker)
             and getElementInterior(localPlayer) == getElementInterior(marker) then
             local mx, my, mz = getElementPosition(marker)
-            if getDistanceBetweenPoints2D(x, y, mx, my) <= door[4] and math.abs(z - mz) <= 2 then
-                return door[2], door[3]
+            local distance = getDistanceBetweenPoints2D(x, y, mx, my)
+            if distance <= door[4] and math.abs(z - mz) <= 2
+                and (not nearestDistance or distance < nearestDistance) then
+                nearestDoor, nearestDistance = door, distance
             end
         end
     end
+    if nearestDoor then return nearestDoor[2], nearestDoor[3] end
 end
 
 bindKey("h", "down", function()

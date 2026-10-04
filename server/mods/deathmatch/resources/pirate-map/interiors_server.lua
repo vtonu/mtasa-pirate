@@ -20,8 +20,26 @@ local rooms = {
     ammuSouthLS = {
         entrances = {"ammuNationSouthLS"},
         exitID = "ammuSouthLSExitMarker", interior = 1, dimension = 12022,
-        x = 286.45490, y = -40.92108, z = 1001.5162, spawnX = 286.45490, spawnY = -38.42108, rotation = 0,
+        x = 285.40073, y = -41.13444, z = 1001.51562, spawnX = 285.40073, spawnY = -39.63444, rotation = 0,
         blip = "ammuNationSouthLS", blipIcon = 6
+    },
+    ammuSouthLSRange = {
+        entrances = {"ammuSouthLSRangeEntrance"}, exitID = "ammuSouthLSRangeExit",
+        interior = 1, dimension = 12022, internal = true,
+        entranceX = 286.45490, entranceY = -40.92108, entranceZ = 1001.51562,
+        x = 286.45490, y = -42.92108, z = 1001.51562,
+        spawnX = 286.45490, spawnY = -44.42108, rotation = 180,
+        returnPoint = {x = 286.45490, y = -39.92108, z = 1001.51562,
+            rotation = 0, interior = 1, dimension = 12022}
+    },
+    ammuSouthLSFloor = {
+        entrances = {"ammuSouthLSFloorEntrance"}, exitID = "ammuSouthLSFloorExit",
+        interior = 1, dimension = 12022, internal = true,
+        entranceX = 286.45490, entranceY = -46.42108, entranceZ = 1001.51562,
+        x = 286.45490, y = -49.42108, z = 1001.51562,
+        spawnX = 286.45490, spawnY = -50.92108, rotation = 180,
+        returnPoint = {x = 286.45490, y = -45.42108, z = 1001.51562,
+            rotation = 0, interior = 1, dimension = 12022}
     },
     ammuSF = {
         entrances = {"ammuNationSF"},
@@ -121,7 +139,8 @@ local function isNearDoor(player, marker, roomID)
         or getElementInterior(player) ~= getElementInterior(marker) then return false end
     local x, y, z = getElementPosition(player)
     local mx, my, mz = getElementPosition(marker)
-    local distance = (roomID == "ammuBCRange" or roomID == "ammuBCFloor") and 0.7 or 1.8
+    local room = rooms[roomID]
+    local distance = (room and room.internal or roomID == "ammuSouthLS") and 0.7 or 1.8
     return getDistanceBetweenPoints2D(x, y, mx, my) <= distance and math.abs(z - mz) <= 2
 end
 
