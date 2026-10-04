@@ -7,35 +7,6 @@ local PLAYER_SPAWN_FREEZE_MS = 1000
 local PLAYER_FADE_TIME_SECONDS = 1
 local pendingPlayerRespawns = {}
 
-local function getRandomPlayerSpawn()
-    if type(playerSpawns) == "table" and #playerSpawns > 0 then
-        return playerSpawns[math.random(#playerSpawns)]
-    end
-
-    return playerSpawn
-end
-
-local function getNearestPlayerSpawn(posX, posY, posZ)
-    if type(playerSpawns) ~= "table" or #playerSpawns == 0 then
-        return playerSpawn
-    end
-
-    local nearestSpawn = playerSpawns[1]
-    local nearestDistance = false
-
-    for i = 1, #playerSpawns do
-        local spawnData = playerSpawns[i]
-        local distance = getDistanceBetweenPoints3D(posX, posY, posZ, spawnData.x, spawnData.y, spawnData.z)
-
-        if not nearestDistance or distance < nearestDistance then
-            nearestDistance = distance
-            nearestSpawn = spawnData
-        end
-    end
-
-    return nearestSpawn
-end
-
 local function setPlayerSpawnProtection(playerElement, state)
     setElementFrozen(playerElement, state)
 
@@ -54,7 +25,7 @@ function playSpawnPlayer(playerElement, spawnData)
     initPlayerStats(playerElement)
     fadeCamera(playerElement, false, PLAYER_FADE_TIME_SECONDS)
 
-    spawnData = spawnData or getRandomPlayerSpawn()
+    spawnData = spawnData or playerSpawn
 
     -- SPAWN POSITION
     spawnPlayer(playerElement, spawnData.x, spawnData.y, spawnData.z, spawnData.rotation or playerSpawn.rotation,
@@ -155,10 +126,7 @@ function onPlayerWasted(totalAmmo, killerElement)
     onPlayerStatsWasted(killerElement)
     clearPendingPlayerRespawn(source, true)
 
-    local posX, posY, posZ = getElementPosition(source)
-    local nearestSpawn = getNearestPlayerSpawn(posX, posY, posZ)
-
-    setTimer(showPlayerRespawnPrompt, PLAYER_RESPAWN_DELAY_MS, 1, source, nearestSpawn)
+    setTimer(showPlayerRespawnPrompt, PLAYER_RESPAWN_DELAY_MS, 1, source, playerSpawn)
 end
 
 function onPlayerRespawnRequest()

@@ -15,7 +15,7 @@ pickupSpawns = {{"health", 2146, 1683.3000488281, 10.800000190735}, -- red healt
 {"armor", 2144.3000488281, 1683.3000488281, 13.300000190735}, -- armor icon near fountain
 {"loco", 2025.3000488281, 1552.8000488281, 11.39999961853}} -- loco skull at pirates in men's pants
 
--- PLAYER SPAWN FALLBACK
+-- PLAYER SPAWN
 playerSpawn = {
     x = 2163.10,
     y = 1682.55,
@@ -23,45 +23,6 @@ playerSpawn = {
     rotation = 90,
     skin = 303 -- Andre
 }
-
--- PLAYER SPAWNS
-playerSpawns = {{
-    x = 2163.10,
-    y = 1682.55,
-    z = 10.82,
-    rotation = 90,
-    name = "Caligula's Palace"
-}, {
-    x = 1970.145,
-    y = 1623.144,
-    z = 12.863,
-    rotation = 0,
-    name = "Pirate in Men's Pants Casino Entrance"
-}, {
-    x = 2222.357,
-    y = 1838.855,
-    z = 10.820,
-    rotation = 0,
-    name = "The Clown's Pocket"
-}, {
-    x = 2027.691,
-    y = 1916.023,
-    z = 12.328,
-    rotation = 0,
-    name = "The Visage"
-}, {
-    x = 2236.576,
-    y = 1285.966,
-    z = 10.820,
-    rotation = 0,
-    name = "The Camel's Toe"
-}, {
-    x = 1957.339,
-    y = 1343.005,
-    z = 15.375,
-    rotation = 0,
-    name = "The High Roller"
-}}
 
 playWorldSettings = {
     gameType = "Custom",

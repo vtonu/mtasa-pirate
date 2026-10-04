@@ -1,8 +1,8 @@
 -- WALK-THROUGH OBJECT IDS
 local objectIds = {
     greenGulp = true,
-    greenGloop = true,
-    greenCapsule = true
+    greenGloopWeed = true,
+    greenCapsuleParachute = true
 }
 
 -- WALK-THROUGH MODEL IDS
