@@ -41,6 +41,15 @@ local rooms = {
         x = 315.385, y = -142.242, z = 999.601, spawnX = 315.385, spawnY = -139.742, rotation = 0,
         blip = "ammuNationBC", blipIcon = 6
     },
+    ammuBCRange = {
+        entrances = {"ammuBCRangeEntrance"}, exitID = "ammuBCRangeExit",
+        interior = 7, dimension = 12025, internal = true,
+        entranceX = 305.58911, entranceY = -141.97321, entranceZ = 1004.06250,
+        x = 302.5, y = -141.97321, z = 1004.06250,
+        spawnX = 301.5, spawnY = -141.97321, rotation = 90,
+        returnPoint = {x = 306.5, y = -141.97321, z = 1004.06250,
+            rotation = 270, interior = 7, dimension = 12025}
+    },
     ammuEastBC = {
         entrances = {"ammuNationEastBC"},
         exitID = "ammuEastBCExitMarker", interior = 6, dimension = 12026,
@@ -146,7 +155,9 @@ local function useDoor(player, marker, destination, entering, roomID)
             return
         end
         returnPlayer(player, destination)
-        returnPoints[player] = entering and origin or nil
+        if not rooms[roomID].internal then
+            returnPoints[player] = entering and origin or nil
+        end
         transition.timers[2] = setTimer(function()
             if doorTransitions[player] ~= transition then return end
             if not isElement(player) or isPedDead(player) then
@@ -176,6 +187,15 @@ addEventHandler("onResourceStart", resourceRoot, function()
         setElementCollisionsEnabled(barrier, true)
     end
     for _, room in pairs(rooms) do
+        if room.internal then
+            local marker = createMarker(room.entranceX, room.entranceY, room.entranceZ + 0.6,
+                "arrow", 1, 4, 210, 193, 255)
+            if isElement(marker) then
+                setElementID(marker, room.entrances[1])
+                setElementInterior(marker, room.interior)
+                setElementDimension(marker, room.dimension)
+            end
+        end
         local entrance = room.blip and getElementByID(room.blip)
         if isElement(entrance) then
             local blip = createBlipAttachedTo(entrance, room.blipIcon or 44, 2, 255, 255, 255, 255, 0, 65535)
@@ -217,9 +237,9 @@ addEventHandler("royalCasino:useDoor", resourceRoot, function(door, roomID)
             interior = room.interior, dimension = room.dimension
         }, true, roomID)
     elseif door == "exit" then
-        local point = returnPoints[client]
+        local point = room.internal and room.returnPoint or returnPoints[client]
         if not isNearDoor(client, room.exitMarker) then return end
-        if not point or point.roomID ~= roomID then return end
+        if not point or (not room.internal and point.roomID ~= roomID) then return end
         useDoor(client, room.exitMarker, point, false, roomID)
     end
 end)
