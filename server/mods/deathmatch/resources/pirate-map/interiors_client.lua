@@ -53,7 +53,7 @@ local function getNearbyDoor()
             local mx, my, mz = getElementPosition(marker)
             local side = getElementData(marker, "pirate.doorSide")
             local distance = getDistanceBetweenPoints2D(x, y, mx, my)
-            if distance <= door[4] and math.abs(z - mz) <= 2
+            if distance <= (getElementData(marker, "pirate.doorDistance") or door[4]) and math.abs(z - mz) <= 2
                 and (not side or (y - side.y) * side.sign > 0)
                 and (not nearestDistance or distance < nearestDistance) then
                 nearestDoor, nearestDistance = door, distance
