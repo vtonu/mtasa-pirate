@@ -1847,6 +1847,38 @@ eC.blipID = {
 	end,
 }
 
+eC.propertyToggle = {
+	default = eC.boolean.default,
+	constructor = function(self, info)
+		local value = rawget(info, "value")
+		if value == nil and info.validvalues then value = info.validvalues[1] end
+		self.GUI.checkbox = guiCreateCheckBox(info.x, info.y, info.width, info.height, info.label,
+			value == "true" or value == true, info.relative, info.parent)
+		self:updateColor()
+		self:setChangeHandler("onClientGUIClick", self.GUI.checkbox, function(control, button)
+			if button == "left" then
+				self:updateColor()
+				self:callChangeHandlers()
+			end
+		end, false)
+		return self
+	end,
+	updateColor = function(self)
+		guiSetProperty(self.GUI.checkbox, "NormalTextColour",
+			guiCheckBoxGetSelected(self.GUI.checkbox) and "FF66D9A0" or "FFFFFFFF")
+	end,
+	setValue = function(self, value)
+		local result = guiCheckBoxSetSelected(self.GUI.checkbox, value == "true" or value == true)
+		self:updateColor()
+		self:callChangeHandlers()
+		return result
+	end,
+	getValue = function(self)
+		return guiCheckBoxGetSelected(self.GUI.checkbox) and "true" or "false"
+	end,
+	focus = eC.boolean.focus,
+}
+
 eC.selection = {
 	default = eC.dropdown.default,
 	constructor = function( self, info )

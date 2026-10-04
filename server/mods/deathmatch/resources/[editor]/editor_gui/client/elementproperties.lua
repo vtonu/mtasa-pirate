@@ -39,9 +39,9 @@ layout.pullout = {
 	width = 120, --px
 	height = 70, --px
 	items = {
+		"CopyPOS",
 		"Clone",
 		"Delete",
-		"CopyPOS",
 	}
 }
 layout.line = {
@@ -113,17 +113,22 @@ local function propertyPlacement(field)
 	local width = layout.pane.width
 	local elementType = selectedElement and getElementType(selectedElement) or newElementType
 	if field == "model" then
-		return {x = width * 0.72, y = 25, width = width * 0.28 - 15, labelX = width * 0.66, labelY = 25, height = 23}
+		return {x = width * 0.72, y = 25, width = width * 0.28 - 10, labelX = width * 0.67, labelY = 25, height = 23}
 	elseif field == "position" or field == "rotation" then
 		local x = field == "position" and 10 or math.floor(width / 2)
 		return {x = x + 65, y = 60, width = width / 2 - 80, labelX = x, labelY = 60, height = 23, horizontal = true}
 	elseif elementType == "object" then
-		local left = {interior = 0, dimension = 1, alpha = 2, collisions = 3, frozen = 4, ["locked-s"] = 5, scale = 6}
-		local right = {doublesided = 0, breakable = 1, moveX = 2, moveY = 3, moveZ = 4, moveSpeed = 5, moveDelay = 6}
+		local toggles = {collisions = 0, frozen = 1, doublesided = 2, breakable = 3, ["locked-s"] = 4}
+		if toggles[field] then
+			local x = math.floor(width * 0.72)
+			return {x = x, y = 125 + toggles[field] * 28, width = width - x - 10, labelX = x, labelY = 125 + toggles[field] * 28, height = 23}
+		end
+		local left = {interior = 0, dimension = 1, alpha = 2, scale = 3}
+		local right = {moveX = 0, moveY = 1, moveZ = 2, moveSpeed = 3, moveDelay = 4}
 		local row = left[field] or right[field]
 		if row then
-			local x = left[field] and 10 or math.floor(width / 2)
-			return {x = x + 100, y = 125 + row * 28, width = math.min(130, width / 2 - 120), labelX = x, labelY = 125 + row * 28, height = 23}
+			local x = left[field] and 10 or math.floor(width * 0.36)
+			return {x = x + 85, y = 125 + row * 28, width = math.min(150, width * 0.36 - 105), labelX = x, labelY = 125 + row * 28, height = 23}
 		end
 	elseif elementType == "vehicle" then
 		local color = tonumber(field:match("^color(%d)$"))
@@ -241,7 +246,7 @@ function createPropertiesBox()
 	edtID = guiCreateEdit(
 		100,
 		layout.padding.top,
-		layout.pane.width * 0.25 - 100,
+		layout.pane.width * 0.35 - 110,
 		layout.label.height,
 		"",
 		layout.relative,
@@ -264,9 +269,11 @@ function createPropertiesBox()
 	guiLabelSetColor( lblParentCaption, layout.label.R, layout.label.G, layout.label.B )
 
 	cntParent = editingControl.element:create{
-		x = layout.pane.width * 0.33,
+		x = layout.pane.width * 0.35 + 55,
 		y = layout.padding.top,
-		width = layout.pane.width * 0.31,
+		width = layout.pane.width * 0.32 - 65,
+		editWidth = .60,
+		clearButtonWidth = .10,
 		relative = layout.relative,
 		parent = spnProperties,
 	}
@@ -276,8 +283,8 @@ function createPropertiesBox()
 	guiSetPosition(lblType, 10, 25, false)
 	guiSetPosition(lblIDCaption, 75, 25, false)
 	guiSetSize(lblIDCaption, 25, 23, false)
-	guiSetPosition(lblParentCaption, layout.pane.width * 0.26, 25, false)
-	guiSetSize(lblParentCaption, layout.pane.width * 0.07, 23, false)
+	guiSetPosition(lblParentCaption, layout.pane.width * 0.35, 25, false)
+	guiSetSize(lblParentCaption, 55, 23, false)
 
 	tooltipParent = tooltip.Create(0, 0, DEFAULT_PARENT_TEXT)
 
@@ -302,7 +309,7 @@ function createPropertiesBox()
 	)
 
 	btnCancel = guiCreateButton(
-		layout.padding.left + layout.button.width + 10,
+		layout.window.width - layout.button.width - 10,
 		layout.window.height - layout.padding.bottom,
 		layout.button.width,
 		layout.button.height,
@@ -351,10 +358,7 @@ function createPropertiesBox()
 	guiSetVisible(btnOK, false)
 	guiSetVisible(btnPullout, false)
 	for index, name in ipairs(layout.pullout.items) do
-		local copyPosition = name == "CopyPOS"
-		local x = copyPosition and 10 or layout.window.width - (3 - index) * 85 - 10
-		local y = copyPosition and 90 or layout.window.height - layout.padding.bottom
-		local button = guiCreateButton(x, y, 80, 20, name, false, copyPosition and spnProperties or wndProperties)
+		local button = guiCreateButton(10 + (index - 1) * 90, 90, 80, 20, name, false, spnProperties)
 		actionButtons[index] = button
 		addEventHandler("onClientGUIClick", button, function(mouseButton)
 			if mouseButton == "left" then pulloutAction[name]() end
@@ -424,6 +428,11 @@ end
 
 --this function creates a new editing control and attaches it to the properties window
 local function addPropertyControl( controlType, controlLabelName, controlDescription, propertyApplier, addedParameters )
+	local elementType = selectedElement and getElementType(selectedElement) or newElementType
+	local toggleFields = {collisions = true, frozen = true, doublesided = true, breakable = true}
+	if controlType == "selection" and (controlLabelName == "locked-s" or (elementType == "object" and toggleFields[controlLabelName])) then
+		controlType = "propertyToggle"
+	end
 	local controlPrototype = editingControl[controlType]
 
 	-- if the control type exists,
@@ -456,7 +465,7 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 			end
 		end
 
-		local placement = propertyPlacement(addedParameters and addedParameters.datafield or controlLabelName)
+		local placement = propertyPlacement(controlLabelName == "locked-s" and "locked-s" or (addedParameters and addedParameters.datafield or controlLabelName))
 		local parameters = {
 			x = layout.control.x,
 			y = propertiesYPos,
@@ -558,6 +567,7 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 		guiLabelSetVerticalAlign ( controlLabel, "center" ) -- align it to the vertical center
 		guiLabelSetColor( controlLabel, layout.label.R, layout.label.G, layout.label.B ) -- colour it as the rest of labels
 		caption[newControl] = controlLabel
+		if controlType == "propertyToggle" then guiSetVisible(controlLabel, false) end
 
 		-- Create the description tooltip
 		if controlDescription and type(controlDescription) == "string" then
@@ -897,12 +907,13 @@ function openPropertiesBox( element, resourceName, shortcut )
 		-- `locked` is reserved for vehicles
 		addPropertyControl("selection", "locked-s", "Locked selection", function (control) exports.editor_main:lockSelectedElement(selectedElement, control:getValue() == "true" or false) end, {value = exports.editor_main:isElementLocked(selectedElement) and "true" or "false", validvalues = {"false","true"}, datafield = "locked"})
 
-		creatingNewElment = false
+		creatingNewElement = false
 		syncPropertiesCallback = applyPropertiesChanges
 		setPropertiesChanged(false)
 	end
 
 	--Hack to ensure the OK button doesn't get pressed immediately if the properties box is opened whilst the cursor is over the OK button
+	guiSetVisible(btnCancel, true)
 	if not getKeyState ( "mouse1" ) then --If the left mouse key isnt being pressed, we're okay to allow the OK button to be pressed
 		addEventHandler( "onClientGUIClick", btnOK, toggleProperties, false )
 	else --Otherwise, we attach a handler which waits for the left mouse button to be released before activating the OK button
@@ -972,11 +983,11 @@ function setPropertiesChanged(newState)
 
 	if newState == true then
 		guiSetVisible(btnApply, true)
-		guiSetVisible(btnCancel, not creatingNewElement)
+		guiSetVisible(btnCancel, true)
 		guiSetVisible(btnOK, false)
 	else
 		guiSetVisible(btnApply, false)
-		guiSetVisible(btnCancel, false)
+		guiSetVisible(btnCancel, true)
 		guiSetVisible(btnOK, true)
 	end
 
@@ -984,6 +995,12 @@ function setPropertiesChanged(newState)
 end
 
 function cancelProperties()
+	if creatingNewElement then
+		closePropertiesBox()
+		newElementType = nil
+		newElementResource = nil
+		return
+	end
 	undoProperties()
 	toggleProperties()
 end
@@ -1009,11 +1026,6 @@ end
 --Resize
 function propertiesResize()
 	local windowWidth,windowHeight = guiGetSize ( source, layout.relative )
-	for index = 1, 2 do
-		if isElement(actionButtons[index]) then
-			guiSetPosition(actionButtons[index], windowWidth - (3 - index) * 85 - 10, windowHeight - layout.padding.bottom, false)
-		end
-	end
 	local x, y = guiGetPosition(wndProperties, false)
 	guiSetPosition(wndProperties, x, math.max(0, math.min(y, screenY - windowHeight)), false)
 	--Resize the scrollpane
@@ -1049,7 +1061,7 @@ function propertiesResize()
 	)
 	guiSetPosition (
 		btnCancel,
-		layout.padding.left + layout.button.width + 10,
+		windowWidth - layout.button.width - 10,
 		windowHeight - layout.padding.bottom,
 		layout.relative
 	)
