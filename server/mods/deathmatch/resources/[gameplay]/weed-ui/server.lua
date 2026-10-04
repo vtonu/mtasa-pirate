@@ -344,6 +344,12 @@ local function sendWeedNotification(player, message)
     outputChatBox(message, player, 127, 255, 212)
 end
 
+local function isAircraft(vehicle)
+    if not isElement(vehicle) then return false end
+    local vehicleType = getVehicleType(vehicle)
+    return vehicleType == "Plane" or vehicleType == "Helicopter"
+end
+
 local function restorePlayerPerks(player)
     local active = playerPerks[player]
     if not active then
@@ -363,7 +369,7 @@ local function restorePlayerPerks(player)
             takeWeapon(player, active.weapon)
         end
 
-        setPedGravity(player, active.baseGravity or 0.008)
+        setPedGravity(player, isAircraft(getPedOccupiedVehicle(player)) and 0.008 or (active.baseGravity or 0.008))
         setPedWalkingStyle(player, active.baseWalkingStyle or 0)
         setPedFightingStyle(player, active.baseFightingStyle or 4)
 
@@ -424,7 +430,9 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
     playerPerks[player] = active
 
     local gravity = perks.gravity or baseGravity
-    if perks.drivingGravity and isPedInVehicle(player) and getPedOccupiedVehicleSeat(player) == 0 then
+    if isAircraft(getPedOccupiedVehicle(player)) then
+        gravity = 0.008
+    elseif perks.drivingGravity and isPedInVehicle(player) and getPedOccupiedVehicleSeat(player) == 0 then
         gravity = perks.drivingGravity
     end
     setPedGravity(player, gravity)
@@ -666,17 +674,22 @@ end)
 
 addEventHandler("onPlayerVehicleEnter", root, function(vehicle, seat)
     local perks = PERK_SETTINGS[getElementData(source, "weed.perk")]
-    if playerPerks[source] and perks and perks.drivingGravity and seat == 0 then
+    if isAircraft(vehicle) then
+        setPedGravity(source, 0.008)
+    elseif playerPerks[source] and perks and perks.drivingGravity and seat == 0 then
         setPedGravity(source, perks.drivingGravity)
     end
-end)
+end, true, "low")
 
 addEventHandler("onPlayerVehicleExit", root, function(vehicle, seat)
     local perks = PERK_SETTINGS[getElementData(source, "weed.perk")]
-    if playerPerks[source] and perks and perks.drivingGravity and seat == 0 then
+    if isAircraft(vehicle) then
+        local active = playerPerks[source]
+        setPedGravity(source, active and perks and (perks.gravity or active.baseGravity or 0.008) or 0.008)
+    elseif playerPerks[source] and perks and perks.drivingGravity and seat == 0 then
         setPedGravity(source, perks.gravity)
     end
-end)
+end, true, "low")
 
 addEventHandler("onPlayerWasted", root, function()
     restorePlayerPerks(source)
