@@ -581,7 +581,7 @@
     <marker id="markerCJHouse" type="cylinder" color="#17F5B4FF" size="1" interior="0" dimension="0" alpha="255" posX="2495.4004" posY="-1690.9004" posZ="13.7" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="markerAmmuOld" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="2177.6006" posY="962.09961" posZ="11.6" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="markerAmmuOld2" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="2158.7" posY="943.29999" posZ="11.6" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
-    <marker id="markerAmmuOld3" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="2176.8999" posY="923.90002" posZ="11.6" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="markerAmmuOld3" type="arrow" color="#04D2C1FF" size="1" interior="0" dimension="0" alpha="255" posX="2176.98608" posY="924.85376" posZ="11.6" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <object id="CJGarage" dimension="0" model="17950" interior="0" scale="1" alpha="255" frozen="false" collisions="true" doublesided="false" breakable="false" posX="2505.5" posY="-1689" posZ="14.7" rotX="0" rotY="0" rotZ="0"></object>
     <object id="object (CJ_CHICK_TABLE) (1)" dimension="0" model="2762" interior="0" scale="1" alpha="255" frozen="false" collisions="true" doublesided="false" breakable="false" posX="2499" posY="-1686.8" posZ="12.9" rotX="0" rotY="0" rotZ="10"></object>
     <object id="object (gb_foodwrap04) (1)" dimension="0" model="2866" interior="0" scale="1" alpha="255" frozen="false" collisions="true" doublesided="false" breakable="false" posX="2499.3999" posY="-1686.6" posZ="13.3" rotX="0" rotY="0" rotZ="0"></object>

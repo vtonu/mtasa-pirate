@@ -1,9 +1,22 @@
 local rooms = {
     ammuBlueberry = {
-        entrances = {"ammuNationRedCounty", "ammuNationRedCounty2", "ammuNationRedCounty3", "ammuNationRedCounty4"},
-        exitID = "ammuBlueberryExitMarker", interior = 6, dimension = 12029,
-        x = 296.95419, y = -111.67903, z = 1001.51562, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        entrances = {"ammuNationRedCounty", "ammuNationRedCounty2", "ammuNationRedCounty3"},
+        exitID = "ammuBlueberryExitMarker", interior = 7, dimension = 12029,
+        returnGroup = "ammuBlueberry",
+        x = 315.83853, y = -143.35983, z = 999.60156, spawnX = 315.385, spawnY = -139.742, rotation = 0,
         blip = "ammuNationRedCounty", blipIcon = 6
+    },
+    ammuBlueberryUpstairs = {
+        entrances = {"ammuNationRedCounty4"}, exitID = "ammuBlueberryUpstairsExit",
+        interior = 7, dimension = 12029, returnGroup = "ammuBlueberry",
+        x = 306.5, y = -141.97321, z = 1004.06250,
+        spawnX = 307.5, spawnY = -141.97321, rotation = 90
+    },
+    ammuBlueberryDirectRange = {
+        entrances = {"ammuNationRedCountyMiddle"}, exitID = "ammuBlueberryDirectRangeExit",
+        interior = 7, dimension = 12029, returnGroup = "ammuBlueberry",
+        x = 301.5, y = -141.97321, z = 1004.06250,
+        spawnX = 302.5, spawnY = -141.97321, rotation = 90
     },
     ammuPalomino = {
         entrances = {"palaminoAmmuFront", "palaminoAmmuBackdoor"},
@@ -26,7 +39,7 @@ local rooms = {
     ammuOld = {
         entrances = {"markerAmmuOld", "markerAmmuOld2", "markerAmmuOld3"},
         exitID = "ammuOldExitMarker", interior = 6, dimension = 12020,
-        x = 297.446, y = -109.968, z = 1001.516, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        x = 296.99658, y = -111.87418, z = 1001.51562, spawnX = 297.446, spawnY = -107.468, rotation = 0,
         blip = "markerAmmuOld", blipIcon = 6
     },
     ammuLS = {
@@ -91,27 +104,27 @@ local rooms = {
     },
     ammuBC = {
         entrances = {"ammuNationBCEntrance", "ammuNationBCBackdoor"},
-        exitID = "ammuBCExitMarker", interior = 7, dimension = 12025,
-        x = 315.83853, y = -143.35983, z = 999.60156, spawnX = 315.385, spawnY = -139.742, rotation = 0,
+        exitID = "ammuBCExitMarker", interior = 6, dimension = 12025,
+        x = 296.95419, y = -111.67903, z = 1001.51562, spawnX = 297.446, spawnY = -107.468, rotation = 0,
         blip = "ammuNationBCEntrance", blipIcon = 6
     },
-    ammuBCRange = {
-        entrances = {"ammuBCRangeEntrance"}, exitID = "ammuBCRangeExit",
-        interior = 7, dimension = 12025, internal = true,
+    ammuBlueberryRange = {
+        entrances = {"ammuBlueberryRangeEntrance"}, exitID = "ammuBlueberryRangeExit",
+        interior = 7, dimension = 12029, internal = true,
         entranceX = 305.58911, entranceY = -141.97321, entranceZ = 1004.06250,
         x = 304.31448, y = -141.94641, z = 1004.06250,
         spawnX = 301.5, spawnY = -141.97321, rotation = 90,
         returnPoint = {x = 306.5, y = -141.97321, z = 1004.06250,
-            rotation = 270, interior = 7, dimension = 12025}
+            rotation = 270, interior = 7, dimension = 12029}
     },
-    ammuBCFloor = {
-        entrances = {"ammuBCFloorEntrance"}, exitID = "ammuBCFloorExit",
-        interior = 7, dimension = 12025, internal = true,
+    ammuBlueberryFloor = {
+        entrances = {"ammuBlueberryFloorEntrance"}, exitID = "ammuBlueberryFloorExit",
+        interior = 7, dimension = 12029, internal = true,
         entranceX = 299.94708, entranceY = -141.97240, entranceZ = 1004.06250,
         x = 298.44708, y = -141.97240, z = 1004.06250,
         spawnX = 294.94708, spawnY = -141.97240, rotation = 90,
         returnPoint = {x = 300.74708, y = -141.97240, z = 1004.06250,
-            rotation = 270, interior = 7, dimension = 12025}
+            rotation = 270, interior = 7, dimension = 12029}
     },
     ammuEastBC = {
         entrances = {"ammuNationEastBCFront", "ammuNationEastBCBackdoor"},
@@ -227,7 +240,8 @@ local function useDoor(player, marker, destination, entering, roomID)
     local _, _, rotation = getElementRotation(player)
     local origin = {
         x = x, y = y, z = z, rotation = rotation,
-        interior = getElementInterior(player), dimension = getElementDimension(player), roomID = roomID
+        interior = getElementInterior(player), dimension = getElementDimension(player), roomID = roomID,
+        returnGroup = rooms[roomID].returnGroup
     }
     local transition = {timers = {}, frozen = isElementFrozen(player)}
     doorTransitions[player] = transition
@@ -345,7 +359,8 @@ addEventHandler("royalCasino:useDoor", resourceRoot, function(door, roomID)
     elseif door == "exit" then
         local point = room.internal and room.returnPoint or returnPoints[client]
         if not isNearDoor(client, room.exitMarker, roomID) then return end
-        if not point or (not room.internal and point.roomID ~= roomID) then return end
+        if not point or (not room.internal and point.roomID ~= roomID
+            and (not room.returnGroup or point.returnGroup ~= room.returnGroup)) then return end
         useDoor(client, room.exitMarker, point, false, roomID)
     end
 end)
