@@ -7,6 +7,7 @@ local rooms = {
     {id = "ammuTR", entrances = {"ammuNationTR"}, exitID = "ammuTRExitMarker"},
     {id = "ammuBC", entrances = {"ammuNationBC"}, exitID = "ammuBCExitMarker"},
     {id = "ammuBCRange", entrances = {"ammuBCRangeEntrance"}, exitID = "ammuBCRangeExit"},
+    {id = "ammuBCFloor", entrances = {"ammuBCFloorEntrance"}, exitID = "ammuBCFloorExit"},
     {id = "ammuEastBC", entrances = {"ammuNationEastBC"}, exitID = "ammuEastBCExitMarker"},
     {id = "royal", entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"}, exitID = "royalCasinoExitMarker"},
     {id = "highRoller", entrances = {"theHighRollerMarker"}, exitID = "highRollerExitMarker"},
@@ -26,10 +27,11 @@ local function getNearbyDoor()
     local doors = {}
     for _, room in ipairs(rooms) do
         if not isElement(casinoMarkers[room.exitID]) then casinoMarkers[room.exitID] = getElementByID(room.exitID) end
-        doors[#doors + 1] = {casinoMarkers[room.exitID], "exit", room.id}
+        local distance = (room.id == "ammuBCRange" or room.id == "ammuBCFloor") and 0.7 or 1.8
+        doors[#doors + 1] = {casinoMarkers[room.exitID], "exit", room.id, distance}
         for _, id in ipairs(room.entrances) do
             if not isElement(casinoMarkers[id]) then casinoMarkers[id] = getElementByID(id) end
-            doors[#doors + 1] = {casinoMarkers[id], "enter", room.id}
+            doors[#doors + 1] = {casinoMarkers[id], "enter", room.id, distance}
         end
     end
     local x, y, z = getElementPosition(localPlayer)
@@ -38,7 +40,7 @@ local function getNearbyDoor()
         if isElement(marker) and getElementDimension(localPlayer) == getElementDimension(marker)
             and getElementInterior(localPlayer) == getElementInterior(marker) then
             local mx, my, mz = getElementPosition(marker)
-            if getDistanceBetweenPoints2D(x, y, mx, my) <= 1.8 and math.abs(z - mz) <= 2 then
+            if getDistanceBetweenPoints2D(x, y, mx, my) <= door[4] and math.abs(z - mz) <= 2 then
                 return door[2], door[3]
             end
         end

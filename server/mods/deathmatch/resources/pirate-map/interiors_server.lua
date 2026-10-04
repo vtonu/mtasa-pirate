@@ -45,9 +45,18 @@ local rooms = {
         entrances = {"ammuBCRangeEntrance"}, exitID = "ammuBCRangeExit",
         interior = 7, dimension = 12025, internal = true,
         entranceX = 305.58911, entranceY = -141.97321, entranceZ = 1004.06250,
-        x = 302.5, y = -141.97321, z = 1004.06250,
+        x = 304.31448, y = -141.94641, z = 1004.06250,
         spawnX = 301.5, spawnY = -141.97321, rotation = 90,
         returnPoint = {x = 306.5, y = -141.97321, z = 1004.06250,
+            rotation = 270, interior = 7, dimension = 12025}
+    },
+    ammuBCFloor = {
+        entrances = {"ammuBCFloorEntrance"}, exitID = "ammuBCFloorExit",
+        interior = 7, dimension = 12025, internal = true,
+        entranceX = 299.94708, entranceY = -141.97240, entranceZ = 1004.06250,
+        x = 298.44708, y = -141.97240, z = 1004.06250,
+        spawnX = 294.94708, spawnY = -141.97240, rotation = 90,
+        returnPoint = {x = 300.74708, y = -141.97240, z = 1004.06250,
             rotation = 270, interior = 7, dimension = 12025}
     },
     ammuEastBC = {
@@ -106,13 +115,14 @@ local returnPoints = {}
 local doorCooldowns = {}
 local doorTransitions = {}
 
-local function isNearDoor(player, marker)
+local function isNearDoor(player, marker, roomID)
     if not isElement(marker) or isPedDead(player) or getPedOccupiedVehicle(player) then return false end
     if getElementDimension(player) ~= getElementDimension(marker)
         or getElementInterior(player) ~= getElementInterior(marker) then return false end
     local x, y, z = getElementPosition(player)
     local mx, my, mz = getElementPosition(marker)
-    return getDistanceBetweenPoints2D(x, y, mx, my) <= 1.8 and math.abs(z - mz) <= 2
+    local distance = (roomID == "ammuBCRange" or roomID == "ammuBCFloor") and 0.7 or 1.8
+    return getDistanceBetweenPoints2D(x, y, mx, my) <= distance and math.abs(z - mz) <= 2
 end
 
 local function returnPlayer(player, point)
@@ -150,7 +160,7 @@ local function useDoor(player, marker, destination, entering, roomID)
     fadeCamera(player, false, 0.25)
     transition.timers[1] = setTimer(function()
         if doorTransitions[player] ~= transition then return end
-        if not isElement(player) or not isNearDoor(player, marker) then
+        if not isElement(player) or not isNearDoor(player, marker, roomID) then
             clearDoorTransition(player)
             return
         end
@@ -226,7 +236,7 @@ addEventHandler("royalCasino:useDoor", resourceRoot, function(door, roomID)
         local entrance
         for _, id in ipairs(room.entrances) do
             local marker = getElementByID(id)
-            if isNearDoor(client, marker) then
+            if isNearDoor(client, marker, roomID) then
                 entrance = marker
                 break
             end
@@ -238,7 +248,7 @@ addEventHandler("royalCasino:useDoor", resourceRoot, function(door, roomID)
         }, true, roomID)
     elseif door == "exit" then
         local point = room.internal and room.returnPoint or returnPoints[client]
-        if not isNearDoor(client, room.exitMarker) then return end
+        if not isNearDoor(client, room.exitMarker, roomID) then return end
         if not point or (not room.internal and point.roomID ~= roomID) then return end
         useDoor(client, room.exitMarker, point, false, roomID)
     end
