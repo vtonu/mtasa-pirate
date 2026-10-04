@@ -53,6 +53,7 @@ local function getCoordsWithBoundingBox(origX, origY, origZ)
 end
 
 local function processCursorMove(absoluteX, absoluteY)
+	if not isEnabled or not isElement(selectedElement) then return end
 	if guiGetInputEnabled() or isMTAWindowActive() or getCommandState("mod_rotate") or getCommandState("mod_rotate_local") then return end
 	if not absoluteX or not absoluteY then
 		local relX, relY = getCursorPosition()
@@ -62,6 +63,7 @@ local function processCursorMove(absoluteX, absoluteY)
 	end
 	-- process line, checking for water and surfaces
 	local worldX, worldY, worldZ = getWorldFromScreenPosition(absoluteX, absoluteY, MAX_DISTANCE )
+	camX, camY, camZ = getCameraMatrix()
 	-- make sure there is a camera position
 	if camX and camY then
 		local surfaceFound, surfaceX, surfaceY, surfaceZ, element = processLineOfSight(camX, camY, camZ, worldX, worldY, worldZ, true, true, true, true, true, true, false, true, selectedElement)
@@ -130,6 +132,8 @@ local function processCursorMove(absoluteX, absoluteY)
 				setElementPosition(selectedElement, waterX, waterY, waterZ)
 			end
 		else -- in air
+			-- KEEP ARROWS IN PLACE WHEN THE CURSOR MISSES A SURFACE
+			if getElementType(selectedElement) == "marker" and (getMarkerType(selectedElement) == "arrow" or getElementData(selectedElement, "editor.arrowPreview")) then return end
 			local tempDistance = math.sqrt((worldX - camX)^2 + (worldY - camY)^2 + (worldZ - camZ)^2)
 			local distanceRatio = maxMoveDistance / tempDistance
 			local x = camX + (worldX - camX) * distanceRatio

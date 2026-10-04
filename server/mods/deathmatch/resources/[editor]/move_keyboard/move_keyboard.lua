@@ -103,6 +103,8 @@ local function onClientRender_keyboard()
 				movementType = MOVEMENT_MOVE
 			end
 
+			-- USE THE CURRENT POSITION AFTER PROPERTY EDITS
+			posX, posY, posZ = getElementPosition(selectedElement)
 			local tempX, tempY, tempZ = posX, posY, posZ
 			local camRotX, camRotY, camRotZ = getCameraRotation()
 			camRotZ = camRotZ%360

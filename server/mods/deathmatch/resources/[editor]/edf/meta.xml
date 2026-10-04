@@ -6,6 +6,7 @@
 	<script src="sharedutil.lua" type="shared" />
 	<script src="interface.lua" />
 	<script src="properties.lua" />
+	<script src="arrow_preview.lua" type="client" />
 	<script src="properties_client.lua" type="client" />
 	<script src="datatypes.lua" />
 	<script src="edf.lua" />

@@ -6,6 +6,9 @@ local height = 1
 local dimensionElement
 local callbackFunction
 local ignoredTable = {}
+local selectedCategoryRow = 1
+local savedCategory
+local sortMode = 1
 
 --Stoled from jbeta
 local setElementDimension = setElementDimension
@@ -29,7 +32,16 @@ function createCurrentBrowser ()
 	local windowWidth = screenX*width
 	local windowHeight = screenY*height
 	currentBrowserGUI.browser = guiCreateWindow 	( 1 - width, 0, width, height, "Current Elements...", true )
-	currentBrowserGUI.gridlist = browserList:create(12, 85, windowWidth, windowHeight-128,{{["Name [ID]"]=0.85}},false, currentBrowserGUI.browser )
+	currentBrowserGUI.gridlist = browserList:create(12, 110, windowWidth, windowHeight-153,{{["Name [ID]"]=0.85}},false, currentBrowserGUI.browser )
+	currentBrowserGUI.sort = guiCreateComboBox(12, 85, windowWidth, 130, "", false, currentBrowserGUI.browser)
+	for _, label in ipairs({"Name A-Z", "Name Z-A", "ID low-high", "ID high-low"}) do
+		guiComboBoxAddItem(currentBrowserGUI.sort, label)
+	end
+	guiComboBoxSetSelected(currentBrowserGUI.sort, sortMode - 1)
+	addEventHandler("onClientGUIComboBoxAccepted", currentBrowserGUI.sort, function()
+		sortMode = guiComboBoxGetSelected(currentBrowserGUI.sort) + 1
+		currentBrowser.prepareSearch()
+	end, false)
 	currentBrowserGUI.search = guiCreateEdit ( 12, 50, windowWidth, 30, "Search...", false, currentBrowserGUI.browser )
 	currentBrowserGUI.dropdown = editingControl.dropdown:create{["x"]=12,["y"]=25,["width"]=windowWidth,["height"]=20,["dropWidth"]=windowWidth,["dropHeight"]=200,["relative"]=false,["parent"]=currentBrowserGUI.browser,["rows"]={""}}
 	--linked to options
@@ -61,7 +73,8 @@ end
 local isResizing = false
 function currentBrowser.resized()
 	local windowWidth,windowHeight = guiGetSize(currentBrowserGUI.browser,false)
-	currentBrowserGUI.gridlist:setSize(windowWidth, windowHeight-128)
+	currentBrowserGUI.gridlist:setSize(windowWidth, windowHeight-153)
+	guiSetSize(currentBrowserGUI.sort, windowWidth, 130, false)
 	guiSetSize ( currentBrowserGUI.search,windowWidth,30,false)
 	currentBrowserGUI.dropdown:setSize(windowWidth,20,windowWidth,200,false)
 	dialog.autosnap:setPosition( 12, windowHeight-48,false )
@@ -89,7 +102,8 @@ local elementList = {}
 local linearresourceElementDefinitions = {}
 function currentBrowser.update(elementArray)
 	--Destroy the old dropdown
-	local position = currentBrowserGUI.dropdown:getRow()
+	local category = elementList[selectedCategoryRow]
+	local position = 1
 	currentBrowserGUI.dropdown:destroy()
 	local dropdownArray = {}
 	elementList = {}
@@ -127,9 +141,18 @@ function currentBrowser.update(elementArray)
 			end
 		end
 	end
+	-- KEEP THE CATEGORY BY TYPE AND RESOURCE, NOT ITS ROW NUMBER
+	if category then
+		for row, entry in pairs(elementList) do
+			if entry.name == category.name and entry.resource == category.resource then
+				position = row
+				break
+			end
+		end
+	end
 	currentBrowserGUI.dropdown = editingControl.dropdown:create{["x"]=12,["y"]=25,["width"]=screenX*width,["height"]=20,["dropWidth"]=screenX*width,["dropHeight"]=200,["relative"]=false,["parent"]=currentBrowserGUI.browser,["rows"]=dropdownArray}
 	currentBrowserGUI.dropdown:setValue(position)
-	currentBrowser.dropdownSelect = position
+	selectedCategoryRow = position
 	currentBrowser.prepareSearch()
 end
 
@@ -212,8 +235,10 @@ function currentBrowser.doubleClick()
 end
 
 function currentBrowser.dropdownSelect ( element )
-	if currentBrowserGUI.dropdown:getRow() ~= currentBrowser.dropdownSelect then
-		currentBrowser.dropdownSelect = currentBrowserGUI.dropdown:getRow()
+	if source ~= currentBrowserGUI.dropdown.GUI.gridlist then return end
+	if currentBrowserGUI.dropdown:getRow() ~= selectedCategoryRow then
+		selectedCategoryRow = currentBrowserGUI.dropdown:getRow()
+		if not callbackFunction then savedCategory = elementList[selectedCategoryRow] end
 		currentBrowser.prepareSearch()
 	end
 end
@@ -237,8 +262,8 @@ addEventHandler ( "onClientGUIChanged", root, currentBrowser.searchChanged )
 
 function currentBrowser.prepareSearch()
 	local query = guiGetText ( currentBrowserGUI.search ) --get the query
-	local cellrow = currentBrowser.dropdownSelect
-	if cellrow == -0 then cellrow = 1 end
+	local cellrow = selectedCategoryRow
+	if not elementList[cellrow] then cellrow = 1 end
 	if cellrow ~= 1 then
 		local resource = elementList[cellrow]["resource"]
 		local elemType = elementList[cellrow]["name"]
@@ -250,7 +275,7 @@ function currentBrowser.prepareSearch()
 		array = clearEditorElements ( array )
 		array = setTableElementIDs(array)
 		array = applySearch ( array, query )
-		currentBrowserGUI.gridlist:setRows(array)
+		currentBrowserGUI.gridlist:setRows(currentBrowser.sortRows(array))
 	else
 		local search = {}
 		for row,theTable in pairs(elementList) do
@@ -268,8 +293,31 @@ function currentBrowser.prepareSearch()
 		end
 		search = setTableElementIDs(search)
 		search = applySearch ( search, query )
-		currentBrowserGUI.gridlist:setRows(search)
+		currentBrowserGUI.gridlist:setRows(currentBrowser.sortRows(search))
 	end
+end
+
+function currentBrowser.sortRows(rows)
+	table.sort(rows, function(left, right)
+		local leftName, rightName = string.lower(left), string.lower(right)
+		if sortMode >= 3 then
+			local leftID = tonumber(string.match(left, "%[(%d+)%]%s*$"))
+			local rightID = tonumber(string.match(right, "%[(%d+)%]%s*$"))
+			-- ELEMENTS WITHOUT MODEL IDS FOLLOW THOSE WITH IDS
+			if leftID and not rightID then return true end
+			if rightID and not leftID then return false end
+			if leftID and rightID and leftID ~= rightID then
+				if sortMode == 4 then return leftID > rightID end
+				return leftID < rightID
+			end
+		elseif sortMode == 2 then
+			if leftName == rightName then return left > right end
+			return leftName > rightName
+		end
+		if leftName == rightName then return left < right end
+		return leftName < rightName
+	end)
+	return rows
 end
 
 local previousInput = false
@@ -411,16 +459,24 @@ function showCurrentBrowser ( elementArray, ignoredElements, elementType, resour
 		for k,dataTable in pairs(elementList) do
 			if ( resourceName == dataTable.resource ) and ( elementType == dataTable.name ) then
 				currentBrowserGUI.dropdown:setValue(k)
-				currentBrowser.dropdownSelect = k
+				selectedCategoryRow = k
 				if ( locked ) then
 					currentBrowserGUI.dropdown:disable()
 				end
 				break
 			end
 		end
-	elseif not restore then
-		currentBrowser.dropdownSelect = 1
-		currentBrowserGUI.dropdown:setValue(1)
+	elseif not callback then
+		selectedCategoryRow = 1
+		if savedCategory then
+			for row, entry in pairs(elementList) do
+				if entry.name == savedCategory.name and entry.resource == savedCategory.resource then
+					selectedCategoryRow = row
+					break
+				end
+			end
+		end
+		currentBrowserGUI.dropdown:setValue(selectedCategoryRow)
 	end
 	if ( callback ) then
 		callbackFunction = callback
@@ -441,6 +497,7 @@ end
 function closeCurrentBrowser()
     if (not currentBrowser.showing) then return end
     currentBrowser.showing = false
+    if not callbackFunction then savedCategory = elementList[selectedCategoryRow] end
     cSelectedElement = false
     if (callbackFunction) then
         local fullText = currentBrowserGUI.gridlist:getSelectedText()

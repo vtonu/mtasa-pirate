@@ -6,10 +6,10 @@ local rooms = {
         blip = "ammuNationRedCounty", blipIcon = 6
     },
     ammuPalomino = {
-        entrances = {"ammuNationPalomino", "ammuNationPalamino2"},
+        entrances = {"palaminoAmmuFront", "palaminoAmmuBackdoor"},
         exitID = "ammuPalominoExitMarker", interior = 6, dimension = 12030,
         x = 296.77710, y = -111.76501, z = 1001.51562, spawnX = 297.446, spawnY = -107.468, rotation = 0,
-        blip = "ammuNationPalomino", blipIcon = 6
+        blip = "palaminoAmmuFront", blipIcon = 6
     },
     ammuMC = {
         entrances = {"ammuNationMC", "ammuNationMC2"},
@@ -90,10 +90,10 @@ local rooms = {
         blip = "ammuNationTR", blipIcon = 6
     },
     ammuBC = {
-        entrances = {"ammuNationBC"},
+        entrances = {"ammuNationBCEntrance", "ammuNationBCBackdoor"},
         exitID = "ammuBCExitMarker", interior = 7, dimension = 12025,
         x = 315.83853, y = -143.35983, z = 999.60156, spawnX = 315.385, spawnY = -139.742, rotation = 0,
-        blip = "ammuNationBC", blipIcon = 6
+        blip = "ammuNationBCEntrance", blipIcon = 6
     },
     ammuBCRange = {
         entrances = {"ammuBCRangeEntrance"}, exitID = "ammuBCRangeExit",
@@ -114,10 +114,10 @@ local rooms = {
             rotation = 270, interior = 7, dimension = 12025}
     },
     ammuEastBC = {
-        entrances = {"ammuNationEastBC"},
+        entrances = {"ammuNationEastBCFront", "ammuNationEastBCBackdoor"},
         exitID = "ammuEastBCExitMarker", interior = 6, dimension = 12026,
         x = 316.48804, y = -170.08716, z = 999.59375, spawnX = 317.238, spawnY = -165.552, rotation = 0,
-        blip = "ammuNationEastBC", blipIcon = 6
+        blip = "ammuNationEastBCFront", blipIcon = 6
     },
     royal = {
         entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"},

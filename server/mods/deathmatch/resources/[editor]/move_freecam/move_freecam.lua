@@ -170,6 +170,8 @@ local function onClientRender_freecam()
 				setElementPosition(selectedElement, waterX, waterY, waterZ)
 			end
 		else
+			-- KEEP ARROWS IN PLACE WHEN THE CAMERA MISSES A SURFACE
+			if getElementType(selectedElement) == "marker" and (getMarkerType(selectedElement) == "arrow" or getElementData(selectedElement, "editor.arrowPreview")) then return end
 			setElementPosition(selectedElement, targetX, targetY, targetZ)
 		end
 
