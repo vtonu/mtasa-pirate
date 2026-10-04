@@ -1,4 +1,16 @@
 local rooms = {
+    ammuBlueberry = {
+        entrances = {"ammuNationRedCounty", "ammuNationRedCounty2", "ammuNationRedCounty3", "ammuNationRedCounty4"},
+        exitID = "ammuBlueberryExitMarker", interior = 6, dimension = 12029,
+        x = 297.446, y = -109.968, z = 1001.516, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        blip = "ammuNationRedCounty", blipIcon = 6
+    },
+    ammuPalomino = {
+        entrances = {"ammuNationPalomino", "ammuNationPalamino2"},
+        exitID = "ammuPalominoExitMarker", interior = 6, dimension = 12030,
+        x = 297.446, y = -109.968, z = 1001.516, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        blip = "ammuNationPalomino", blipIcon = 6
+    },
     ammuMC = {
         entrances = {"ammuNationMC", "ammuNationMC2"},
         exitID = "ammuMCExitMarker", interior = 6, dimension = 12028,

@@ -600,4 +600,10 @@
     <marker id="ammuNationNorthLV3" type="cylinder" color="#28F4D5FF" size="1" interior="0" dimension="0" alpha="255" posX="2557.5" posY="2102.1006" posZ="9.6" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="ammuNationMC" type="cylinder" color="#0AF4D0FF" size="1" interior="0" dimension="0" alpha="255" posX="-2093.5" posY="-2464.7" posZ="29.5" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="ammuNationMC2" type="cylinder" color="#0AF4D0FF" size="1" interior="0" dimension="0" alpha="255" posX="-2105.8999" posY="-2470.8999" posZ="29.4" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationRedCounty" type="cylinder" color="#21F5B7FF" size="1" interior="0" dimension="0" alpha="255" posX="242.7" posY="-178.39999" posZ="0.5" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationRedCounty2" type="cylinder" color="#21F5B7FF" size="1" interior="0" dimension="0" alpha="255" posX="255.5" posY="-192.10001" posZ="0.4" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationRedCounty3" type="cylinder" color="#21F5B7FF" size="1" interior="0" dimension="0" alpha="255" posX="272.89999" posY="-195.5" posZ="0.3" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationRedCounty4" type="cylinder" color="#21F5B7FF" size="1" interior="0" dimension="0" alpha="255" posX="253.7998" posY="-163.7998" posZ="4" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationPalomino" type="cylinder" color="#0AF4C0FF" size="1" interior="0" dimension="0" alpha="255" posX="2333.6001" posY="61.5" posZ="26" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationPalamino2" type="cylinder" color="#0AF4C0FF" size="1" interior="0" dimension="0" alpha="255" posX="2326.7" posY="63.2" posZ="25.3" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
 </map>

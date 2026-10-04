@@ -1,4 +1,6 @@
 local rooms = {
+    {id = "ammuBlueberry", entrances = {"ammuNationRedCounty", "ammuNationRedCounty2", "ammuNationRedCounty3", "ammuNationRedCounty4"}, exitID = "ammuBlueberryExitMarker"},
+    {id = "ammuPalomino", entrances = {"ammuNationPalomino", "ammuNationPalamino2"}, exitID = "ammuPalominoExitMarker"},
     {id = "ammuMC", entrances = {"ammuNationMC", "ammuNationMC2"}, exitID = "ammuMCExitMarker"},
     {id = "ammuNorthLV", entrances = {"ammuNationNorthLV", "ammuNationNorthLV2", "ammuNationNorthLV3"}, exitID = "ammuNorthLVExitMarker"},
     {id = "ammuOld", entrances = {"markerAmmuOld", "markerAmmuOld2", "markerAmmuOld3"}, exitID = "ammuOldExitMarker"},
