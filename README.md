@@ -1,4 +1,4 @@
-# Project Details (mtasa-pirate v1.3.5)
+# Project Details (mtasa-pirate v1.3.6)
 
 <img width="1920" height="1080" alt="mtasa-pirate-openbeta" src="https://github.com/user-attachments/assets/bee0cba0-5b55-4744-9ff9-d74f14e8e4cc" />
 
@@ -6,10 +6,11 @@ MTA:SA freeroam server for custom gameplay, content creation, and playing with f
 
 ## Features
 
-- Fog of War Garden with strain prices, rotating stock, and Indica, Sativa, and Hybrid perks lasting 5, 10, 20, or 30 minutes.
-- Casino, lounge, and garage interiors with shared access and return to your entrance.
-- Passive mode, vehicle options, weapon drops, and a Money / Team / K/D scoreboard.
+- Fog of War Garden with strain prices, rotating stock, and Indica, Sativa, and Hybrid perks lasting 5, 10, 20, or 30 minutes, with matching health-bar colors.
+- Casino, lounge, garage, Ammu-Nation, and CJ's house interiors with shared access and return to your entrance.
+- Passive mode with a shield beside player names, vehicle options, weapon drops, and a Money / Team / K/D / Z/D scoreboard.
 - Built-in reports with saved admin inbox, gameplay details, and spam cooldown.
+- Discord join/quit logs and server alerts.
 - Pirate map in Las Venturas with late-night weather and storm infected.
 - Loco Skull vehicle missions, the Airyard route, and Rustler bombing.
 - Booty Desk weapon shop with item previews and live inventory info.
