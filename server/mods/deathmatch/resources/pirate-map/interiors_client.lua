@@ -1,10 +1,13 @@
 local rooms = {
+    {id = "ammuMC", entrances = {"ammuNationMC", "ammuNationMC2"}, exitID = "ammuMCExitMarker"},
     {id = "ammuNorthLV", entrances = {"ammuNationNorthLV", "ammuNationNorthLV2", "ammuNationNorthLV3"}, exitID = "ammuNorthLVExitMarker"},
     {id = "ammuOld", entrances = {"markerAmmuOld", "markerAmmuOld2", "markerAmmuOld3"}, exitID = "ammuOldExitMarker"},
     {id = "ammuLS", entrances = {"ammuNationLSOG"}, exitID = "ammuLSExitMarker"},
     {id = "ammuSouthLS", entrances = {"ammuNationSouthLS"}, exitID = "ammuSouthLSExitMarker"},
     {id = "ammuSouthLSRange", entrances = {"ammuSouthLSRangeEntrance"}, exitID = "ammuSouthLSRangeExit"},
     {id = "ammuSouthLSFloor", entrances = {"ammuSouthLSFloorEntrance"}, exitID = "ammuSouthLSFloorExit"},
+    {id = "ammuTRRange", entrances = {"ammuTRRangeEntrance"}, exitID = "ammuTRRangeExit"},
+    {id = "ammuTRFloor", entrances = {"ammuTRFloorEntrance"}, exitID = "ammuTRFloorExit"},
     {id = "ammuSF", entrances = {"ammuNationSF"}, exitID = "ammuSFExitMarker"},
     {id = "ammuTR", entrances = {"ammuNationTR"}, exitID = "ammuTRExitMarker"},
     {id = "ammuBC", entrances = {"ammuNationBC"}, exitID = "ammuBCExitMarker"},
@@ -30,8 +33,9 @@ local function getNearbyDoor()
     for _, room in ipairs(rooms) do
         if not isElement(casinoMarkers[room.exitID]) then casinoMarkers[room.exitID] = getElementByID(room.exitID) end
         local distance = (room.id == "ammuBCRange" or room.id == "ammuBCFloor"
-            or room.id == "ammuSouthLS" or room.id == "ammuSouthLSRange"
-            or room.id == "ammuSouthLSFloor") and 0.7 or 1.8
+            or room.id == "ammuTR" or room.id == "ammuTRRange"
+            or room.id == "ammuTRFloor" or room.id == "ammuSouthLS"
+            or room.id == "ammuSouthLSRange" or room.id == "ammuSouthLSFloor") and 0.7 or 1.8
         doors[#doors + 1] = {casinoMarkers[room.exitID], "exit", room.id, distance}
         for _, id in ipairs(room.entrances) do
             if not isElement(casinoMarkers[id]) then casinoMarkers[id] = getElementByID(id) end
@@ -45,8 +49,10 @@ local function getNearbyDoor()
         if isElement(marker) and getElementDimension(localPlayer) == getElementDimension(marker)
             and getElementInterior(localPlayer) == getElementInterior(marker) then
             local mx, my, mz = getElementPosition(marker)
+            local side = getElementData(marker, "pirate.doorSide")
             local distance = getDistanceBetweenPoints2D(x, y, mx, my)
             if distance <= door[4] and math.abs(z - mz) <= 2
+                and (not side or (y - side.y) * side.sign > 0)
                 and (not nearestDistance or distance < nearestDistance) then
                 nearestDoor, nearestDistance = door, distance
             end

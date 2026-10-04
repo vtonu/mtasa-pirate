@@ -597,5 +597,7 @@
     <marker id="ammuNationEastBC" type="cylinder" color="#1FF7B2FF" size="1" interior="0" dimension="0" alpha="255" posX="777.09998" posY="1871.4" posZ="3.7" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="ammuNationNorthLV" type="cylinder" color="#28F4D5FF" size="1" interior="0" dimension="0" alpha="255" posX="2539.1001" posY="2083.8999" posZ="9.7" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="ammuNationNorthLV2" type="cylinder" color="#28F4D5FF" size="1" interior="0" dimension="0" alpha="255" posX="2557" posY="2064.7" posZ="10" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
-    <marker id="ammuNationNorthLV3" type="cylinder" color="#28F4D5FF" size="1" interior="0" dimension="0" alpha="255" posX="2557.5" posY="2102.1001" posZ="9.6" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationNorthLV3" type="cylinder" color="#28F4D5FF" size="1" interior="0" dimension="0" alpha="255" posX="2557.5" posY="2102.1006" posZ="9.6" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationMC" type="cylinder" color="#0AF4D0FF" size="1" interior="0" dimension="0" alpha="255" posX="-2093.5" posY="-2464.7" posZ="29.5" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationMC2" type="cylinder" color="#0AF4D0FF" size="1" interior="0" dimension="0" alpha="255" posX="-2105.8999" posY="-2470.8999" posZ="29.4" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
 </map>

@@ -1,4 +1,10 @@
 local rooms = {
+    ammuMC = {
+        entrances = {"ammuNationMC", "ammuNationMC2"},
+        exitID = "ammuMCExitMarker", interior = 6, dimension = 12028,
+        x = 296.81174, y = -111.54875, z = 1001.51562, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        blip = "ammuNationMC", blipIcon = 6
+    },
     ammuNorthLV = {
         entrances = {"ammuNationNorthLV", "ammuNationNorthLV2", "ammuNationNorthLV3"},
         exitID = "ammuNorthLVExitMarker", interior = 6, dimension = 12027,
@@ -14,32 +20,50 @@ local rooms = {
     ammuLS = {
         entrances = {"ammuNationLSOG"},
         exitID = "ammuLSExitMarker", interior = 6, dimension = 12021,
-        x = 297.446, y = -109.968, z = 1001.516, spawnX = 297.446, spawnY = -107.468, rotation = 0,
+        x = 296.81174, y = -111.54875, z = 1001.51562, spawnX = 297.446, spawnY = -107.468, rotation = 0,
         blip = "ammuNationLSOG", blipIcon = 6
     },
     ammuSouthLS = {
         entrances = {"ammuNationSouthLS"},
         exitID = "ammuSouthLSExitMarker", interior = 1, dimension = 12022,
-        x = 285.40073, y = -41.13444, z = 1001.51562, spawnX = 285.40073, spawnY = -39.63444, rotation = 0,
+        x = 285.73962, y = -41.18461, z = 1001.51562, spawnX = 285.73962, spawnY = -39.68461, rotation = 0,
         blip = "ammuNationSouthLS", blipIcon = 6
     },
     ammuSouthLSRange = {
         entrances = {"ammuSouthLSRangeEntrance"}, exitID = "ammuSouthLSRangeExit",
         interior = 1, dimension = 12022, internal = true,
-        entranceX = 286.45490, entranceY = -40.92108, entranceZ = 1001.51562,
-        x = 286.45490, y = -42.92108, z = 1001.51562,
-        spawnX = 286.45490, spawnY = -44.42108, rotation = 180,
-        returnPoint = {x = 286.45490, y = -39.92108, z = 1001.51562,
-            rotation = 0, interior = 1, dimension = 12022}
+        entranceX = 286.12119, entranceY = -30.32537, entranceZ = 1001.51562,
+        x = 286.12119, y = -28.32537, z = 1001.51562,
+        spawnX = 286.12119, spawnY = -27.32537, rotation = 0,
+        returnPoint = {x = 286.12119, y = -31.32537, z = 1001.51562,
+            rotation = 180, interior = 1, dimension = 12022}
     },
     ammuSouthLSFloor = {
         entrances = {"ammuSouthLSFloorEntrance"}, exitID = "ammuSouthLSFloorExit",
         interior = 1, dimension = 12022, internal = true,
-        entranceX = 286.45490, entranceY = -46.42108, entranceZ = 1001.51562,
-        x = 286.45490, y = -49.42108, z = 1001.51562,
-        spawnX = 286.45490, spawnY = -50.92108, rotation = 180,
-        returnPoint = {x = 286.45490, y = -45.42108, z = 1001.51562,
-            rotation = 0, interior = 1, dimension = 12022}
+        entranceX = 285.95078, entranceY = -24.79792, entranceZ = 1001.51562,
+        x = 286.11548, y = -23.34547, z = 1001.52295,
+        spawnX = 286.11548, spawnY = -22.34547, rotation = 0,
+        returnPoint = {x = 286.18500, y = -26.52018, z = 1001.51562,
+            rotation = 180, interior = 1, dimension = 12022}
+    },
+    ammuTRRange = {
+        entrances = {"ammuTRRangeEntrance"}, exitID = "ammuTRRangeExit",
+        interior = 1, dimension = 12024, internal = true,
+        entranceX = 286.12119, entranceY = -30.32537, entranceZ = 1001.51562,
+        x = 286.12119, y = -28.32537, z = 1001.51562,
+        spawnX = 286.12119, spawnY = -27.32537, rotation = 0,
+        returnPoint = {x = 286.12119, y = -31.32537, z = 1001.51562,
+            rotation = 180, interior = 1, dimension = 12024}
+    },
+    ammuTRFloor = {
+        entrances = {"ammuTRFloorEntrance"}, exitID = "ammuTRFloorExit",
+        interior = 1, dimension = 12024, internal = true,
+        entranceX = 285.95078, entranceY = -24.79792, entranceZ = 1001.51562,
+        x = 286.11548, y = -23.34547, z = 1001.52295,
+        spawnX = 286.11548, spawnY = -22.34547, rotation = 0,
+        returnPoint = {x = 286.18500, y = -26.52018, z = 1001.51562,
+            rotation = 180, interior = 1, dimension = 12024}
     },
     ammuSF = {
         entrances = {"ammuNationSF"},
@@ -50,7 +74,7 @@ local rooms = {
     ammuTR = {
         entrances = {"ammuNationTR"},
         exitID = "ammuTRExitMarker", interior = 1, dimension = 12024,
-        x = 286.12119, y = -30.32537, z = 1001.5162, spawnX = 286.12119, spawnY = -32.82537, rotation = 180,
+        x = 285.73962, y = -41.18461, z = 1001.51562, spawnX = 285.73962, spawnY = -39.68461, rotation = 0,
         blip = "ammuNationTR", blipIcon = 6
     },
     ammuBC = {
@@ -129,6 +153,24 @@ local rooms = {
         blip = "markerCovealot"
     }
 }
+local sidedMarkers = {}
+for _, id in ipairs({"ammuSouthLSRange", "ammuSouthLSFloor", "ammuTRRange", "ammuTRFloor"}) do
+    rooms[id].doorY = (rooms[id].entranceY + rooms[id].y) / 2
+    rooms[id].markerSize = 0.6
+end
+
+local function setDoorSide(marker, room, sign)
+    if not isElement(marker) or not room.doorY then return end
+    local rangeRoom = room.dimension == 12022 and rooms.ammuSouthLSRange or rooms.ammuTRRange
+    local floorRoom = room.dimension == 12022 and rooms.ammuSouthLSFloor or rooms.ammuTRFloor
+    local side = {y = room.doorY, sign = sign}
+    if room == rangeRoom and sign == 1 then side.maxY = floorRoom.doorY end
+    if room == floorRoom and sign == -1 then side.minY = rangeRoom.doorY end
+    setElementData(marker, "pirate.doorSide", side)
+    setElementVisibleTo(marker, root, false)
+    sidedMarkers[#sidedMarkers + 1] = marker
+end
+
 local returnPoints = {}
 local doorCooldowns = {}
 local doorTransitions = {}
@@ -138,9 +180,11 @@ local function isNearDoor(player, marker, roomID)
     if getElementDimension(player) ~= getElementDimension(marker)
         or getElementInterior(player) ~= getElementInterior(marker) then return false end
     local x, y, z = getElementPosition(player)
+    local side = getElementData(marker, "pirate.doorSide")
+    if side and (y - side.y) * side.sign <= 0 then return false end
     local mx, my, mz = getElementPosition(marker)
     local room = rooms[roomID]
-    local distance = (room and room.internal or roomID == "ammuSouthLS") and 0.7 or 1.8
+    local distance = (room and room.internal or roomID == "ammuTR" or roomID == "ammuSouthLS") and 0.7 or 1.8
     return getDistanceBetweenPoints2D(x, y, mx, my) <= distance and math.abs(z - mz) <= 2
 end
 
@@ -218,11 +262,12 @@ addEventHandler("onResourceStart", resourceRoot, function()
     for _, room in pairs(rooms) do
         if room.internal then
             local marker = createMarker(room.entranceX, room.entranceY, room.entranceZ + 0.6,
-                "arrow", 1, 4, 210, 193, 255)
+                "arrow", room.markerSize or 1, 4, 210, 193, 255)
             if isElement(marker) then
                 setElementID(marker, room.entrances[1])
                 setElementInterior(marker, room.interior)
                 setElementDimension(marker, room.dimension)
+                setDoorSide(marker, room, -1)
             end
         end
         local entrance = room.blip and getElementByID(room.blip)
@@ -233,13 +278,30 @@ addEventHandler("onResourceStart", resourceRoot, function()
                 setElementDimension(blip, getElementDimension(entrance))
             end
         end
-        room.exitMarker = createMarker(room.x, room.y, room.z + 0.6, "arrow", 1, 4, 210, 193, 255)
+        room.exitMarker = createMarker(room.x, room.y, room.z + 0.6, "arrow", room.markerSize or 1, 4, 210, 193, 255)
         if isElement(room.exitMarker) then
             setElementID(room.exitMarker, room.exitID)
             setElementInterior(room.exitMarker, room.interior)
             setElementDimension(room.exitMarker, room.dimension)
+            setDoorSide(room.exitMarker, room, 1)
         end
     end
+    setTimer(function()
+        for _, player in ipairs(getElementsByType("player")) do
+            local _, y = getElementPosition(player)
+            for _, marker in ipairs(sidedMarkers) do
+                local side = getElementData(marker, "pirate.doorSide")
+                local visible = getElementInterior(player) == getElementInterior(marker)
+                    and getElementDimension(player) == getElementDimension(marker)
+                    and (y - side.y) * side.sign > 0
+                    and (not side.minY or y > side.minY)
+                    and (not side.maxY or y < side.maxY)
+                if isElementVisibleTo(marker, player) ~= visible then
+                    setElementVisibleTo(marker, player, visible)
+                end
+            end
+        end
+    end, 150, 0)
 end)
 
 -- CHECK BOTH DOORS ON THE SERVER
