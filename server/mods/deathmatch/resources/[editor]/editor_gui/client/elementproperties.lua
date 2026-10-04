@@ -109,19 +109,21 @@ local createdTooltips = {}
 local pulloutAction = {}
 local actionButtons = {}
 
-local function arrangePropertiesHeader(objectLayout)
+local function arrangePropertiesHeader(objectLayout, vehicleLayout)
 	local width = layout.pane.width
-	local y = objectLayout and 35 or 25
-	local idX = objectLayout and 70 or 100
+	local y = (objectLayout or vehicleLayout) and 35 or 25
+	local idX = vehicleLayout and 82 or (objectLayout and 70 or 100)
+	guiSetVisible(lblIDCaption, not vehicleLayout and not creatingNewElement)
+	if vehicleLayout then guiSetText(lblType, "vehicle ID:") end
 	guiSetPosition(lblType, 10, y, false)
-	guiSetSize(lblType, objectLayout and 42 or 65, 23, false)
+	guiSetSize(lblType, vehicleLayout and 72 or (objectLayout and 42 or 65), 23, false)
 	guiSetPosition(lblIDCaption, objectLayout and 50 or 75, y, false)
 	guiSetPosition(edtID, idX, y, false)
 	guiSetSize(edtID, width * 0.35 - idX - 8, 23, false)
 	guiSetPosition(lblParentCaption, width * 0.35, y, false)
 	guiSetSize(lblParentCaption, 45, 23, false)
 	local x = width * 0.35 + 45
-	local parentWidth = objectLayout and width - x - 187 or width * 0.32 - 55
+	local parentWidth = (objectLayout or vehicleLayout) and width - x - 187 or width * 0.32 - 55
 	local editWidth, clearWidth = parentWidth - 85, 23
 	guiSetPosition(cntParent.GUI.editField, x, y, false)
 	guiSetSize(cntParent.GUI.editField, editWidth, 23, false)
@@ -130,7 +132,13 @@ local function arrangePropertiesHeader(objectLayout)
 	guiSetPosition(cntParent.GUI.launchBrowserButton, x + editWidth + clearWidth, y, false)
 	guiSetSize(cntParent.GUI.launchBrowserButton, 62, 23, false)
 	for index, button in ipairs(actionButtons) do
-		guiSetPosition(button, 10 + (index - 1) * 90, objectLayout and 270 or 90, false)
+		if index == 1 then
+			guiSetSize(button, 110, 20, false)
+			guiSetPosition(button, (objectLayout or vehicleLayout) and 100 or 10, vehicleLayout and 440 or (objectLayout and 235 or 90), false)
+		else
+			local _, windowHeight = guiGetSize(wndProperties, false)
+			guiSetPosition(button, 100 + (index - 2) * 90, windowHeight - layout.padding.bottom, false)
+		end
 	end
 end
 
@@ -138,15 +146,21 @@ local function propertyPlacement(field)
 	local width = layout.pane.width
 	local elementType = selectedElement and getElementType(selectedElement) or newElementType
 	if field == "model" then
-		if elementType == "object" then
+		if elementType == "object" or elementType == "vehicle" then
 			local x = width - 177
 			return {x = x + 45, y = 35, width = 122, labelX = x, labelY = 35, height = 23, editWidth = 60 / 122, buttonWidth = 62 / 122}
 		end
 		return {x = width * 0.72, y = 25, width = width * 0.28 - 10, labelX = width * 0.67, labelY = 25, height = 23}
 	elseif field == "position" or field == "rotation" then
 		local x = field == "position" and 10 or math.floor(width / 2)
-		local gap = elementType == "object" and 52 or 65
-		local y = elementType == "object" and 235 or 60
+		if elementType == "vehicle" then
+			return {x = x, y = 463, width = width / 2 - 20, labelX = x, labelY = 440, height = 23, horizontal = true}
+		end
+		if elementType == "object" then
+			return {x = x, y = 258, width = width / 2 - 20, labelX = x, labelY = 235, height = 23, horizontal = true}
+		end
+		local gap = 65
+		local y = 60
 		return {x = x + gap, y = y, width = width / 2 - gap - 10, labelX = x, labelY = y, height = 23, horizontal = true}
 	elseif elementType == "object" then
 		local toggles = {collisions = 0, frozen = 1, doublesided = 2, breakable = 3, ["locked-s"] = 4}
@@ -163,24 +177,35 @@ local function propertyPlacement(field)
 		end
 	elseif elementType == "vehicle" then
 		local color = tonumber(field:match("^color(%d)$"))
-		if color or field == "paintjob" then
-			local x = 10 + (color and color - 1 or 4) * (width - 20) / 5
-			return {x = x, y = 143, width = (width - 20) / 5 - 10, labelX = x, labelY = 120, height = 23}
+		if color then
+			local x = 10 + (color - 1) * (width * 0.62 - 25) / 4
+			return {x = x, y = 90, width = (width * 0.62 - 25) / 4 - 10, labelX = x, labelY = 67, height = 23, swatchOnly = true}
+		elseif field == "paintjob" then
+			return {x = 10, y = 140, width = width * 0.62 - 25, labelX = 10, labelY = 117, height = 28}
 		elseif field == "upgrades" then
 			local _, paneHeight = guiGetSize(spnProperties, false)
-			return {x = 10, y = 200, width = width * 0.6 - 25, labelX = 10, labelY = 177, height = math.max(150, paneHeight - 210), columns = 3}
+			return {x = 10, y = 200, width = width * 0.62 - 25, labelX = 10, labelY = 177, height = math.min(230, math.max(165, paneHeight - 307)), columns = 3, hideHeaders = true}
 		else
-			local fields = {plate = 0, sirens = 1, health = 2, interior = 3, dimension = 4, alpha = 5, frozen = 6, collisions = 7, locked = 8, landingGearDown = 9, ["locked-s"] = 10}
-			if fields[field] then
-				local x = math.floor(width * 0.6)
-				if field == "plate" then
-					return {x = x, y = 185, width = width - x - 15, labelX = x, labelY = 162, height = 23}
+			local x = math.floor(width * 0.64)
+			if field == "plate" then
+				return {x = x, y = 90, width = width - x - 10, labelX = x, labelY = 67, height = 23}
+			end
+			local numbers = {health = 0, interior = 1, dimension = 2, alpha = 3}
+			if numbers[field] then
+				local y = 130 + numbers[field] * 28
+				return {x = x + 75, y = y, width = math.min(110, width - x - 85), labelX = x, labelY = y, height = 23}
+			end
+			local toggles = {collisions = 0, frozen = 1, locked = 2, sirens = 3, landingGearDown = 4, ["locked-s"] = 5}
+			if field == "locked-s" then
+				local hasLandingGear = false
+				for _, control in ipairs(addedControls) do
+					if control:getDataField() == "landingGearDown" then hasLandingGear = true break end
 				end
-				local index = fields[field] - 1
-				local cellWidth = (width - x - 15) / 2
-				x = x + (index % 2) * cellWidth
-				local y = 220 + math.floor(index / 2) * 50
-				return {x = x, y = y + 20, width = cellWidth - 10, labelX = x, labelY = y, height = 23}
+				if not hasLandingGear then toggles[field] = 4 end
+			end
+			if toggles[field] then
+				local y = 250 + toggles[field] * 28
+				return {x = x, y = y, width = width - x - 10, labelX = x, labelY = y, height = 26}
 			end
 		end
 	end
@@ -389,7 +414,11 @@ function createPropertiesBox()
 	guiSetVisible(btnOK, false)
 	guiSetVisible(btnPullout, false)
 	for index, name in ipairs(layout.pullout.items) do
-		local button = guiCreateButton(10 + (index - 1) * 90, 90, 80, 20, name, false, spnProperties)
+		local copyPosition = name == "CopyPOS"
+		local button = guiCreateButton(copyPosition and 100 or (100 + (index - 2) * 90),
+			copyPosition and 90 or layout.window.height - layout.padding.bottom,
+			copyPosition and 110 or 80, 20, copyPosition and "Copy Position" or name, false,
+			copyPosition and spnProperties or wndProperties)
 		actionButtons[index] = button
 		addEventHandler("onClientGUIClick", button, function(mouseButton)
 			if mouseButton == "left" then pulloutAction[name]() end
@@ -460,8 +489,10 @@ end
 --this function creates a new editing control and attaches it to the properties window
 local function addPropertyControl( controlType, controlLabelName, controlDescription, propertyApplier, addedParameters )
 	local elementType = selectedElement and getElementType(selectedElement) or newElementType
-	local toggleFields = {collisions = true, frozen = true, doublesided = true, breakable = true}
-	if controlType == "selection" and (controlLabelName == "locked-s" or (elementType == "object" and toggleFields[controlLabelName])) then
+	local toggleFields = elementType == "vehicle" and {collisions = true, frozen = true, locked = true, sirens = true, landingGearDown = true}
+		or {collisions = true, frozen = true, doublesided = true, breakable = true}
+	if elementType == "vehicle" and controlLabelName == "paintjob" then controlType = "paintjob" end
+	if controlType == "selection" and (controlLabelName == "locked-s" or ((elementType == "object" or elementType == "vehicle") and toggleFields[controlLabelName])) then
 		controlType = "propertyToggle"
 	end
 	local controlPrototype = editingControl[controlType]
@@ -525,6 +556,13 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 		for name, value in pairs(placement) do parameters[name] = value end
 		if controlType == "propertyToggle" and not selectedElement and elementType == "object" then
 			parameters.value = "true"
+		end
+		if not selectedElement and elementType == "vehicle" then
+			if controlType == "propertyToggle" then
+				parameters.value = (controlLabelName == "frozen" or controlLabelName == "locked-s" or controlLabelName == "landingGearDown") and "true" or "false"
+			elseif controlLabelName:match("^color[1-4]$") then
+				parameters.value = "#000000FF"
+			elseif controlType == "paintjob" then parameters.value = "3" end
 		end
 		if controlType == "selection" and parameters.validvalues then
 			parameters.dropHeight = math.min(200, (#parameters.validvalues + 0.5) * controlPrototype.default.height)
@@ -600,6 +638,16 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 		guiLabelSetColor( controlLabel, layout.label.R, layout.label.G, layout.label.B ) -- colour it as the rest of labels
 		caption[newControl] = controlLabel
 		if controlType == "propertyToggle" then guiSetVisible(controlLabel, false) end
+		if (elementType == "vehicle" or elementType == "object") and (controlLabelName == "position" or controlLabelName == "rotation") then
+			guiSetText(controlLabel, controlLabelName:upper())
+			guiSetSize(controlLabel, 85, 23, false)
+			local lineX = controlLabelName == "position" and 220 or placement.labelX + 85
+			local lineEnd = controlLabelName == "position" and math.floor(layout.pane.width / 2) - 10 or layout.pane.width - 10
+			newControl.GUI.sectionLine = guiCreateStaticImage(lineX, placement.labelY + 11, lineEnd - lineX, 1,
+				"client/images/line.png", false, spnProperties)
+		elseif elementType == "vehicle" and (controlLabelName == "paintjob" or controlLabelName == "upgrades") then
+			guiSetText(controlLabel, controlLabelName:upper())
+		end
 
 		-- Create the description tooltip
 		if controlDescription and type(controlDescription) == "string" then
@@ -797,7 +845,7 @@ local function applyPropertiesChanges()
 
 	--set properties
 	for i, control in ipairs(addedControls) do
-		if control:getDataField() ~= "locked" then -- we don't want to sync it
+		if control:getLabel() ~= "locked-s" then -- we don't want to sync it
 			local value = control:getValue()
 			local modified
 
@@ -892,17 +940,16 @@ function openPropertiesBox( element, resourceName, shortcut )
 	selectedElement = nil
 	local openingType = resourceName and element or getElementType(element)
 	if openingType ~= lastPropertiesType then
-		local width = math.min(screenX - 40, openingType == "object" and 820 or 1000)
+		local width = math.min(screenX - 40, openingType == "object" and 820 or (openingType == "vehicle" and 900 or 1000))
 		layout.pane.width = width - scrollbarThumbSize
-		guiSetProperty(wndProperties, "AbsoluteMinSize", "w:" .. width .. " h:350")
+		guiSetProperty(wndProperties, "AbsoluteMinSize", "w:" .. width .. " h:" .. (openingType == "vehicle" and 560 or 350))
 		guiSetProperty(wndProperties, "AbsoluteMaxSize", "w:" .. width .. " h:" .. (screenY - 20))
-		guiSetSize(wndProperties, width, math.min(screenY - 40, openingType == "object" and 370 or 650), false)
+		guiSetSize(wndProperties, width, math.min(screenY - 40, openingType == "object" and 370 or (openingType == "vehicle" and 600 or 650)), false)
 		local _, paneHeight = guiGetSize(spnProperties, false)
 		guiSetSize(spnProperties, layout.pane.width, paneHeight, false)
 		guiSetSize(lineImg, width - 20, 1, false)
 		lastPropertiesType = openingType
 	end
-	arrangePropertiesHeader(openingType == "object")
 	--Tutorial hook
 	if tutorialVars.detectPropertiesBox then
 		tutorialNext()
@@ -924,7 +971,7 @@ function openPropertiesBox( element, resourceName, shortcut )
 		guiSetVisible( lblIDCaption, false )
 
 		addEDFPropertyControlsForType( elementType, resourceName )
-		if elementType == "object" then
+		if elementType == "object" or elementType == "vehicle" then
 			addPropertyControl("selection", "locked-s", "Locked selection", nil,
 				{value = "true", validvalues = {"false", "true"}, datafield = "locked"})
 		end
@@ -958,6 +1005,7 @@ function openPropertiesBox( element, resourceName, shortcut )
 	end
 
 	--Hack to ensure the OK button doesn't get pressed immediately if the properties box is opened whilst the cursor is over the OK button
+	arrangePropertiesHeader(openingType == "object", openingType == "vehicle")
 	guiSetVisible(btnCancel, true)
 	if not getKeyState ( "mouse1" ) then --If the left mouse key isnt being pressed, we're okay to allow the OK button to be pressed
 		addEventHandler( "onClientGUIClick", btnOK, toggleProperties, false )
@@ -1002,7 +1050,7 @@ function openPropertiesBox( element, resourceName, shortcut )
 	               "l:" .. string.format("%.06f", layout.padding.left) .. " " ..
 		       "t:" .. string.format("%.06f", layout.padding.top) .. " " ..
 		       "r:" .. string.format("%.06f", layout.pane.width - layout.padding.right) .. " " ..
-		       "b:" .. string.format("%.06f", math.max(propertiesYPos,projPropertiesYPos, openingType == "object" and 295 or 0)))
+		       "b:" .. string.format("%.06f", math.max(propertiesYPos,projPropertiesYPos, openingType == "object" and 295 or (openingType == "vehicle" and 523 or 0))))
 	projPropertiesYPos = 0
 	guiScrollPaneSetVerticalScrollPosition(spnProperties, 0)
 end
@@ -1084,10 +1132,19 @@ function propertiesResize()
 	for _, control in ipairs(addedControls) do
 		if control:getDataField() == "upgrades" then
 			local _, paneHeight = guiGetSize(spnProperties, false)
-			local height = math.max(150, paneHeight - 210)
-			guiSetSize(control.GUI.list, layout.pane.width * 0.6 - 25, height, false)
-			propertiesYPos = math.max(525, 200 + height + layout.margin.bottom)
+			local height = math.min(230, math.max(165, paneHeight - 307))
+			guiSetSize(control.GUI.list, layout.pane.width * 0.62 - 25, height + 22, false)
+			if control.GUI.frame then
+				guiSetSize(control.GUI.frame, layout.pane.width * 0.62 - 25, height, false)
+				guiSetProperty(control.GUI.frame, "ContentArea", "l:0 t:0 r:" .. (layout.pane.width * 0.62 - 25) .. " b:" .. height)
+			end
+			propertiesYPos = math.max(491, 200 + height + layout.margin.bottom)
 			guiSetProperty(spnProperties, "ContentArea", "l:10 t:25 r:" .. layout.pane.width .. " b:" .. propertiesYPos)
+		end
+	end
+	for index = 2, 3 do
+		if isElement(actionButtons[index]) then
+			guiSetPosition(actionButtons[index], 100 + (index - 2) * 90, windowHeight - layout.padding.bottom, false)
 		end
 	end
 	--Reposition the line

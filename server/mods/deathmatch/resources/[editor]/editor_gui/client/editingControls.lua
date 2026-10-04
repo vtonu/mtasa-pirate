@@ -985,6 +985,7 @@ eC.color = {
 		self.value = self:convertColorToTable(info.value)
 
 		self.testWidth = info.width * self.default.testWidth
+		if info.swatchOnly then self.testWidth = info.width end
 		self.testHeight = info.height * self.default.testHeight
 		self.buttonWidth = info.width * self.default.buttonWidth
 
@@ -1028,6 +1029,14 @@ eC.color = {
 		self:updateTest()
 
 		self:addHandler("onClientGUIClick", self.GUI.changeButton, self.openSelect, false)
+		if info.swatchOnly then
+			guiSetVisible(self.GUI.changeButton, false)
+			for _, label in ipairs(self.GUI.test) do
+				self:addHandler("onClientGUIClick", label, function(control, button)
+					if button == "left" then control:openSelect() end
+				end, false)
+			end
+		end
 		self.isSelectOpen = false
 
 		-- Create the RGB and HSL edit boxes
@@ -1586,7 +1595,17 @@ eC.vehicleupgrades = {
 		local gridlistHeight = info.height
 		self.columns = info.columns or 1
 
-		self.GUI.list = guiCreateGridList(info.x, info.y, info.width, gridlistHeight, info.relative, info.parent)
+		local listParent = info.parent
+		local listX, listY = info.x, info.y
+		if info.hideHeaders then
+			self.GUI.frame = guiCreateScrollPane(info.x, info.y, info.width, info.height, false, info.parent)
+			guiSetProperty(self.GUI.frame, "ContentPaneAutoSized", "False")
+			guiSetProperty(self.GUI.frame, "ContentArea", "l:0 t:0 r:" .. info.width .. " b:" .. info.height)
+			guiScrollPaneSetScrollBars(self.GUI.frame, false, false)
+			listParent, listX, listY = self.GUI.frame, 0, -22
+			gridlistHeight = gridlistHeight + 22
+		end
+		self.GUI.list = guiCreateGridList(listX, listY, info.width, gridlistHeight, info.relative, listParent)
 		guiGridListSetSortingEnabled(self.GUI.list, false)
 		for column = 1, self.columns do
 			guiGridListAddColumn(self.GUI.list, "Upgrade", 0.94 / self.columns)
@@ -1877,6 +1896,40 @@ eC.propertyToggle = {
 		return guiCheckBoxGetSelected(self.GUI.checkbox) and "true" or "false"
 	end,
 	focus = eC.boolean.focus,
+}
+
+eC.paintjob = {
+	default = eC.propertyToggle.default,
+	constructor = function(self, info)
+		self.value = tostring(info.value or 3)
+		self.GUI.background = guiCreateStaticImage(info.x, info.y, info.width, info.height, "client/images/line.png", false, info.parent)
+		guiSetProperty(self.GUI.background, "ImageColours", "tl:FF000000 tr:FF000000 bl:FF000000 br:FF000000")
+		for index = 1, 4 do
+			local label = guiCreateLabel((index - 1) * info.width / 4, 0, info.width / 4, info.height,
+				index == 4 and "NONE" or tostring(index), false, self.GUI.background)
+			guiLabelSetHorizontalAlign(label, "center")
+			guiLabelSetVerticalAlign(label, "center")
+			self.GUI[index] = label
+			self:addHandler("onClientGUIClick", label, function(control, button)
+				if button == "left" then control:setValue(index - 1) end
+			end, false)
+		end
+		self:markSelected()
+		return self
+	end,
+	markSelected = function(self)
+		for column = 1, 4 do
+			local selected = tonumber(self.value) == column - 1
+			guiLabelSetColor(self.GUI[column], selected and 145 or 255, 255, selected and 170 or 255)
+		end
+	end,
+	setValue = function(self, value)
+		self.value = tostring(value)
+		self:markSelected()
+		self:callChangeHandlers()
+	end,
+	getValue = function(self) return self.value end,
+	focus = function(self) setCursorPosition(guiElementGetScreenPosition(self.GUI.background)) end,
 }
 
 eC.selection = {

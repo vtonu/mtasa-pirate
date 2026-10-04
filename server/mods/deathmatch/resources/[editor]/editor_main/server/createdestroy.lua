@@ -67,6 +67,13 @@ addEventHandler ( "doCreateElement", root,
 				if parameters[field] == nil then parameters[field] = "true" end
 			end
 			lockSelection = parameters._editorSelectionLocked ~= "false" and parameters._editorSelectionLocked ~= false
+		elseif elementType == "vehicle" then
+			local defaults = {color1 = "#000000FF", color2 = "#000000FF", color3 = "#000000FF", color4 = "#000000FF",
+				health = 1000, alpha = 255, frozen = "true", collisions = "false", locked = "false", sirens = "false", paintjob = "3"}
+			for field, value in pairs(defaults) do
+				if parameters[field] == nil then parameters[field] = value end
+			end
+			lockSelection = parameters._editorSelectionLocked ~= "false" and parameters._editorSelectionLocked ~= false
 		end
 		parameters._editorSelectionLocked = nil
 

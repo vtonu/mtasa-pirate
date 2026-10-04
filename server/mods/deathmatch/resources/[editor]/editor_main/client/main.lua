@@ -1068,7 +1068,7 @@ end
 
 addEventHandler("onClientElementCreate", root,
 	function(creator, lockSelection)
-		if creator == localPlayer and lockSelection == true and getElementType(source) == "object" then
+		if creator == localPlayer and lockSelection == true and (getElementType(source) == "object" or getElementType(source) == "vehicle") then
 			g_lock[source] = true
 		end
 	end
