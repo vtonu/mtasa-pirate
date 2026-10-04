@@ -609,4 +609,7 @@
     <marker id="ammuNationBCBackdoor" type="arrow" color="#08F6B0FF" size="1" interior="0" dimension="0" alpha="255" posX="-328.79999" posY="835.59998" posZ="14.6" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="ammuNationEastBCBackdoor" type="arrow" color="#1FF7B2FF" size="1" interior="0" dimension="0" alpha="255" posX="764.29999" posY="1877.4" posZ="5.4" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="ammuNationRedCountyMiddle" type="arrow" color="#21F5B7FF" size="1" interior="0" dimension="0" alpha="255" posX="242.5" posY="-166.5" posZ="1.6" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNationSouthBCFront" type="arrow" color="#04D2C1FF" size="0.6" interior="0" dimension="0" alpha="255" posX="794.69080" posY="1687.11926" posZ="5.88125" rotX="0" rotY="0" rotZ="0"></marker>
+    <marker id="ammuNationSouthBCBackdoor" type="arrow" color="#04D2C1FF" size="0.6" interior="0" dimension="0" alpha="255" posX="785.07617" posY="1692.70020" posZ="5.88125" rotX="0" rotY="0" rotZ="0"></marker>
+    <marker id="ammuSouthBCShed" type="arrow" color="#04D2C1FF" size="0.6" interior="0" dimension="0" alpha="255" posX="788.54559" posY="1702.28186" posZ="5.88125" rotX="0" rotY="0" rotZ="0"></marker>
 </map>

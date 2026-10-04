@@ -1,7 +1,7 @@
 local rooms = {
     {id = "ammuBlueberry", entrances = {"ammuNationRedCounty", "ammuNationRedCounty2", "ammuNationRedCounty3"}, exitID = "ammuBlueberryExitMarker"},
-    {id = "ammuBlueberryUpstairs", entrances = {"ammuNationRedCounty4"}, exitID = "ammuBlueberryUpstairsExit"},
-    {id = "ammuBlueberryDirectRange", entrances = {"ammuNationRedCountyMiddle"}, exitID = "ammuBlueberryDirectRangeExit"},
+    {id = "ammuBlueberryUpstairs", entrances = {"ammuNationRedCounty4"}},
+    {id = "ammuBlueberryDirectRange", entrances = {"ammuNationRedCountyMiddle"}},
     {id = "ammuPalomino", entrances = {"palaminoAmmuFront", "palaminoAmmuBackdoor"}, exitID = "ammuPalominoExitMarker"},
     {id = "ammuMC", entrances = {"ammuNationMC", "ammuNationMC2"}, exitID = "ammuMCExitMarker"},
     {id = "ammuNorthLV", entrances = {"ammuNationNorthLV", "ammuNationNorthLV2", "ammuNationNorthLV3"}, exitID = "ammuNorthLVExitMarker"},
@@ -10,14 +10,17 @@ local rooms = {
     {id = "ammuSouthLS", entrances = {"ammuNationSouthLS"}, exitID = "ammuSouthLSExitMarker"},
     {id = "ammuSouthLSRange", entrances = {"ammuSouthLSRangeEntrance"}, exitID = "ammuSouthLSRangeExit"},
     {id = "ammuSouthLSFloor", entrances = {"ammuSouthLSFloorEntrance"}, exitID = "ammuSouthLSFloorExit"},
+    {id = "ammuSouthLSRoof", entrances = {"ammuSouthLSRoofEntrance"}},
     {id = "ammuTRRange", entrances = {"ammuTRRangeEntrance"}, exitID = "ammuTRRangeExit"},
     {id = "ammuTRFloor", entrances = {"ammuTRFloorEntrance"}, exitID = "ammuTRFloorExit"},
+    {id = "ammuTRGarage", entrances = {"ammuTRGarageEntrance"}, exitID = "ammuTRGarageExit"},
     {id = "ammuSF", entrances = {"ammuNationSF"}, exitID = "ammuSFExitMarker"},
     {id = "ammuTR", entrances = {"ammuNationTR"}, exitID = "ammuTRExitMarker"},
     {id = "ammuBC", entrances = {"ammuNationBCEntrance", "ammuNationBCBackdoor"}, exitID = "ammuBCExitMarker"},
     {id = "ammuBlueberryRange", entrances = {"ammuBlueberryRangeEntrance"}, exitID = "ammuBlueberryRangeExit"},
     {id = "ammuBlueberryFloor", entrances = {"ammuBlueberryFloorEntrance"}, exitID = "ammuBlueberryFloorExit"},
     {id = "ammuEastBC", entrances = {"ammuNationEastBCFront", "ammuNationEastBCBackdoor"}, exitID = "ammuEastBCExitMarker"},
+    {id = "ammuSouthBC", entrances = {"ammuNationSouthBCFront", "ammuNationSouthBCBackdoor"}, exitID = "ammuSouthBCExitMarker"},
     {id = "royal", entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"}, exitID = "royalCasinoExitMarker"},
     {id = "highRoller", entrances = {"theHighRollerMarker"}, exitID = "highRollerExitMarker"},
     {id = "highRollerLounge", entrances = {"markerHighRollerLounge"}, exitID = "highRollerLoungeExitMarker"},
@@ -35,12 +38,14 @@ local function getNearbyDoor()
         or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
     local doors = {}
     for _, room in ipairs(rooms) do
-        if not isElement(casinoMarkers[room.exitID]) then casinoMarkers[room.exitID] = getElementByID(room.exitID) end
         local distance = (room.id == "ammuBlueberryRange" or room.id == "ammuBlueberryFloor"
             or room.id == "ammuTR" or room.id == "ammuTRRange"
             or room.id == "ammuTRFloor" or room.id == "ammuSouthLS"
             or room.id == "ammuSouthLSRange" or room.id == "ammuSouthLSFloor") and 0.7 or 1.8
-        doors[#doors + 1] = {casinoMarkers[room.exitID], "exit", room.id, distance}
+        if room.exitID then
+            if not isElement(casinoMarkers[room.exitID]) then casinoMarkers[room.exitID] = getElementByID(room.exitID) end
+            doors[#doors + 1] = {casinoMarkers[room.exitID], "exit", room.id, distance}
+        end
         for _, id in ipairs(room.entrances) do
             if not isElement(casinoMarkers[id]) then casinoMarkers[id] = getElementByID(id) end
             doors[#doors + 1] = {casinoMarkers[id], "enter", room.id, distance}

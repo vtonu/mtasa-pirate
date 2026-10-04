@@ -7,16 +7,16 @@ local rooms = {
         blip = "ammuNationRedCounty", blipIcon = 6
     },
     ammuBlueberryUpstairs = {
-        entrances = {"ammuNationRedCounty4"}, exitID = "ammuBlueberryUpstairsExit",
+        entrances = {"ammuNationRedCounty4"},
         interior = 7, dimension = 12029, returnGroup = "ammuBlueberry",
-        x = 306.5, y = -141.97321, z = 1004.06250,
+        z = 1004.06250,
         spawnX = 307.5, spawnY = -141.97321, rotation = 90
     },
     ammuBlueberryDirectRange = {
-        entrances = {"ammuNationRedCountyMiddle"}, exitID = "ammuBlueberryDirectRangeExit",
+        entrances = {"ammuNationRedCountyMiddle"},
         interior = 7, dimension = 12029, returnGroup = "ammuBlueberry",
-        x = 301.5, y = -141.97321, z = 1004.06250,
-        spawnX = 302.5, spawnY = -141.97321, rotation = 90
+        z = 1004.06250,
+        spawnX = 303.03814, spawnY = -128.75558, rotation = 180
     },
     ammuPalomino = {
         entrances = {"palaminoAmmuFront", "palaminoAmmuBackdoor"},
@@ -72,6 +72,13 @@ local rooms = {
         returnPoint = {x = 286.18500, y = -26.52018, z = 1001.51562,
             rotation = 180, interior = 1, dimension = 12022}
     },
+    ammuSouthLSRoof = {
+        entrances = {"ammuSouthLSRoofEntrance"},
+        interior = 1, dimension = 12022, internal = true,
+        entranceX = 299.84576, entranceY = -26.60274, entranceZ = 1001.51562,
+        destination = {x = 2366.97534, y = -2000.47253, z = 18.55293,
+            rotation = 0, interior = 0, dimension = 0}
+    },
     ammuTRRange = {
         entrances = {"ammuTRRangeEntrance"}, exitID = "ammuTRRangeExit",
         interior = 1, dimension = 12024, internal = true,
@@ -90,6 +97,16 @@ local rooms = {
         returnPoint = {x = 286.18500, y = -26.52018, z = 1001.51562,
             rotation = 180, interior = 1, dimension = 12024}
     },
+    ammuTRGarage = {
+        entrances = {"ammuTRGarageEntrance"}, exitID = "ammuTRGarageExit",
+        interior = 1, dimension = 12024, returnGroup = "ammuTR", createEntrance = true,
+        entranceInterior = 0, entranceDimension = 0,
+        entranceX = -1505.25903, entranceY = 2625.92407, entranceZ = 55.83594,
+        x = 299.80051, y = -26.76061, z = 1001.51562,
+        spawnX = 299.80051, spawnY = -27.76061, rotation = 180,
+        returnPoint = {x = -1505.25903, y = 2625.92407, z = 55.83594,
+            rotation = 270, interior = 0, dimension = 0}
+    },
     ammuSF = {
         entrances = {"ammuNationSF"},
         exitID = "ammuSFExitMarker", interior = 6, dimension = 12023,
@@ -99,6 +116,7 @@ local rooms = {
     ammuTR = {
         entrances = {"ammuNationTR"},
         exitID = "ammuTRExitMarker", interior = 1, dimension = 12024,
+        returnGroup = "ammuTR",
         x = 285.73962, y = -41.18461, z = 1001.51562, spawnX = 285.73962, spawnY = -39.68461, rotation = 0,
         blip = "ammuNationTR", blipIcon = 6
     },
@@ -131,6 +149,13 @@ local rooms = {
         exitID = "ammuEastBCExitMarker", interior = 6, dimension = 12026,
         x = 316.48804, y = -170.08716, z = 999.59375, spawnX = 317.238, spawnY = -165.552, rotation = 0,
         blip = "ammuNationEastBCFront", blipIcon = 6
+    },
+    ammuSouthBC = {
+        entrances = {"ammuNationSouthBCFront", "ammuNationSouthBCBackdoor"},
+        exitID = "ammuSouthBCExitMarker", interior = 6, dimension = 12031,
+        x = 316.48804, y = -170.08716, z = 999.59375,
+        spawnX = 317.238, spawnY = -165.552, rotation = 0,
+        blip = "ammuNationSouthBCFront", blipIcon = 6
     },
     royal = {
         entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"},
@@ -287,13 +312,13 @@ addEventHandler("onResourceStart", resourceRoot, function()
         setElementCollisionsEnabled(barrier, true)
     end
     for _, room in pairs(rooms) do
-        if room.internal then
+        if room.internal or room.createEntrance then
             local marker = createMarker(room.entranceX, room.entranceY, room.entranceZ + 0.6,
                 "arrow", room.markerSize or 0.6, 4, 210, 193, 255)
             if isElement(marker) then
                 setElementID(marker, room.entrances[1])
-                setElementInterior(marker, room.interior)
-                setElementDimension(marker, room.dimension)
+                setElementInterior(marker, room.entranceInterior or room.interior)
+                setElementDimension(marker, room.entranceDimension or room.dimension)
                 setElementData(marker, "pirate.doorDistance", 0.7)
                 setDoorSide(marker, room, -1)
             end
@@ -306,13 +331,15 @@ addEventHandler("onResourceStart", resourceRoot, function()
                 setElementDimension(blip, getElementDimension(entrance))
             end
         end
-        room.exitMarker = createMarker(room.x, room.y, room.z + 0.6, "arrow", room.markerSize or 0.6, 4, 210, 193, 255)
-        if isElement(room.exitMarker) then
-            setElementID(room.exitMarker, room.exitID)
-            setElementInterior(room.exitMarker, room.interior)
-            setElementDimension(room.exitMarker, room.dimension)
-            setElementData(room.exitMarker, "pirate.doorDistance", 0.7)
-            setDoorSide(room.exitMarker, room, 1)
+        if room.exitID then
+            room.exitMarker = createMarker(room.x, room.y, room.z + 0.6, "arrow", room.markerSize or 0.6, 4, 210, 193, 255)
+            if isElement(room.exitMarker) then
+                setElementID(room.exitMarker, room.exitID)
+                setElementInterior(room.exitMarker, room.interior)
+                setElementDimension(room.exitMarker, room.dimension)
+                setElementData(room.exitMarker, "pirate.doorDistance", 0.7)
+                setDoorSide(room.exitMarker, room, 1)
+            end
         end
     end
     setTimer(function()
@@ -339,7 +366,7 @@ addEventHandler("royalCasino:useDoor", resourceRoot, function(door, roomID)
     if not client or source ~= resourceRoot then return end
     roomID = roomID or "royal"
     local room = rooms[roomID]
-    if not room or not isElement(room.exitMarker) then return end
+    if not room then return end
     local now = getTickCount()
     if doorTransitions[client] or now < (doorCooldowns[client] or 0) then return end
     if door == "enter" then
@@ -352,14 +379,14 @@ addEventHandler("royalCasino:useDoor", resourceRoot, function(door, roomID)
             end
         end
         if not entrance then return end
-        useDoor(client, entrance, {
+        useDoor(client, entrance, room.destination or {
             x = room.spawnX, y = room.spawnY, z = room.z, rotation = room.rotation,
             interior = room.interior, dimension = room.dimension
         }, true, roomID)
     elseif door == "exit" then
-        local point = room.internal and room.returnPoint or returnPoints[client]
+        local point = room.returnPoint or returnPoints[client]
         if not isNearDoor(client, room.exitMarker, roomID) then return end
-        if not point or (not room.internal and point.roomID ~= roomID
+        if not point or (not room.internal and not room.returnPoint and point.roomID ~= roomID
             and (not room.returnGroup or point.returnGroup ~= room.returnGroup)) then return end
         useDoor(client, room.exitMarker, point, false, roomID)
     end
