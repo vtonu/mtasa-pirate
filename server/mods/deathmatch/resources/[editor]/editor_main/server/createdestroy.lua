@@ -37,7 +37,7 @@ function makeElementStatic(element)
 	end
 end
 
-function setupNewElement(element, creatorResource, creatorClient, attachLater,shortcut,selectionSubmode)
+function setupNewElement(element, creatorResource, creatorClient, attachLater,shortcut,selectionSubmode,lockSelection)
 	selectionSubmode = selectionSubmode or 1
 	setElementParent(element, mapContainer)
 	setElementDimension ( element, getWorkingDimension() )
@@ -50,7 +50,7 @@ function setupNewElement(element, creatorResource, creatorClient, attachLater,sh
 	justCreated[element] = true --mark it so undoredo ignores first placement
 
 	triggerEvent("onElementCreate", element)
-	triggerClientEvent(root, "onClientElementCreate", element)
+	triggerClientEvent(root, "onClientElementCreate", element, creatorClient, lockSelection)
 end
 
 addEventHandler ( "doCreateElement", root,
@@ -61,6 +61,14 @@ addEventHandler ( "doCreateElement", root,
 		end
 
 		parameters = parameters or {}
+		local lockSelection
+		if elementType == "object" then
+			for _, field in ipairs({"collisions", "frozen", "doublesided", "breakable"}) do
+				if parameters[field] == nil then parameters[field] = "true" end
+			end
+			lockSelection = parameters._editorSelectionLocked ~= "false" and parameters._editorSelectionLocked ~= false
+		end
+		parameters._editorSelectionLocked = nil
 
 		local creatorResource = getResourceFromName( resourceName )
 		local edfElement = edf.edfCreateElement (
@@ -73,7 +81,7 @@ addEventHandler ( "doCreateElement", root,
 
 		if edfElement then
 			outputConsole ( "Created '"..elementType..":"..tostring(edfElement).."' from '"..resourceName.."'" )
-			setupNewElement(edfElement, creatorResource, client, attachLater, shortcut)
+			setupNewElement(edfElement, creatorResource, client, attachLater, shortcut, nil, lockSelection)
 		else
 			outputDebugString ( "Failed to create '"..elementType.."' from '"..resourceName.."'" )
 		end

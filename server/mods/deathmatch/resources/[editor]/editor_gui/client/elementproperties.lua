@@ -109,26 +109,57 @@ local createdTooltips = {}
 local pulloutAction = {}
 local actionButtons = {}
 
+local function arrangePropertiesHeader(objectLayout)
+	local width = layout.pane.width
+	local y = objectLayout and 35 or 25
+	local idX = objectLayout and 70 or 100
+	guiSetPosition(lblType, 10, y, false)
+	guiSetSize(lblType, objectLayout and 42 or 65, 23, false)
+	guiSetPosition(lblIDCaption, objectLayout and 50 or 75, y, false)
+	guiSetPosition(edtID, idX, y, false)
+	guiSetSize(edtID, width * 0.35 - idX - 8, 23, false)
+	guiSetPosition(lblParentCaption, width * 0.35, y, false)
+	guiSetSize(lblParentCaption, 45, 23, false)
+	local x = width * 0.35 + 45
+	local parentWidth = objectLayout and width - x - 187 or width * 0.32 - 55
+	local editWidth, clearWidth = parentWidth - 85, 23
+	guiSetPosition(cntParent.GUI.editField, x, y, false)
+	guiSetSize(cntParent.GUI.editField, editWidth, 23, false)
+	guiSetPosition(cntParent.GUI.clearButton, x + editWidth, y, false)
+	guiSetSize(cntParent.GUI.clearButton, clearWidth, 23, false)
+	guiSetPosition(cntParent.GUI.launchBrowserButton, x + editWidth + clearWidth, y, false)
+	guiSetSize(cntParent.GUI.launchBrowserButton, 62, 23, false)
+	for index, button in ipairs(actionButtons) do
+		guiSetPosition(button, 10 + (index - 1) * 90, objectLayout and 270 or 90, false)
+	end
+end
+
 local function propertyPlacement(field)
 	local width = layout.pane.width
 	local elementType = selectedElement and getElementType(selectedElement) or newElementType
 	if field == "model" then
+		if elementType == "object" then
+			local x = width - 177
+			return {x = x + 45, y = 35, width = 122, labelX = x, labelY = 35, height = 23, editWidth = 60 / 122, buttonWidth = 62 / 122}
+		end
 		return {x = width * 0.72, y = 25, width = width * 0.28 - 10, labelX = width * 0.67, labelY = 25, height = 23}
 	elseif field == "position" or field == "rotation" then
 		local x = field == "position" and 10 or math.floor(width / 2)
-		return {x = x + 65, y = 60, width = width / 2 - 80, labelX = x, labelY = 60, height = 23, horizontal = true}
+		local gap = elementType == "object" and 52 or 65
+		local y = elementType == "object" and 235 or 60
+		return {x = x + gap, y = y, width = width / 2 - gap - 10, labelX = x, labelY = y, height = 23, horizontal = true}
 	elseif elementType == "object" then
 		local toggles = {collisions = 0, frozen = 1, doublesided = 2, breakable = 3, ["locked-s"] = 4}
 		if toggles[field] then
-			local x = math.floor(width * 0.72)
-			return {x = x, y = 125 + toggles[field] * 28, width = width - x - 10, labelX = x, labelY = 125 + toggles[field] * 28, height = 23}
+			local x = math.floor(width * 0.64)
+			return {x = x, y = 75 + toggles[field] * 28, width = width - x - 10, labelX = x, labelY = 75 + toggles[field] * 28, height = 26}
 		end
 		local left = {interior = 0, dimension = 1, alpha = 2, scale = 3}
 		local right = {moveX = 0, moveY = 1, moveZ = 2, moveSpeed = 3, moveDelay = 4}
 		local row = left[field] or right[field]
 		if row then
-			local x = left[field] and 10 or math.floor(width * 0.36)
-			return {x = x + 85, y = 125 + row * 28, width = math.min(150, width * 0.36 - 105), labelX = x, labelY = 125 + row * 28, height = 23}
+			local x = left[field] and 10 or math.floor(width * 0.32)
+			return {x = x + 75, y = 75 + row * 28, width = math.min(110, width * 0.32 - 95), labelX = x, labelY = 75 + row * 28, height = 23}
 		end
 	elseif elementType == "vehicle" then
 		local color = tonumber(field:match("^color(%d)$"))
@@ -437,8 +468,6 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 
 	-- if the control type exists,
 	if controlPrototype then
-		local elementType
-
 		if selectedElement then
 			elementType = getElementType(selectedElement)
 			local creatorResource = getResourceName(edf.edfGetCreatorResource(selectedElement))
@@ -494,6 +523,9 @@ local function addPropertyControl( controlType, controlLabelName, controlDescrip
 			parameters[name] = value
 		end
 		for name, value in pairs(placement) do parameters[name] = value end
+		if controlType == "propertyToggle" and not selectedElement and elementType == "object" then
+			parameters.value = "true"
+		end
 		if controlType == "selection" and parameters.validvalues then
 			parameters.dropHeight = math.min(200, (#parameters.validvalues + 0.5) * controlPrototype.default.height)
 		end
@@ -711,7 +743,8 @@ end
 local function sendInitialParameters()
 	local parametersTable = {}
 	for i, control in ipairs(addedControls) do
-		parametersTable[control:getDataField()] = control:getValue()
+		local field = control:getDataField()
+		parametersTable[control:getLabel() == "locked-s" and "_editorSelectionLocked" or field] = control:getValue()
 	end
 
 	closePropertiesBox()
@@ -859,9 +892,17 @@ function openPropertiesBox( element, resourceName, shortcut )
 	selectedElement = nil
 	local openingType = resourceName and element or getElementType(element)
 	if openingType ~= lastPropertiesType then
-		guiSetSize(wndProperties, layout.window.width, math.min(screenY - 40, openingType == "object" and 440 or 650), false)
+		local width = math.min(screenX - 40, openingType == "object" and 820 or 1000)
+		layout.pane.width = width - scrollbarThumbSize
+		guiSetProperty(wndProperties, "AbsoluteMinSize", "w:" .. width .. " h:350")
+		guiSetProperty(wndProperties, "AbsoluteMaxSize", "w:" .. width .. " h:" .. (screenY - 20))
+		guiSetSize(wndProperties, width, math.min(screenY - 40, openingType == "object" and 370 or 650), false)
+		local _, paneHeight = guiGetSize(spnProperties, false)
+		guiSetSize(spnProperties, layout.pane.width, paneHeight, false)
+		guiSetSize(lineImg, width - 20, 1, false)
 		lastPropertiesType = openingType
 	end
+	arrangePropertiesHeader(openingType == "object")
 	--Tutorial hook
 	if tutorialVars.detectPropertiesBox then
 		tutorialNext()
@@ -883,6 +924,10 @@ function openPropertiesBox( element, resourceName, shortcut )
 		guiSetVisible( lblIDCaption, false )
 
 		addEDFPropertyControlsForType( elementType, resourceName )
+		if elementType == "object" then
+			addPropertyControl("selection", "locked-s", "Locked selection", nil,
+				{value = "true", validvalues = {"false", "true"}, datafield = "locked"})
+		end
 
 		creatingNewElement = true
 		syncPropertiesCallback = sendInitialParameters
@@ -957,7 +1002,7 @@ function openPropertiesBox( element, resourceName, shortcut )
 	               "l:" .. string.format("%.06f", layout.padding.left) .. " " ..
 		       "t:" .. string.format("%.06f", layout.padding.top) .. " " ..
 		       "r:" .. string.format("%.06f", layout.pane.width - layout.padding.right) .. " " ..
-		       "b:" .. string.format("%.06f", math.max(propertiesYPos,projPropertiesYPos)))
+		       "b:" .. string.format("%.06f", math.max(propertiesYPos,projPropertiesYPos, openingType == "object" and 295 or 0)))
 	projPropertiesYPos = 0
 	guiScrollPaneSetVerticalScrollPosition(spnProperties, 0)
 end

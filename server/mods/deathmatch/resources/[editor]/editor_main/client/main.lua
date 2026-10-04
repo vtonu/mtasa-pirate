@@ -1066,6 +1066,14 @@ function isElementLocked(element)
 	end
 end
 
+addEventHandler("onClientElementCreate", root,
+	function(creator, lockSelection)
+		if creator == localPlayer and lockSelection == true and getElementType(source) == "object" then
+			g_lock[source] = true
+		end
+	end
+)
+
 addEventHandler("onClientElementDestroy",resourceRoot,
 function ()
 	if g_lock[source] then
