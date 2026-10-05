@@ -40,7 +40,7 @@ addEventHandler("emmet:state", resourceRoot, function(state, first, second, thir
         deadline = getTickCount() + second * 1000
         local x, y, z = getElementPosition(first)
         targetBlip = createBlip(x, y, z, 51)
-        notice, noticeUntil = "DELIVER TO " .. third .. ".", getTickCount() + 6000
+        notice, noticeUntil = nil, 0
     elseif state == "finished" then
         clearMission()
         notice, noticeUntil = first, getTickCount() + 7000
@@ -66,6 +66,7 @@ addEventHandler("onClientRender", root, function()
     local now = getTickCount()
     local w, h = guiGetScreenSize()
     if isElement(vanBlip) then setBlipVisibleDistance(vanBlip, math.floor(now / 600) % 2 == 0 and 16383 or 0) end
+    if isElement(targetBlip) then setBlipVisibleDistance(targetBlip, math.floor(now / 600) % 2 == 0 and 16383 or 0) end
     if phase == "delivery" and deadline then
         local seconds = math.max(0, math.ceil((deadline - now) / 1000))
         dxDrawText(string.format("DELIVERY TIME: %02d:%02d", math.floor(seconds / 60), seconds % 60),
