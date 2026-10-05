@@ -94,9 +94,8 @@ addEventHandler("emmet:start", resourceRoot, function()
     local destination = choices[math.random(#choices)]
     lastDestination = destination
     session = {player = client, destination = destination, phase = "pickup"}
-    session.publicBlip = createBlipAttachedTo(van, 41, 2, 255, 255, 255, 255, 0, 16383, root)
     setElementData(van, "emmet:armored", true)
-    session.timer = setTimer(function() finish("DELIVERY FAILED: VAN NOT COLLECTED.") end, 120000, 1)
+    session.timer = setTimer(function() finish("DELIVERY FAILED: VAN NOT COLLECTED.") end, 30000, 1)
     setElementData(resourceRoot, "emmet:busy", true)
     setVehicleLocked(van, false)
     setElementFrozen(van, false)
@@ -114,6 +113,7 @@ addEventHandler("onVehicleEnter", resourceRoot, function(player, seat)
     if session.phase ~= "pickup" then return end
     killTimer(session.timer)
     session.phase = "delivery"
+    session.publicBlip = createBlipAttachedTo(van, 41, 2, 255, 255, 255, 255, 0, 16383, root)
     session.timer = setTimer(function() finish("DELIVERY FAILED: TIME EXPIRED.") end, session.destination.seconds * 1000, 1)
     setElementVisibleTo(session.destination.marker, player, true)
     send(player, "delivery", session.destination.marker, session.destination.seconds, session.destination.name)
