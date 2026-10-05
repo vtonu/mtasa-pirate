@@ -31,7 +31,7 @@ addEventHandler("emmet:state", resourceRoot, function(state, first, second, thir
     if state == "pickup" then
         clearMission()
         phase = "pickup"
-        if isElement(first) then vanBlip = createBlipAttachedTo(first, 0, 2, 127, 255, 212, 255) end
+        if isElement(first) then vanBlip = createBlipAttachedTo(first, 0, 2, 255, 0, 0, 255) end
         notice, noticeUntil = second, getTickCount() + 6000
         playSoundFrontEnd(42)
     elseif state == "delivery" then
@@ -104,11 +104,20 @@ local function isBullet(weapon)
 end
 
 addEventHandler("onClientVehicleDamage", root, function(_, weapon, loss)
-    if getElementData(source, "emmet:armored") ~= true or not isBullet(weapon) then return end
+    if getElementData(source, "emmet:armored") ~= true then return end
+    local damageScale = isBullet(weapon) and 0.1 or (weapon == 16 or weapon == 51) and (2 / 3)
+    if not damageScale then return end
     cancelEvent()
     -- ONLY THE VEHICLE SYNCER APPLIES THE REDUCED HEALTH LOSS
     if isElementSyncer(source) and type(loss) == "number" and loss > 0 then
-        setElementHealth(source, math.max(0, getElementHealth(source) - loss * 0.1))
+        local health = getElementHealth(source)
+        local damage = loss * damageScale
+        local explosion = weapon == 16 or weapon == 51
+        if explosion then damage = math.min(damage, 550) end
+        local remaining = math.max(0, health - damage)
+        -- LET A LETHAL BLAST START A FIRE BEFORE THE VAN EXPLODES
+        if explosion and health >= 250 and remaining < 150 then remaining = 150 end
+        setElementHealth(source, remaining)
         setVehicleWheelStates(source, 0, 0, 0, 0)
     end
 end)

@@ -6,6 +6,8 @@ local destinations = {
 }
 local template, startMarker, home, settings
 local sessions, vehicleSessions, lastDestinations, lastRequests, recoveries = {}, {}, {}, {}, {}
+local attempts = {}
+local cooldownSeconds = 300
 local stopping = false
 local finish
 local loot = {}
@@ -156,6 +158,10 @@ end
 
 finish = function(current, message, success, wreck)
     if not current or sessions[current.player] ~= current then return end
+    local access = attempts[current.serial]
+    if access and access.count >= 2 and not access.untilTime then
+        access.untilTime = getRealTime().timestamp + cooldownSeconds
+    end
     sessions[current.player] = nil
     vehicleSessions[current.van] = nil
     if isTimer(current.timer) then killTimer(current.timer) end
@@ -230,6 +236,16 @@ addEventHandler("emmet:start", resourceRoot, function()
     local sx, sy, sz = getElementPosition(startMarker)
     if getDistanceBetweenPoints3D(x, y, z, sx, sy, sz + 1) > 2 then return end
     if sessions[client] then send(client, "notice", "DELIVERY ALREADY IN PROGRESS.") return end
+    local serial = getPlayerSerial(client)
+    local access = attempts[serial]
+    if access and access.untilTime and getRealTime().timestamp >= access.untilTime then
+        attempts[serial] = nil
+        access = nil
+    end
+    if access and access.count >= 2 then
+        send(client, "notice", "SORRY, EMMET ISN'T AVAILABLE RIGHT NOW. TRY AGAIN LATER.")
+        return
+    end
     if getElementData(client, "emmet:busy") then send(client, "notice", "DELIVERY VAN RESETTING. TRY AGAIN SHORTLY.") return end
     local choices, available = {}, {}
     for _, destination in ipairs(destinations) do
@@ -244,7 +260,10 @@ addEventHandler("emmet:start", resourceRoot, function()
     if not vehicle then send(client, "notice", "VAN PICKUP AREA FULL. TRY AGAIN SHORTLY.") return end
     local destination = choices[math.random(#choices)]
     lastDestinations[client] = destination
-    local current = {player = client, van = vehicle, destination = destination, phase = "pickup"}
+    access = access or {count = 0}
+    access.count = access.count + 1
+    attempts[serial] = access
+    local current = {player = client, serial = serial, van = vehicle, destination = destination, phase = "pickup"}
     sessions[client], vehicleSessions[vehicle] = current, current
     setPlayerBusy(client, true)
     current.timer = setTimer(function() finish(current, "DELIVERY FAILED: VAN NOT COLLECTED.") end, 30000, 1)
