@@ -7,6 +7,63 @@ local dragOffsetX = 0
 local dragOffsetY = 0
 local previousInputMode = nil
 local previewTimer
+local activeClerk, clerkTimer
+local lastClerkReaction = 0
+
+local function stopClerk()
+    if isTimer(clerkTimer) then killTimer(clerkTimer) end
+    clerkTimer = nil
+    if isElement(activeClerk) then
+        setPedAnimation(activeClerk)
+        setElementFrozen(activeClerk, true)
+    end
+    activeClerk = nil
+end
+
+local function clerkIdle()
+    if isElement(activeClerk) then
+        setElementFrozen(activeClerk, false)
+        setPedAnimation(activeClerk, "shop", "shp_serve_idle", -1, true, false, false, false)
+    end
+end
+
+local function animateClerk(state, weapon)
+    if not isElement(activeClerk) then return end
+    local now = getTickCount()
+    if state == "browse" and now - lastClerkReaction < 1500 then return end
+    lastClerkReaction = now
+    if isTimer(clerkTimer) then killTimer(clerkTimer) end
+    local block, animation, duration = "shop", "shp_serve_start", 1400
+    if state == "browse" then
+        block, animation = "weapons", weapon and weapon >= 25 and weapon <= 34 and "shp_ar_lift" or "shp_1h_lift"
+    elseif state == "purchase" then
+        animation, duration = "shp_serve_loop", 1800
+        if weapon == 35 or weapon == 36 or weapon == 38 then
+            block, animation = "cop_ambient", "coplook_nod"
+        end
+    elseif state == "refusal" then
+        block, animation = "cop_ambient", "coplook_shake"
+    elseif state == "goodbye" then
+        animation = "shp_serve_end"
+    end
+    setElementFrozen(activeClerk, false)
+    setPedAnimation(activeClerk, block, animation, duration, false, false, false, false)
+    clerkTimer = setTimer(function()
+        clerkTimer = nil
+        if state == "goodbye" then stopClerk() else clerkIdle() end
+    end, duration, 1)
+end
+
+addEvent("bootyShop:clerkReaction", true)
+addEventHandler("bootyShop:clerkReaction", resourceRoot, function(clerk, state, weapon)
+    if clerk ~= activeClerk or not isElement(uiBrowserElement) then return end
+    animateClerk(state, weapon)
+end)
+
+-- KEEP THE CLERKS SAFE WITHOUT AFFECTING OTHER PEDS
+addEventHandler("onClientPedDamage", root, function()
+    if getElementData(source, "ammu:clerk") == true then cancelEvent() end
+end)
 
 local UI_WIDTH = math.floor(math.min(screenW - 32, math.max(960, screenW * 0.52)))
 local UI_HEIGHT = math.floor(math.min(screenH - 32, math.max(680, screenH * 0.66)))
@@ -76,13 +133,18 @@ local function sendPayloadToBrowser(payload)
     end
 end
 
-local function createBootyUI(payload)
+local function createBootyUI(payload, clerk)
     if isElement(uiBrowserElement) then
         sendPayloadToBrowser(payload)
         return
     end
 
     currentPayload = payload or {}
+    stopClerk()
+    if isElement(clerk) then
+        activeClerk = clerk
+        animateClerk("greeting")
+    end
     uiBrowserElement = guiCreateBrowser(uiX, uiY, UI_WIDTH, UI_HEIGHT, true, true, false)
     uiBrowser = guiGetBrowser(uiBrowserElement)
 
@@ -103,6 +165,7 @@ local function createBootyUI(payload)
 end
 
 local function closeBootyUI()
+    if isElement(uiBrowserElement) and isElement(activeClerk) then animateClerk("goodbye") end
     if isTimer(previewTimer) then killTimer(previewTimer) end
     previewTimer = nil
     if isElement(uiBrowserElement) then
@@ -191,7 +254,8 @@ local lastKeyTick = nil
 local lockoutUntilTick = 0
 
 local function handleShopToggle()
-    if getElementData(localPlayer, "atBootyShop") ~= true or isElement(uiBrowserElement) or isPedDead(localPlayer)
+    if (getElementData(localPlayer, "atBootyShop") ~= true and not isElement(getElementData(localPlayer, "ammu:shopClerk")))
+        or isElement(uiBrowserElement) or isPedDead(localPlayer)
         or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
     local currentTick = getTickCount()
 
@@ -211,20 +275,21 @@ local function handleShopToggle()
         return
     end
 
-    if getElementData(localPlayer, "atBootyShop") == true then
+    if getElementData(localPlayer, "atBootyShop") == true or isElement(getElementData(localPlayer, "ammu:shopClerk")) then
         triggerServerEvent("bootyShop:requestOpen", resourceRoot)
     end
 end
 
 -- MATCH THE AIRYARD H PROMPT
 addEventHandler("onClientRender", root, function()
-    if getElementData(localPlayer, "atBootyShop") ~= true or isElement(uiBrowserElement)
+    local ammu = isElement(getElementData(localPlayer, "ammu:shopClerk"))
+    if (getElementData(localPlayer, "atBootyShop") ~= true and not ammu) or isElement(uiBrowserElement)
         or isPedDead(localPlayer) or isCursorShowing() or isChatBoxInputActive()
         or isConsoleActive() or isMainMenuActive() then return end
     local w, h = guiGetScreenSize()
     local width = math.min(420, w - 32)
     local left, top = (w - width) / 2, h * 0.82
-    local prompt = "PRESS [H] TO OPEN BOOTY SHOP"
+    local prompt = ammu and "PRESS [H] TO OPEN WEAPON SHOP" or "PRESS [H] TO OPEN BOOTY SHOP"
     local font = "unifont"
     local scale = math.min(1, (width - 32) / dxGetTextWidth(prompt, 1, font))
     dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 124))
@@ -243,3 +308,6 @@ end)
 addEventHandler("onClientResourceStart", resourceRoot, function()
     bindKey(SHOP_KEY, "down", handleShopToggle)
 end)
+
+addEventHandler("onClientResourceStop", resourceRoot, stopClerk)
+addEventHandler("onClientPlayerWasted", localPlayer, closeBootyUI)

@@ -736,10 +736,34 @@ local function getWeaponPayload()
     return payload
 end
 
-local function getShopPayload(note, resetSelection)
+local function getCounterClerk(player)
+    if not isElement(player) or isPedDead(player) or isPedInVehicle(player) then return false end
+    for _, col in ipairs(getElementsByType("colshape")) do
+        local clerk = getElementData(col, "ammu:counterClerk")
+        if isElement(clerk) and getElementInterior(player) == getElementInterior(col)
+            and getElementDimension(player) == getElementDimension(col) and isElementWithinColShape(player, col) then return clerk end
+    end
+    return false
+end
+
+local function atShop(player)
+    if getCounterClerk(player) then return true end
+    if not isElement(player) or isPedDead(player) or isPedInVehicle(player)
+        or getElementInterior(player) ~= 0 or getElementDimension(player) ~= 0
+        or getElementData(player, "atBootyShop") ~= true then return false end
+    local x, y, z = getElementPosition(player)
+    return getDistanceBetweenPoints3D(x, y, z, 2000.70, 1539.16, 12.65) <= 1.1
+end
+
+local function react(player, state, weapon)
+    local clerk = getCounterClerk(player)
+    if clerk then triggerClientEvent(player, "bootyShop:clerkReaction", resourceRoot, clerk, state, weapon) end
+end
+
+local function getShopPayload(note, resetSelection, player)
     return {
-        title = "Shop System",
-        zone = "Pirate in Men's Pants",
+        title = "Weapon Shop System",
+        zone = getCounterClerk(player) and "Ammu-Nation" or "Pirate in Men's Pants",
         stock = "Available",
         note = note or "SELECT A WEAPON.",
         resetSelection = resetSelection == true,
@@ -749,17 +773,17 @@ end
 
 local function updateShop(player, note, resetSelection)
     if isElement(player) then
-        triggerClientEvent(player, "bootyShop:updateUI", resourceRoot, getShopPayload(note, resetSelection))
+        triggerClientEvent(player, "bootyShop:updateUI", resourceRoot, getShopPayload(note, resetSelection, player))
     end
 end
 
 function openBootyUI(player)
-    if not isElement(player) or getElementData(player, "atBootyShop") ~= true then
+    if not atShop(player) then
         return false
     end
 
     playerShopState[player] = {}
-    triggerClientEvent(player, "bootyShop:openUI", resourceRoot, getShopPayload("SELECT A WEAPON.", true))
+    triggerClientEvent(player, "bootyShop:openUI", resourceRoot, getShopPayload("SELECT A WEAPON.", true, player), getCounterClerk(player))
     return true
 end
 
@@ -778,7 +802,7 @@ end)
 local function purchaseWeapon(player, weaponId)
     local weapon = WEAPONS[weaponId]
 
-    if not weapon or getElementData(player, "atBootyShop") ~= true then
+    if not weapon or not atShop(player) then
         updateShop(player, "YOU MUST REMAIN AT THE BOOTY DESK.")
         return
     end
@@ -794,6 +818,7 @@ local function purchaseWeapon(player, weaponId)
         playerShopState[player] = state
         local message = state.insufficientFunds > 3 and "YO, GET SOME MONEY DAWG!" or "SORRY, INSUFFICIENT FUNDS."
         updateShop(player, message)
+        react(player, "refusal")
         return
     end
 
@@ -823,6 +848,7 @@ local function purchaseWeapon(player, weaponId)
         state.insufficientFunds = 0
     end
     updateShop(player, "PURCHASE COMPLETE: " .. string.upper(weapon.name) .. " FOR $" .. weapon.price .. ".")
+    react(player, "purchase", weapon.weapon)
 end
 
 addEvent("bootyShop:uiAction", true)
@@ -830,6 +856,7 @@ addEventHandler("bootyShop:uiAction", resourceRoot, function(actionName)
     if not isElement(client) or type(actionName) ~= "string" or #actionName > 80 then
         return
     end
+    if source ~= resourceRoot or not playerShopState[client] or not atShop(client) then return end
 
     local weaponId = actionName:match("^select:(.+)$")
     if weaponId and WEAPONS[weaponId] then
@@ -837,6 +864,7 @@ addEventHandler("bootyShop:uiAction", resourceRoot, function(actionName)
             weaponId = weaponId,
             insufficientFunds = 0
         }
+        react(client, "browse", WEAPONS[weaponId].weapon)
         return
     end
 

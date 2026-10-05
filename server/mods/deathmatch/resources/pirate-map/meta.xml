@@ -6,6 +6,7 @@
     <script src="interiors_client.lua" type="client"></script>
     <script src="arrow_client.lua" type="client"></script>
     <script src="interiors_server.lua" type="server"></script>
+    <script src="ammu_counters_server.lua" type="server"></script>
     <script src="vehicles_server.lua" type="server"></script>
     <script src="emmet_delivery_server.lua" type="server"></script>
     <script src="emmet_delivery_client.lua" type="client"></script>
