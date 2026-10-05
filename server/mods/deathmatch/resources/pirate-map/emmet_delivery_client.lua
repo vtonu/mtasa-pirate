@@ -46,7 +46,7 @@ addEventHandler("emmet:state", resourceRoot, function(state, first, second, thir
     elseif state == "finished" then
         clearMission()
         notice, noticeUntil = first, getTickCount() + 7000
-        if second then playSoundFrontEnd(42) end
+        if second then playSoundFrontEnd(46) end
     elseif state == "notice" then
         notice, noticeUntil = first, getTickCount() + 5000
     end
@@ -61,6 +61,13 @@ local function drawPanel(text, top)
     dxDrawRectangle(left, top, width, 1, tocolor(220, 255, 239, 55))
     dxDrawRectangle(left, top, 2, 48, tocolor(127, 255, 212, 200))
     dxDrawText(text, left + 12, top, left + width - 12, top + 48,
+        tocolor(238, 255, 247, 245), scale, "unifont", "center", "center")
+end
+
+local function drawMissionText(text, top)
+    local w = guiGetScreenSize()
+    local scale = math.min(1, (w - 32) / dxGetTextWidth(text, 1, "unifont"))
+    dxDrawText(text, 16, top, w - 16, top + 32,
         tocolor(238, 255, 247, 245), scale, "unifont", "center", "center")
 end
 
@@ -80,8 +87,10 @@ addEventHandler("onClientRender", root, function()
                 tocolor(238, 255, 247, 245), 1, "unifont", "center", "center")
         end
     end
-    if notice and now < noticeUntil then
-        drawPanel(notice, h * 0.74)
+    if phase == "pickup" then
+        drawMissionText(notice or "COLLECT THE DELIVERY VAN.", h * 0.88)
+    elseif notice and now < noticeUntil then
+        drawMissionText(notice, h * 0.88)
     end
     if not phase and atStart() then
         drawPanel(getElementData(localPlayer, "emmet:busy") and "DELIVERY VAN RESETTING" or "PRESS [H] TO START", h * 0.82)

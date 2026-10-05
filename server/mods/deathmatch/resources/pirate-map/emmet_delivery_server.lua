@@ -1,43 +1,77 @@
 -- EMMET DELIVERY
 local destinations = {
-    {id = "markerEmmetDeliveryDropoffLS", location = "DOWNTOWN LOS SANTOS", seconds = 180, reward = 100000},
-    {id = "markerEmmetDeliveryDropoffRedCounty", location = "PALOMINO CREEK, RED COUNTY", seconds = 300, reward = 100000},
-    {id = "markerEmmetDeliveryDropoffRedCountyWest", location = "BLUEBERRY, RED COUNTY", seconds = 360, reward = 100000}
+    {id = "markerEmmetDeliveryDropoffLS", location = "DOWNTOWN LOS SANTOS", seconds = 180, reward = 498000},
+    {id = "markerEmmetDeliveryDropoffRedCounty", location = "PALOMINO CREEK, RED COUNTY", seconds = 300, reward = 500000},
+    {id = "markerEmmetDeliveryDropoffRedCountyWest", location = "BLUEBERRY, RED COUNTY", seconds = 360, reward = 750000}
 }
 local template, startMarker, home, settings
 local sessions, vehicleSessions, lastDestinations, lastRequests, recoveries = {}, {}, {}, {}, {}
 local stopping = false
 local finish
 local loot = {}
--- ONE WEAPON FROM EACH OF SIX COMBAT SLOTS, USING BOOTY SHOP PRICES AND AMMO
-local lootSlots = {
-    {{weapon = 4, ammo = 1, price = 8000}, {weapon = 8, ammo = 1, price = 18000}},
-    {{weapon = 22, ammo = 1000, price = 4000}, {weapon = 23, ammo = 1000, price = 6000}, {weapon = 24, ammo = 500, price = 12000}},
-    {{weapon = 25, ammo = 500, price = 15000}, {weapon = 26, ammo = 500, price = 25000}, {weapon = 27, ammo = 500, price = 35000}},
-    {{weapon = 28, ammo = 1000, price = 15000}, {weapon = 29, ammo = 500, price = 15000}, {weapon = 32, ammo = 1000, price = 15000}},
-    {{weapon = 30, ammo = 500, price = 25000}, {weapon = 31, ammo = 500, price = 30000}},
-    {{weapon = 33, ammo = 500, price = 12000}, {weapon = 34, ammo = 10, price = 15000}}
+-- AVAILABLE BOOTY SHOP WEAPONS AND GEAR, USING SHOP PRICES AND AMMO
+local lootPool = {
+    {weapon = 1, ammo = 1, price = 2000},
+    {weapon = 15, ammo = 1, price = 250},
+    {weapon = 10, ammo = 1, price = 250},
+    {weapon = 12, ammo = 1, price = 250},
+    {weapon = 4, ammo = 1, price = 8000},
+    {weapon = 8, ammo = 1, price = 18000},
+    {weapon = 5, ammo = 1, price = 1000},
+    {weapon = 2, ammo = 1, price = 1000},
+    {weapon = 3, ammo = 1, price = 1000},
+    {weapon = 6, ammo = 1, price = 250},
+    {weapon = 7, ammo = 1, price = 1000},
+    {weapon = 22, ammo = 1000, price = 4000},
+    {weapon = 23, ammo = 1000, price = 6000},
+    {weapon = 24, ammo = 500, price = 12000},
+    {weapon = 32, ammo = 1000, price = 15000},
+    {weapon = 28, ammo = 1000, price = 15000},
+    {weapon = 29, ammo = 500, price = 15000},
+    {weapon = 25, ammo = 500, price = 15000},
+    {weapon = 26, ammo = 500, price = 25000},
+    {weapon = 27, ammo = 500, price = 35000},
+    {weapon = 30, ammo = 500, price = 25000},
+    {weapon = 31, ammo = 500, price = 30000},
+    {weapon = 33, ammo = 500, price = 12000},
+    {weapon = 34, ammo = 10, price = 15000},
+    {weapon = 16, ammo = 10, price = 6000},
+    {weapon = 39, ammo = 10, price = 8000},
+    {weapon = 18, ammo = 10, price = 6000},
+    {weapon = 17, ammo = 10, price = 3000},
+    {weapon = 35, ammo = 10, price = 45000},
+    {weapon = 36, ammo = 10, price = 60000},
+    {weapon = 37, ammo = 1000, price = 30000},
+    {weapon = 38, ammo = 500, price = 100000},
+    {weapon = 46, ammo = 1, price = 1000},
+    {weapon = 42, ammo = 1000, price = 500},
+    {weapon = 44, ammo = 1, price = 5000},
+    {weapon = 45, ammo = 1, price = 10000},
+    {weapon = 40, ammo = 1, price = 500},
 }
-local lootBundles = {}
-local function buildLootBundles(slot, bundle, value)
-    if slot > #lootSlots then
-        if value >= 95000 and value <= 105000 then
-            local copy = {}
-            for index, item in ipairs(bundle) do copy[index] = item end
-            lootBundles[#lootBundles + 1] = copy
+
+-- SHUFFLE WITHOUT DUPLICATES AND KEEP THE TOTAL AT OR BELOW $150K
+local function chooseLoot()
+    local choices, bundle = {}, {}
+    for index, item in ipairs(lootPool) do choices[index] = item end
+    for index = #choices, 2, -1 do
+        local other = math.random(index)
+        choices[index], choices[other] = choices[other], choices[index]
+    end
+    local target, value = math.random(100000, 150000), 0
+    for _, item in ipairs(choices) do
+        if value + item.price <= 150000 then
+            bundle[#bundle + 1] = item
+            value = value + item.price
+            if value >= target then break end
         end
-        return
     end
-    for _, item in ipairs(lootSlots[slot]) do
-        bundle[slot] = item
-        buildLootBundles(slot + 1, bundle, value + item.price)
-    end
+    return bundle
 end
-buildLootBundles(1, {}, 0)
 
 local function dropLoot(vehicle)
     local x, y, z = getElementPosition(vehicle)
-    local bundle = lootBundles[math.random(#lootBundles)]
+    local bundle = chooseLoot()
     for index, item in ipairs(bundle) do
         local angle = (index - 1) * math.pi * 2 / #bundle
         local pickup = createPickup(x + math.cos(angle) * 4, y + math.sin(angle) * 4, z, 2, item.weapon, 180001, item.ammo)
