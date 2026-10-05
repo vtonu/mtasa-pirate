@@ -1,5 +1,5 @@
 -- EMMET DELIVERY UI
-local phase, vanBlip, targetBlip, deadline
+local phase, vanBlip, targetBlip, deadline, location
 local notice, noticeUntil = nil, 0
 local nextRequest = 0
 
@@ -7,6 +7,7 @@ local function clearMission()
     if isElement(vanBlip) then destroyElement(vanBlip) end
     if isElement(targetBlip) then destroyElement(targetBlip) end
     phase, vanBlip, targetBlip, deadline = nil, nil, nil, nil
+    location = nil
 end
 
 local function atStart()
@@ -38,6 +39,7 @@ addEventHandler("emmet:state", resourceRoot, function(state, first, second, thir
         vanBlip = nil
         phase = "delivery"
         deadline = getTickCount() + second * 1000
+        location = third
         local x, y, z = getElementPosition(first)
         targetBlip = createBlip(x, y, z, 51)
         notice, noticeUntil = nil, 0
@@ -72,6 +74,11 @@ addEventHandler("onClientRender", root, function()
         dxDrawText(string.format("DELIVERY TIME: %02d:%02d", math.floor(seconds / 60), seconds % 60),
             16, h * 0.88, w - 16, h * 0.88 + 32,
             tocolor(238, 255, 247, 245), 1, "unifont", "center", "center")
+        if location then
+            dxDrawText("DELIVERY TO: " .. location,
+                16, h * 0.88 + 24, w - 16, h * 0.88 + 56,
+                tocolor(238, 255, 247, 245), 1, "unifont", "center", "center")
+        end
     end
     if notice and now < noticeUntil then
         drawPanel(notice, h * 0.74)
@@ -92,7 +99,7 @@ addEventHandler("onClientVehicleDamage", root, function(_, weapon, loss)
     cancelEvent()
     -- ONLY THE VEHICLE SYNCER APPLIES THE REDUCED HEALTH LOSS
     if isElementSyncer(source) and type(loss) == "number" and loss > 0 then
-        setElementHealth(source, math.max(0, getElementHealth(source) - loss * 0.2))
+        setElementHealth(source, math.max(0, getElementHealth(source) - loss * 0.1))
         setVehicleWheelStates(source, 0, 0, 0, 0)
     end
 end)
