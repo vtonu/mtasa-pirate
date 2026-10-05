@@ -1,19 +1,12 @@
 -- EMMET DELIVERY UI
-local phase, vanBlip, dropoff, targetBlip, deadline
+local phase, vanBlip, targetBlip, deadline
 local notice, noticeUntil = nil, 0
 local nextRequest = 0
-
-local function gpsReady()
-    local gps = getResourceFromName("gps")
-    return gps and getResourceState(gps) == "running"
-end
 
 local function clearMission()
     if isElement(vanBlip) then destroyElement(vanBlip) end
     if isElement(targetBlip) then destroyElement(targetBlip) end
-    if isElement(dropoff) then destroyElement(dropoff) end
-    if phase and gpsReady() then exports.gps:removeLinePoints() end
-    phase, vanBlip, targetBlip, dropoff, deadline = nil, nil, nil, nil, nil
+    phase, vanBlip, targetBlip, deadline = nil, nil, nil, nil
 end
 
 local function atStart()
@@ -46,24 +39,8 @@ addEventHandler("emmet:state", resourceRoot, function(state, first, second, thir
         phase = "delivery"
         deadline = getTickCount() + second * 1000
         local x, y, z = getElementPosition(first)
-        local r, g, b, a = getMarkerColor(first)
-        dropoff = createMarker(x, y, z, "cylinder", getMarkerSize(first), r, g, b, a)
         targetBlip = createBlip(x, y, z, 51)
         notice, noticeUntil = "DELIVER TO " .. third .. ".", getTickCount() + 6000
-    elseif state == "route" then
-        if phase ~= "delivery" or not gpsReady() then return end
-        exports.gps:removeLinePoints()
-        -- ADD CLOSE POINTS SO THE RADAR ROUTE CROSSES TILES CLEANLY
-        for i = 1, #first - 1 do
-            local a, b = first[i], first[i + 1]
-            local steps = math.max(1, math.ceil(getDistanceBetweenPoints2D(a.x, a.y, b.x, b.y) / 5))
-            for step = 0, steps - 1 do
-                local fraction = step / steps
-                exports.gps:addLinePoint(a.x + (b.x - a.x) * fraction, a.y + (b.y - a.y) * fraction)
-            end
-        end
-        local last = first[#first]
-        if last then exports.gps:addLinePoint(last.x, last.y) end
     elseif state == "finished" then
         clearMission()
         notice, noticeUntil = first, getTickCount() + 7000
@@ -87,11 +64,13 @@ end
 
 addEventHandler("onClientRender", root, function()
     local now = getTickCount()
-    local _, h = guiGetScreenSize()
+    local w, h = guiGetScreenSize()
     if isElement(vanBlip) then setBlipVisibleDistance(vanBlip, math.floor(now / 600) % 2 == 0 and 16383 or 0) end
     if phase == "delivery" and deadline then
         local seconds = math.max(0, math.ceil((deadline - now) / 1000))
-        drawPanel(string.format("DELIVERY TIME: %02d:%02d", math.floor(seconds / 60), seconds % 60), h * 0.12)
+        dxDrawText(string.format("DELIVERY TIME: %02d:%02d", math.floor(seconds / 60), seconds % 60),
+            16, h * 0.88, w - 16, h * 0.88 + 32,
+            tocolor(238, 255, 247, 245), 1, "unifont", "center", "center")
     end
     if notice and now < noticeUntil then
         drawPanel(notice, h * 0.74)

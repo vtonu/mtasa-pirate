@@ -1,8 +1,8 @@
 -- EMMET DELIVERY
 local destinations = {
-    {id = "markerEmmetDeliveryDropoffLS", name = "LOS SANTOS", seconds = 180, reward = 25000},
-    {id = "markerEmmetDeliveryDropoffRedCounty", name = "RED COUNTY", seconds = 300, reward = 40000},
-    {id = "markerEmmetDeliveryDropoffRedCountyWest", name = "RED COUNTY WEST", seconds = 360, reward = 50000}
+    {id = "markerEmmetDeliveryDropoffLS", name = "LOS SANTOS", seconds = 180, reward = 100000},
+    {id = "markerEmmetDeliveryDropoffRedCounty", name = "RED COUNTY", seconds = 300, reward = 100000},
+    {id = "markerEmmetDeliveryDropoffRedCountyWest", name = "RED COUNTY WEST", seconds = 360, reward = 100000}
 }
 local van, startMarker, home, session, lastDestination
 local lastRequests = {}
@@ -34,30 +34,16 @@ local function finish(message, success)
     if not current then return end
     session = nil
     if isTimer(current.timer) then killTimer(current.timer) end
-    if isTimer(current.routeTimer) then killTimer(current.routeTimer) end
+    if isElement(current.destination.marker) then
+        if isElement(current.player) then setElementVisibleTo(current.destination.marker, current.player, false) end
+        setElementVisibleTo(current.destination.marker, root, false)
+    end
     if success and isElement(current.player) then
         givePlayerMoney(current.player, current.destination.reward)
     end
     send(current.player, "finished", message, success)
     setElementData(resourceRoot, "emmet:busy", false)
     resetVan()
-end
-
-local function updateRoute()
-    if not session or session.phase ~= "delivery" or not isElement(van) then return end
-    local gps = getResourceFromName("gps")
-    if not gps or getResourceState(gps) ~= "running" then
-        finish("DELIVERY FAILED: GPS UNAVAILABLE.")
-        return
-    end
-    local x, y, z = getElementPosition(van)
-    local tx, ty, tz = getElementPosition(session.destination.marker)
-    local path = exports.gps:calculatePathByCoords(x, y, z, tx, ty, tz + 1)
-    if type(path) ~= "table" or #path == 0 then
-        finish("DELIVERY FAILED: NO GPS ROUTE.")
-        return
-    end
-    send(session.player, "route", path, {tx, ty, tz + 1})
 end
 
 addEventHandler("onResourceStart", resourceRoot, function()
@@ -97,10 +83,6 @@ addEventHandler("emmet:start", resourceRoot, function()
     local sx, sy, sz = getElementPosition(startMarker)
     if getDistanceBetweenPoints3D(x, y, z, sx, sy, sz + 1) > 2 then return end
     if session then send(client, "notice", "DELIVERY ALREADY IN PROGRESS.") return end
-    local gps = getResourceFromName("gps")
-    if not gps or getResourceState(gps) ~= "running" then
-        send(client, "notice", "GPS UNAVAILABLE. TRY AGAIN LATER.") return
-    end
     local choices = {}
     for _, destination in ipairs(destinations) do
         if isElement(destination.marker) and destination ~= lastDestination then choices[#choices + 1] = destination end
@@ -128,9 +110,8 @@ addEventHandler("onVehicleEnter", resourceRoot, function(player, seat)
     killTimer(session.timer)
     session.phase = "delivery"
     session.timer = setTimer(function() finish("DELIVERY FAILED: TIME EXPIRED.") end, session.destination.seconds * 1000, 1)
+    setElementVisibleTo(session.destination.marker, player, true)
     send(player, "delivery", session.destination.marker, session.destination.seconds, session.destination.name)
-    updateRoute()
-    if session then session.routeTimer = setTimer(updateRoute, 10000, 0) end
 end)
 
 addEventHandler("onMarkerHit", resourceRoot, function(element, matchingDimension)
