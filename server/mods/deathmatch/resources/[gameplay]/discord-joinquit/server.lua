@@ -11,8 +11,9 @@ local function cleanText(value)
     return tostring(value):gsub("#%x%x%x%x%x%x", ""):gsub("[%c`]", " ")
 end
 
-local function timestamp()
+local function timestamp(short)
     local time = getRealTime()
+    if short then return string.format("[%02d:%02d]", time.hour, time.minute) end
     return string.format("[%02d:%02d:%02d]", time.hour, time.minute, time.second)
 end
 
@@ -111,8 +112,8 @@ addEventHandler("onResourceStart", resourceRoot, function()
 end)
 
 addEventHandler("onPlayerJoin", root, function()
-    enqueue(timestamp() .. " JOIN: " .. cleanText(getPlayerName(source))
-        .. " joined the game (IP: " .. cleanText(getPlayerIP(source)) .. ")")
+    enqueue(timestamp(true) .. " JOIN: " .. cleanText(getPlayerName(source))
+        .. " joined the server.")
 end)
 
 local alertTimes = {}
@@ -185,7 +186,7 @@ addEventHandler("onDebugMessage", root, function(message, level, file, line)
         location .. " - " .. cleanText(message))
 end)
 
-addEventHandler("onPlayerQuit", root, function(quitType)
-    enqueue(timestamp() .. " QUIT: " .. cleanText(getPlayerName(source))
-        .. " left the game [" .. cleanText(quitType) .. "]")
+addEventHandler("onPlayerQuit", root, function()
+    enqueue(timestamp(true) .. " QUIT: " .. cleanText(getPlayerName(source))
+        .. " left the server.")
 end)
