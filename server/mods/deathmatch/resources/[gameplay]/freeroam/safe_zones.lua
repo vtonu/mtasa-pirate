@@ -18,7 +18,7 @@ local function updateSafeZones()
         local dimension = getElementDimension(player)
         local inside = false
         for _, marker in ipairs(markers) do
-            if getElementInterior(marker) == interior and getElementDimension(marker) == dimension then
+            if interior == 0 and getElementInterior(marker) == interior and getElementDimension(marker) == dimension then
                 local mx, my, mz = getElementPosition(marker)
                 local radius = math.max(3, getMarkerSize(marker) + 2)
                 if math.abs(z - mz) <= 3 and getDistanceBetweenPoints2D(x, y, mx, my) <= radius then
@@ -27,7 +27,7 @@ local function updateSafeZones()
                 end
             end
         end
-        if not inside then
+        if interior == 0 and not inside then
             for _, circle in ipairs(circles) do
                 if getElementInterior(circle) == interior and getElementDimension(circle) == dimension
                     and isElementWithinColShape(player, circle) then

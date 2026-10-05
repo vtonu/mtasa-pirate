@@ -620,4 +620,11 @@
     <ped id="ammuNationCounterClerkVet4" interior="6" rotZ="0" dimension="0" model="179" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="313" posY="-167.7998" posZ="999.59998" rotX="0" rotY="0" scale="1"></ped>
     <marker id="ammuNationCounter5" type="cylinder" color="#94AD51FF" size="1" interior="7" dimension="0" alpha="255" posX="308.10001" posY="-141" posZ="998.20001" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <ped id="ammuNationCounterClerkVet5" interior="7" rotZ="0" dimension="0" model="179" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="308.09961" posY="-143.2998" posZ="999.59998" rotX="0" rotY="0" scale="1"></ped>
+    <marker id="ammuNation2InteriorEntrance" type="arrow" color="#1DEFC5FF" size="1" interior="4" dimension="0" alpha="255" posX="285.60001" posY="-86.2" posZ="1001.5" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNation2Counter" type="cylinder" color="#90A35BFF" size="1" interior="4" dimension="0" alpha="255" posX="295.5" posY="-79.9" posZ="1000.2" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <ped id="ammuNation2CounterClerkVet" interior="4" rotZ="0" dimension="0" model="179" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="295.2998" posY="-82.40039" posZ="1001.5" rotX="0" rotY="0" scale="1"></ped>
+    <marker id="ammuNation2InteriorRangedoor" type="cylinder" color="#1DEFC5FF" size="1" interior="4" dimension="0" alpha="255" posX="301.79999" posY="-76.9" posZ="1000.2" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNation2InteriorRangedoor2" type="cylinder" color="#1DEFC5FF" size="1" interior="4" dimension="0" alpha="255" posX="301.70001" posY="-75.4" posZ="1000.2" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNation2InteriorRangedoor3" type="cylinder" color="#1DEFC5FF" size="1" interior="4" dimension="0" alpha="255" posX="302.60001" posY="-57.7" posZ="1000.2" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <marker id="ammuNation2InteriorRangedoor4" type="cylinder" color="#1DEFC5FF" size="1" interior="4" dimension="0" alpha="255" posX="304.5" posY="-57.8" posZ="1000" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
 </map>

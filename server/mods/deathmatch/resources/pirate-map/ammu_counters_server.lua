@@ -1,8 +1,9 @@
 -- SHARED COUNTERS FOR EACH AMMU-NATION LAYOUT
 local layouts = {
+    {marker = "ammuNation2Counter", clerk = "ammuNation2CounterClerkVet", interior = 4, dimensions = {12031}},
     {marker = "ammuNationCounter1", clerk = "ammuNationCounterClerkVet", interior = 1, dimensions = {12022, 12024}},
     {marker = "ammuNationCounter3", clerk = "ammuNationCounterClerkVet3", interior = 6, dimensions = {12020, 12021, 12023, 12025, 12027, 12028, 12030}},
-    {marker = "ammuNationCounter4", clerk = "ammuNationCounterClerkVet4", interior = 6, dimensions = {12026, 12031}},
+    {marker = "ammuNationCounter4", clerk = "ammuNationCounterClerkVet4", interior = 6, dimensions = {12026}},
     {marker = "ammuNationCounter5", clerk = "ammuNationCounterClerkVet5", interior = 7, dimensions = {12029}}
 }
 local counters = {}

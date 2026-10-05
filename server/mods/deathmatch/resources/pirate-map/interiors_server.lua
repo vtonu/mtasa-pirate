@@ -152,10 +152,28 @@ local rooms = {
     },
     ammuSouthBC = {
         entrances = {"ammuNationSouthBCFront", "ammuNationSouthBCBackdoor"},
-        exitID = "ammuSouthBCExitMarker", interior = 6, dimension = 12031,
-        x = 316.48804, y = -170.08716, z = 999.59375,
-        spawnX = 317.238, spawnY = -165.552, rotation = 0,
+        exitID = "ammuNation2InteriorEntrance", interior = 4, dimension = 12031,
+        x = 285.60001, y = -86.2, z = 1001.5,
+        spawnX = 285.60001, spawnY = -83.8, rotation = 0,
         blip = "ammuNationSouthBCFront", blipIcon = 6
+    },
+    ammuSouthBCRange = {
+        entrances = {"ammuNation2InteriorRangedoor"}, exitID = "ammuNation2InteriorRangedoor2",
+        interior = 4, dimension = 12031, internal = true, customArrows = true,
+        entranceX = 301.67599, entranceY = -76.90236, entranceZ = 1001.51562,
+        x = 301.68585, y = -75.24219, z = 1001.51562,
+        spawnX = 301.70001, spawnY = -73.8, rotation = 0,
+        returnPoint = {x = 301.79999, y = -78.5, z = 1001.5,
+            rotation = 180, interior = 4, dimension = 12031}
+    },
+    ammuSouthBCRangeRoom = {
+        entrances = {"ammuNation2InteriorRangedoor3"}, exitID = "ammuNation2InteriorRangedoor4",
+        interior = 4, dimension = 12031, internal = true, customArrows = true,
+        entranceX = 302.60883, entranceY = -57.76926, entranceZ = 1001.51562,
+        x = 304.45453, y = -57.78247, z = 1001.51562,
+        spawnX = 306.1, spawnY = -57.8, rotation = 270,
+        returnPoint = {x = 301, y = -57.7, z = 1001.5,
+            rotation = 90, interior = 4, dimension = 12031}
     },
     royal = {
         entrances = {"royalCasinoMarker", "royalCasinoMarker2", "royalCasinoMarker3", "royalCasinoMarker4"},
@@ -313,10 +331,16 @@ addEventHandler("onResourceStart", resourceRoot, function()
     end
     for _, room in pairs(rooms) do
         if room.internal or room.createEntrance then
-            local marker = createMarker(room.entranceX, room.entranceY, room.entranceZ + 0.6,
-                "arrow", room.markerSize or 0.6, 4, 210, 193, 255)
+            local marker = getElementByID(room.entrances[1])
+                or createMarker(room.entranceX, room.entranceY, room.entranceZ + 0.6,
+                    "arrow", room.markerSize or 0.6, 4, 210, 193, 255)
             if isElement(marker) then
                 setElementID(marker, room.entrances[1])
+                if room.customArrows then
+                    setMarkerType(marker, "arrow")
+                    setMarkerSize(marker, 0.6)
+                    setElementPosition(marker, room.entranceX, room.entranceY, room.entranceZ + 0.6)
+                end
                 setElementInterior(marker, room.entranceInterior or room.interior)
                 setElementDimension(marker, room.entranceDimension or room.dimension)
                 setElementData(marker, "pirate.doorDistance", 0.7)
@@ -332,9 +356,15 @@ addEventHandler("onResourceStart", resourceRoot, function()
             end
         end
         if room.exitID then
-            room.exitMarker = createMarker(room.x, room.y, room.z + 0.6, "arrow", room.markerSize or 0.6, 4, 210, 193, 255)
+            room.exitMarker = getElementByID(room.exitID)
+                or createMarker(room.x, room.y, room.z + 0.6, "arrow", room.markerSize or 0.6, 4, 210, 193, 255)
             if isElement(room.exitMarker) then
                 setElementID(room.exitMarker, room.exitID)
+                if room.customArrows then
+                    setMarkerType(room.exitMarker, "arrow")
+                    setMarkerSize(room.exitMarker, 0.6)
+                    setElementPosition(room.exitMarker, room.x, room.y, room.z + 0.6)
+                end
                 setElementInterior(room.exitMarker, room.interior)
                 setElementDimension(room.exitMarker, room.dimension)
                 setElementData(room.exitMarker, "pirate.doorDistance", 0.7)

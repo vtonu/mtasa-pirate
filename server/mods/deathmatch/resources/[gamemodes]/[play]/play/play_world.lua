@@ -16,6 +16,11 @@ local safeZoneCols = {}
 local weatherTimer
 local lastWeather
 
+local function setWorldWeather(weather)
+    setWeather(weather)
+    setElementData(root, "play:outdoorWeather", weather)
+end
+
 local function announceWeather(weather)
     if weather == 9 and lastWeather ~= 9 then
         outputChatBox("☠ It's getting spooky outside, be careful!", root, 255, 70, 70)
@@ -95,18 +100,18 @@ function initPlayWorld()
 
     setMinuteDuration(getWorldSetting("minuteDuration"))
     setTime(time[1], time[2])
-    setWeather(getWorldSetting("weather"))
+    setWorldWeather(getWorldSetting("weather"))
     if isTimer(weatherTimer) then
         killTimer(weatherTimer)
     end
     local cycle = getWorldSetting("weatherCycle")
     if cycle and #cycle > 0 then
         local index = 1
-        setWeather(cycle[index])
+        setWorldWeather(cycle[index])
         announceWeather(cycle[index])
         weatherTimer = setTimer(function()
             index = index % #cycle + 1
-            setWeather(cycle[index])
+            setWorldWeather(cycle[index])
             announceWeather(cycle[index])
             setTime(time[1], time[2])
         end, getWorldSetting("weatherInterval"), 0)
