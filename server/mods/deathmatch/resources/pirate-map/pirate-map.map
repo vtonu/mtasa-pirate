@@ -613,5 +613,11 @@
     <marker id="markerEmmetDeliveryDropoffRedCounty" type="cylinder" color="#99A558FF" size="3" interior="0" dimension="0" alpha="255" posX="2322.8" posY="68.4" posZ="24.8" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="markerEmmetDeliveryDropoffRedCountyWest" type="cylinder" color="#99A558FF" size="4" interior="0" dimension="0" alpha="255" posX="250.60001" posY="-158.5" posZ="-0.2" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="ammuNationCounter1" type="cylinder" color="#A6A947FF" size="1" interior="1" dimension="0" alpha="255" posX="296.29999" posY="-37.9" posZ="1000.2" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
-    <ped id="ammuNationCounterClerkVet" interior="1" rotZ="0" dimension="0" model="179" health="100" armor="0" collisions="true" alpha="255" posX="296.39999" posY="-40.7" posZ="1001.5" rotX="0" rotY="0" scale="1"></ped>
+    <ped id="ammuNationCounterClerkVet" interior="1" rotZ="0" dimension="0" model="179" health="100" armor="0" collisions="true" alpha="255" frozen="false" posX="296.39999" posY="-40.7" posZ="1001.5" rotX="0" rotY="0" scale="1"></ped>
+    <marker id="ammuNationCounter3" type="cylinder" color="#9DAA55FF" size="1" interior="6" dimension="0" alpha="255" posX="288.10001" posY="-109.3" posZ="1000.2" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <ped id="ammuNationCounterClerkVet3" interior="6" rotZ="0" dimension="0" model="179" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="288.40039" posY="-112" posZ="1001.5" rotX="0" rotY="0" scale="1"></ped>
+    <marker id="ammuNationCounter4" type="cylinder" color="#94AD51FF" size="1" interior="6" dimension="0" alpha="255" posX="312.60001" posY="-165.89999" posZ="998.20001" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <ped id="ammuNationCounterClerkVet4" interior="6" rotZ="0" dimension="0" model="179" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="313" posY="-167.7998" posZ="999.59998" rotX="0" rotY="0" scale="1"></ped>
+    <marker id="ammuNationCounter5" type="cylinder" color="#94AD51FF" size="1" interior="7" dimension="0" alpha="255" posX="308.10001" posY="-141" posZ="998.20001" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <ped id="ammuNationCounterClerkVet5" interior="7" rotZ="0" dimension="0" model="179" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="308.09961" posY="-143.2998" posZ="999.59998" rotX="0" rotY="0" scale="1"></ped>
 </map>

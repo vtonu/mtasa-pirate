@@ -1,22 +1,28 @@
--- SHARED COUNTERS FOR AMMU-NATION INTERIOR 1
+-- SHARED COUNTERS FOR EACH AMMU-NATION LAYOUT
+local layouts = {
+    {marker = "ammuNationCounter1", clerk = "ammuNationCounterClerkVet", interior = 1, dimensions = {12022, 12024}},
+    {marker = "ammuNationCounter3", clerk = "ammuNationCounterClerkVet3", interior = 6, dimensions = {12020, 12021, 12023, 12025, 12027, 12028, 12030}},
+    {marker = "ammuNationCounter4", clerk = "ammuNationCounterClerkVet4", interior = 6, dimensions = {12026, 12031}},
+    {marker = "ammuNationCounter5", clerk = "ammuNationCounterClerkVet5", interior = 7, dimensions = {12029}}
+}
 local counters = {}
 local function closeShop(player)
     local shop = getResourceFromName("booty-ui")
     if shop and getResourceState(shop) == "running" then exports["booty-ui"]:closeBootyUI(player) end
 end
 
-addEventHandler("onResourceStart", resourceRoot, function()
-    local marker = getElementByID("ammuNationCounter1")
-    local clerk = getElementByID("ammuNationCounterClerkVet")
+local function createCounters(layout)
+    local marker = getElementByID(layout.marker)
+    local clerk = getElementByID(layout.clerk)
     if not isElement(marker) or not isElement(clerk) then
-        outputDebugString("AMMU COUNTER MARKER OR CLERK MISSING", 1)
+        outputDebugString("AMMU COUNTER MARKER OR CLERK MISSING: " .. layout.marker, 1)
         return
     end
     local mx, my, mz = getElementPosition(marker)
     local px, py, pz = getElementPosition(clerk)
     local _, _, rz = getElementRotation(clerk)
     local r, g, b, a = getMarkerColor(marker)
-    for index, dimension in ipairs({12022, 12024}) do
+    for index, dimension in ipairs(layout.dimensions) do
         local shopMarker, shopClerk = marker, clerk
         if index > 1 then
             shopMarker = createMarker(mx, my, mz, getMarkerType(marker), getMarkerSize(marker), r, g, b, a)
@@ -24,20 +30,20 @@ addEventHandler("onResourceStart", resourceRoot, function()
             setElementParent(shopMarker, resourceRoot)
             setElementParent(shopClerk, resourceRoot)
         end
-        setElementInterior(shopMarker, 1)
-        setElementInterior(shopClerk, 1)
+        setElementInterior(shopMarker, layout.interior)
+        setElementInterior(shopClerk, layout.interior)
         setElementDimension(shopMarker, dimension)
         setElementDimension(shopClerk, dimension)
         setElementFrozen(shopClerk, true)
         setElementData(shopClerk, "ammu:clerk", true)
         local col = createColSphere(mx, my, mz + 1, 1.6)
         setElementParent(col, resourceRoot)
-        setElementInterior(col, 1)
+        setElementInterior(col, layout.interior)
         setElementDimension(col, dimension)
         setElementData(col, "ammu:counterClerk", shopClerk)
         counters[#counters + 1] = col
         addEventHandler("onColShapeHit", col, function(player, matchingDimension)
-            if not matchingDimension or getElementType(player) ~= "player" or getElementInterior(player) ~= 1 then return end
+            if not matchingDimension or getElementType(player) ~= "player" or getElementInterior(player) ~= layout.interior then return end
             setElementData(player, "ammu:shopClerk", shopClerk)
         end)
         addEventHandler("onColShapeLeave", col, function(player)
@@ -46,6 +52,10 @@ addEventHandler("onResourceStart", resourceRoot, function()
             closeShop(player)
         end)
     end
+end
+
+addEventHandler("onResourceStart", resourceRoot, function()
+    for _, layout in ipairs(layouts) do createCounters(layout) end
 end)
 
 -- DIMENSION CHANGES AND RESOURCE RESTARTS ALSO UPDATE ACCESS
