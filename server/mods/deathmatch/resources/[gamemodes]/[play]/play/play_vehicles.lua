@@ -73,6 +73,7 @@ end
 -- ==========================================
 
 function destroyVehicle(vehicleElement)
+    if isElement(vehicleElement) and getElementData(vehicleElement, "emmet:missionVan") == true then return end
     local owner = vehicleOwners[vehicleElement]
 
     if owner and playerVehicles[owner] then
@@ -192,6 +193,7 @@ function onVehicleEnter(playerElement)
 end
 
 function onVehicleExit()
+    if getElementData(source, "emmet:missionVan") == true then return end
 
     -- Remove Existing Timer
     destroyVehicleTimer(source)
@@ -208,6 +210,7 @@ function onVehicleExit()
 end
 
 function onVehicleExplode()
+    if getElementData(source, "emmet:missionVan") == true then return end
     if arePlayExplosionsEnabled and not arePlayExplosionsEnabled() then
         return false
     end

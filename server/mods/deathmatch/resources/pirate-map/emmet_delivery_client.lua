@@ -77,7 +77,7 @@ addEventHandler("onClientRender", root, function()
         drawPanel(notice, h * 0.74)
     end
     if not phase and atStart() then
-        drawPanel(getElementData(resourceRoot, "emmet:busy") and "DELIVERY IN PROGRESS" or "PRESS [H] TO START", h * 0.82)
+        drawPanel(getElementData(localPlayer, "emmet:busy") and "DELIVERY VAN RESETTING" or "PRESS [H] TO START", h * 0.82)
     end
 end)
 addEventHandler("onClientResourceStop", resourceRoot, clearMission)

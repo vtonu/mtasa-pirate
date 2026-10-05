@@ -1,186 +1,236 @@
 -- EMMET DELIVERY
 local destinations = {
-    {id = "markerEmmetDeliveryDropoffLS", name = "LOS SANTOS", seconds = 180, reward = 100000},
-    {id = "markerEmmetDeliveryDropoffRedCounty", name = "RED COUNTY", seconds = 300, reward = 100000},
-    {id = "markerEmmetDeliveryDropoffRedCountyWest", name = "RED COUNTY WEST", seconds = 360, reward = 100000}
+    {id = "markerEmmetDeliveryDropoffLS", seconds = 180, reward = 100000},
+    {id = "markerEmmetDeliveryDropoffRedCounty", seconds = 300, reward = 100000},
+    {id = "markerEmmetDeliveryDropoffRedCountyWest", seconds = 360, reward = 100000}
 }
-local van, startMarker, home, session, lastDestination
-local lastRequests = {}
+local template, startMarker, home, settings
+local sessions, vehicleSessions, lastDestinations, lastRequests, recoveries = {}, {}, {}, {}, {}
 local stopping = false
-local recoveryTimer
+local finish
 
 local function send(player, ...)
     if isElement(player) then triggerClientEvent(player, "emmet:state", resourceRoot, ...) end
 end
-
-local function resetVan()
-    if not isElement(van) or not home then return end
-    if isVehicleBlown(van) then
-        if isTimer(recoveryTimer) then return end
-        setElementData(resourceRoot, "emmet:busy", true)
-        recoveryTimer = setTimer(function()
-            recoveryTimer = nil
-            if stopping or not isElement(van) then return end
-            if not respawnVehicle(van) then
-                outputDebugString("EMMET DELIVERY VAN RESPAWN FAILED", 1)
-                return
-            end
-            resetVan()
-            setElementData(resourceRoot, "emmet:busy", false)
-        end, 5000, 1)
-        return
-    end
-    for _, player in pairs(getVehicleOccupants(van)) do removePedFromVehicle(player) end
-    fixVehicle(van)
-    setElementInterior(van, 0)
-    setElementDimension(van, 0)
-    setElementPosition(van, home.x, home.y, home.z)
-    setElementRotation(van, home.rx, home.ry, home.rz)
-    setElementVelocity(van, 0, 0, 0)
-    setVehicleTurnVelocity(van, 0, 0, 0)
-    setVehicleEngineState(van, false)
-    setVehicleLocked(van, true)
-    setElementFrozen(van, true)
-    setElementCollisionsEnabled(van, true)
-    setVehicleDamageProof(van, true)
-    setVehicleWheelStates(van, 0, 0, 0, 0)
-    setElementData(van, "emmet:armored", false)
+local function setPlayerBusy(player, state)
+    if isElement(player) then setElementData(player, "emmet:busy", state) end
 end
 
-local function finish(message, success)
-    local current = session
-    if not current then return end
-    session = nil
+-- FIND A FREE PICKUP POSITION ALONG THE VAN'S HEADING
+local function findPickupPosition()
+    local angle = math.rad(home.rz)
+    for _, offset in ipairs({0, 8, -8, 16, -16, 24, -24, 32, -32}) do
+        local x, y = home.x - math.sin(angle) * offset, home.y + math.cos(angle) * offset
+        local clear = true
+        for _, vehicle in ipairs(getElementsByType("vehicle")) do
+            if vehicle ~= template and getElementDimension(vehicle) == 0 and getElementInterior(vehicle) == 0 then
+                local vx, vy, vz = getElementPosition(vehicle)
+                if math.abs(vz - home.z) < 5 and getDistanceBetweenPoints2D(x, y, vx, vy) < 7 then
+                    clear = false
+                    break
+                end
+            end
+        end
+        if clear then return x, y, home.z end
+    end
+end
+
+local function createMissionVan(player)
+    local x, y, z = findPickupPosition()
+    if not x then return false end
+    local vehicle = createVehicle(tonumber(settings.model), x, y, z, home.rx, home.ry, home.rz, settings.plate or "SECURITY")
+    if not isElement(vehicle) then return false end
+    setElementParent(vehicle, resourceRoot)
+    setElementData(vehicle, "emmet:missionVan", true)
+    setElementData(vehicle, "emmet:armored", true)
+    setElementData(vehicle, "emmet:owner", player)
+    setVehiclePaintjob(vehicle, tonumber(settings.paintjob) or 3)
+    local colors = {}
+    for number in tostring(settings.color or ""):gmatch("[^,]+") do colors[#colors + 1] = tonumber(number) end
+    if #colors == 12 then setVehicleColor(vehicle, unpack(colors)) end
+    for upgrade in tostring(settings.upgrades or ""):gmatch("[^,]+") do addVehicleUpgrade(vehicle, tonumber(upgrade)) end
+    toggleVehicleRespawn(vehicle, false)
+    setVehicleDamageProof(vehicle, false)
+    setVehicleLocked(vehicle, false)
+    setElementFrozen(vehicle, false)
+    setVehicleWheelStates(vehicle, 0, 0, 0, 0)
+    return vehicle
+end
+
+finish = function(current, message, success, wreck)
+    if not current or sessions[current.player] ~= current then return end
+    sessions[current.player] = nil
+    vehicleSessions[current.van] = nil
     if isTimer(current.timer) then killTimer(current.timer) end
     if isElement(current.publicBlip) then destroyElement(current.publicBlip) end
-    if isElement(current.destination.marker) then
-        if isElement(current.player) then setElementVisibleTo(current.destination.marker, current.player, false) end
-        setElementVisibleTo(current.destination.marker, root, false)
+    if isElement(current.destination.marker) and isElement(current.player) then
+        -- HIDE ONLY THIS PLAYER'S MARKER
+        setElementVisibleTo(current.destination.marker, current.player, false)
     end
-    if success and isElement(current.player) then
-        givePlayerMoney(current.player, current.destination.reward)
-    end
+    if success and isElement(current.player) then givePlayerMoney(current.player, current.destination.reward) end
     send(current.player, "finished", message, success)
-    setElementData(resourceRoot, "emmet:busy", false)
-    resetVan()
+    if wreck and not stopping then
+        setPlayerBusy(current.player, true)
+        local timer
+        timer = setTimer(function()
+            recoveries[timer] = nil
+            if isElement(current.van) then destroyElement(current.van) end
+            setPlayerBusy(current.player, false)
+        end, 5000, 1)
+        recoveries[timer] = current
+    else
+        if isElement(current.van) then destroyElement(current.van) end
+        setPlayerBusy(current.player, false)
+    end
 end
 
 addEventHandler("onResourceStart", resourceRoot, function()
-    van = getElementByID("emmetDeliveryVan")
+    template = getElementByID("emmetDeliveryVan")
     startMarker = getElementByID("markerEmmetDelivery")
-    if not isElement(van) or not isElement(startMarker) then
-        outputDebugString("EMMET DELIVERY VAN OR START MARKER MISSING", 1)
+    local map = xmlLoadFile("pirate-map.map")
+    if map then
+        for _, node in ipairs(xmlNodeGetChildren(map)) do
+            if xmlNodeGetName(node) == "vehicle" and xmlNodeGetAttribute(node, "id") == "emmetDeliveryVan" then
+                settings = xmlNodeGetAttributes(node)
+                break
+            end
+        end
+        xmlUnloadFile(map)
+    end
+    if not isElement(template) or not isElement(startMarker) or not settings then
+        outputDebugString("EMMET DELIVERY TEMPLATE OR START MARKER MISSING", 1)
         return
     end
-    local x, y, z = getElementPosition(van)
-    local rx, ry, rz = getElementRotation(van)
-    home = {x = x, y = y, z = z, rx = rx, ry = ry, rz = rz}
-    setVehicleRespawnPosition(van, x, y, z)
-    setVehicleRespawnRotation(van, rx, ry, rz)
-    toggleVehicleRespawn(van, false)
-    resetVan()
+    home = {x = tonumber(settings.posX), y = tonumber(settings.posY), z = tonumber(settings.posZ),
+        rx = tonumber(settings.rotX) or 0, ry = tonumber(settings.rotY) or 0, rz = tonumber(settings.rotZ) or 0}
+    -- EACH PLAYER GETS A FRESH VAN FROM THIS HIDDEN TEMPLATE
+    setElementData(template, "emmet:missionVan", true)
+    setVehicleLocked(template, true)
+    setElementFrozen(template, true)
+    setElementCollisionsEnabled(template, false)
+    setVehicleDamageProof(template, true)
+    setElementAlpha(template, 0)
+    toggleVehicleRespawn(template, false)
     setElementData(resourceRoot, "emmet:start", startMarker)
     setElementData(resourceRoot, "emmet:busy", false)
     createBlipAttachedTo(startMarker, 51)
     for _, destination in ipairs(destinations) do
         destination.marker = getElementByID(destination.id)
-        if isElement(destination.marker) then
-            setElementVisibleTo(destination.marker, root, false)
-        else
-            outputDebugString("EMMET DELIVERY DROPOFF MISSING: " .. destination.id, 1)
-        end
+        if isElement(destination.marker) then setElementVisibleTo(destination.marker, root, false)
+        else outputDebugString("EMMET DELIVERY DROPOFF MISSING: " .. destination.id, 1) end
     end
+    for _, player in ipairs(getElementsByType("player")) do setPlayerBusy(player, false) end
 end)
 
 addEvent("emmet:start", true)
 addEventHandler("emmet:start", resourceRoot, function()
-    if source ~= resourceRoot or not isElement(client) or not isElement(startMarker) or not isElement(van) then return end
+    if source ~= resourceRoot or not isElement(client) or not isElement(startMarker) or not home then return end
     local now = getTickCount()
     if lastRequests[client] and now - lastRequests[client] < 1000 then return end
     lastRequests[client] = now
-    if isPedDead(client) or isPedInVehicle(client) or getElementInterior(client) ~= 0
-        or getElementDimension(client) ~= 0 then return end
+    if isPedDead(client) or isPedInVehicle(client) or getElementInterior(client) ~= 0 or getElementDimension(client) ~= 0 then return end
     local x, y, z = getElementPosition(client)
     local sx, sy, sz = getElementPosition(startMarker)
     if getDistanceBetweenPoints3D(x, y, z, sx, sy, sz + 1) > 2 then return end
-    if session then send(client, "notice", "DELIVERY ALREADY IN PROGRESS.") return end
-    if isTimer(recoveryTimer) or isVehicleBlown(van) then
-        send(client, "notice", "DELIVERY VAN RESETTING. TRY AGAIN SHORTLY.") return
-    end
-    local choices = {}
+    if sessions[client] then send(client, "notice", "DELIVERY ALREADY IN PROGRESS.") return end
+    if getElementData(client, "emmet:busy") then send(client, "notice", "DELIVERY VAN RESETTING. TRY AGAIN SHORTLY.") return end
+    local choices, available = {}, {}
     for _, destination in ipairs(destinations) do
-        if isElement(destination.marker) and destination ~= lastDestination then choices[#choices + 1] = destination end
+        if isElement(destination.marker) then
+            available[#available + 1] = destination
+            if destination ~= lastDestinations[client] then choices[#choices + 1] = destination end
+        end
     end
+    if #choices == 0 then choices = available end
     if #choices == 0 then send(client, "notice", "NO DELIVERY DESTINATION AVAILABLE.") return end
+    local vehicle = createMissionVan(client)
+    if not vehicle then send(client, "notice", "VAN PICKUP AREA FULL. TRY AGAIN SHORTLY.") return end
     local destination = choices[math.random(#choices)]
-    lastDestination = destination
-    session = {player = client, destination = destination, phase = "pickup"}
-    setElementData(van, "emmet:armored", true)
-    session.timer = setTimer(function() finish("DELIVERY FAILED: VAN NOT COLLECTED.") end, 30000, 1)
-    setElementData(resourceRoot, "emmet:busy", true)
-    setVehicleLocked(van, false)
-    setElementFrozen(van, false)
-    setVehicleDamageProof(van, false)
-    send(client, "pickup", van, "COLLECT THE DELIVERY VAN.")
+    lastDestinations[client] = destination
+    local current = {player = client, van = vehicle, destination = destination, phase = "pickup"}
+    sessions[client], vehicleSessions[vehicle] = current, current
+    setPlayerBusy(client, true)
+    current.timer = setTimer(function() finish(current, "DELIVERY FAILED: VAN NOT COLLECTED.") end, 30000, 1)
+    send(client, "pickup", vehicle, "COLLECT THE DELIVERY VAN.")
 end)
 
 addEventHandler("onVehicleStartEnter", resourceRoot, function(player, seat)
-    if source == van and (not session or player ~= session.player or seat ~= 0) then cancelEvent() end
+    if getElementData(source, "emmet:missionVan") ~= true then return end
+    local current = vehicleSessions[source]
+    if not current or player ~= current.player or seat ~= 0 then cancelEvent() end
 end)
-
 addEventHandler("onVehicleEnter", resourceRoot, function(player, seat)
-    if source ~= van then return end
-    if not session or player ~= session.player or seat ~= 0 then removePedFromVehicle(player) return end
-    if session.phase ~= "pickup" then return end
-    killTimer(session.timer)
-    session.phase = "delivery"
-    session.publicBlip = createBlipAttachedTo(van, 41, 2, 255, 255, 255, 255, 0, 16383, root)
-    session.timer = setTimer(function() finish("DELIVERY FAILED: TIME EXPIRED.") end, session.destination.seconds * 1000, 1)
-    setElementVisibleTo(session.destination.marker, player, true)
-    send(player, "delivery", session.destination.marker, session.destination.seconds, session.destination.name)
+    if getElementData(source, "emmet:missionVan") ~= true then return end
+    local current = vehicleSessions[source]
+    if not current or player ~= current.player or seat ~= 0 then removePedFromVehicle(player) return end
+    if current.phase ~= "pickup" then return end
+    if isTimer(current.timer) then killTimer(current.timer) end
+    current.phase = "delivery"
+    current.publicBlip = createBlipAttachedTo(current.van, 41, 2, 255, 255, 255, 255, 0, 16383, root)
+    current.timer = setTimer(function() finish(current, "DELIVERY FAILED: TIME EXPIRED.") end, current.destination.seconds * 1000, 1)
+    setElementVisibleTo(current.destination.marker, player, true)
+    send(player, "delivery", current.destination.marker, current.destination.seconds)
 end)
-
 addEventHandler("onMarkerHit", resourceRoot, function(element, matchingDimension)
-    if not matchingDimension or not session or session.phase ~= "delivery" then return end
-    if source ~= session.destination.marker or element ~= van then return end
-    if getVehicleController(van) ~= session.player or getElementInterior(van) ~= 0 then return end
-    finish("DELIVERY COMPLETE: $" .. session.destination.reward .. " RECEIVED.", true)
+    local current = vehicleSessions[element]
+    if not matchingDimension or not current or current.phase ~= "delivery" then return end
+    if source ~= current.destination.marker or getVehicleController(current.van) ~= current.player or getElementInterior(current.van) ~= 0 then return end
+    finish(current, "DELIVERY COMPLETE: $" .. current.destination.reward .. " RECEIVED.", true)
 end)
-
 addEventHandler("onVehicleExplode", resourceRoot, function()
-    if source ~= van then return end
-    finish("DELIVERY FAILED: VAN DESTROYED.")
-    resetVan()
+    finish(vehicleSessions[source], "DELIVERY FAILED: VAN DESTROYED.", false, true)
 end)
 addEventHandler("onElementDestroy", resourceRoot, function()
-    if not stopping and session and (source == van or source == session.destination.marker) then
-        finish("DELIVERY FAILED: DELIVERY UNAVAILABLE.")
+    if stopping then return end
+    local current = vehicleSessions[source]
+    if current then
+        vehicleSessions[source] = nil
+        current.van = false
+        finish(current, "DELIVERY FAILED: DELIVERY UNAVAILABLE.")
+        return
     end
+    local affected = {}
+    for _, active in pairs(sessions) do
+        if active.destination.marker == source then affected[#affected + 1] = active end
+    end
+    for _, active in ipairs(affected) do finish(active, "DELIVERY FAILED: DELIVERY UNAVAILABLE.") end
 end)
-addEventHandler("onPlayerWasted", root, function()
-    if session and source == session.player then finish("DELIVERY FAILED.") end
-end)
+addEventHandler("onPlayerWasted", root, function() finish(sessions[source], "DELIVERY FAILED.") end)
 
 -- PROTECT THE CABIN FROM THE HEADSHOT RESOURCE
 addEventHandler("onPlayerPreHeadshot", root, function(_, weapon)
-    if session and getPedOccupiedVehicle(source) == van
+    local vehicle = getPedOccupiedVehicle(source)
+    if isElement(vehicle) and getElementData(vehicle, "emmet:armored") == true and type(weapon) == "number"
         and ((weapon >= 22 and weapon <= 34) or weapon == 38) then cancelEvent() end
 end)
-
 -- KEEP MISSION TIRES INFLATED WITHOUT REPAIRING THE BODY
 setTimer(function()
-    if not session or not isElement(van) then return end
-    local frontLeft, rearLeft, frontRight, rearRight = getVehicleWheelStates(van)
-    if frontLeft ~= 0 or rearLeft ~= 0 or frontRight ~= 0 or rearRight ~= 0 then
-        setVehicleWheelStates(van, 0, 0, 0, 0)
+    for vehicle in pairs(vehicleSessions) do
+        if isElement(vehicle) then
+            local a, b, c, d = getVehicleWheelStates(vehicle)
+            if a ~= 0 or b ~= 0 or c ~= 0 or d ~= 0 then setVehicleWheelStates(vehicle, 0, 0, 0, 0) end
+        end
     end
 end, 250, 0)
 addEventHandler("onPlayerQuit", root, function()
-    lastRequests[source] = nil
-    if session and source == session.player then finish("DELIVERY CANCELLED.") end
+    finish(sessions[source], "DELIVERY CANCELLED.")
+    for timer, current in pairs(recoveries) do
+        if current.player == source then
+            if isTimer(timer) then killTimer(timer) end
+            recoveries[timer] = nil
+            if isElement(current.van) then destroyElement(current.van) end
+        end
+    end
+    lastRequests[source], lastDestinations[source] = nil, nil
 end)
 addEventHandler("onResourceStop", resourceRoot, function()
     stopping = true
-    finish("DELIVERY CANCELLED.")
-    if isTimer(recoveryTimer) then killTimer(recoveryTimer) end
+    local active = {}
+    for _, current in pairs(sessions) do active[#active + 1] = current end
+    for _, current in ipairs(active) do finish(current, "DELIVERY CANCELLED.") end
+    for timer, current in pairs(recoveries) do
+        if isTimer(timer) then killTimer(timer) end
+        if isElement(current.van) then destroyElement(current.van) end
+        setPlayerBusy(current.player, false)
+    end
 end)
