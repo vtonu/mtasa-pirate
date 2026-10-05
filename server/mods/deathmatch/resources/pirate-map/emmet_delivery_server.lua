@@ -7,6 +7,7 @@ local destinations = {
 local van, startMarker, home, session, lastDestination
 local lastRequests = {}
 local stopping = false
+local recoveryTimer
 
 local function send(player, ...)
     if isElement(player) then triggerClientEvent(player, "emmet:state", resourceRoot, ...) end
@@ -14,6 +15,21 @@ end
 
 local function resetVan()
     if not isElement(van) or not home then return end
+    if isVehicleBlown(van) then
+        if isTimer(recoveryTimer) then return end
+        setElementData(resourceRoot, "emmet:busy", true)
+        recoveryTimer = setTimer(function()
+            recoveryTimer = nil
+            if stopping or not isElement(van) then return end
+            if not respawnVehicle(van) then
+                outputDebugString("EMMET DELIVERY VAN RESPAWN FAILED", 1)
+                return
+            end
+            resetVan()
+            setElementData(resourceRoot, "emmet:busy", false)
+        end, 5000, 1)
+        return
+    end
     for _, player in pairs(getVehicleOccupants(van)) do removePedFromVehicle(player) end
     fixVehicle(van)
     setElementInterior(van, 0)
@@ -59,6 +75,8 @@ addEventHandler("onResourceStart", resourceRoot, function()
     local x, y, z = getElementPosition(van)
     local rx, ry, rz = getElementRotation(van)
     home = {x = x, y = y, z = z, rx = rx, ry = ry, rz = rz}
+    setVehicleRespawnPosition(van, x, y, z)
+    setVehicleRespawnRotation(van, rx, ry, rz)
     toggleVehicleRespawn(van, false)
     resetVan()
     setElementData(resourceRoot, "emmet:start", startMarker)
@@ -86,6 +104,9 @@ addEventHandler("emmet:start", resourceRoot, function()
     local sx, sy, sz = getElementPosition(startMarker)
     if getDistanceBetweenPoints3D(x, y, z, sx, sy, sz + 1) > 2 then return end
     if session then send(client, "notice", "DELIVERY ALREADY IN PROGRESS.") return end
+    if isTimer(recoveryTimer) or isVehicleBlown(van) then
+        send(client, "notice", "DELIVERY VAN RESETTING. TRY AGAIN SHORTLY.") return
+    end
     local choices = {}
     for _, destination in ipairs(destinations) do
         if isElement(destination.marker) and destination ~= lastDestination then choices[#choices + 1] = destination end
@@ -127,7 +148,9 @@ addEventHandler("onMarkerHit", resourceRoot, function(element, matchingDimension
 end)
 
 addEventHandler("onVehicleExplode", resourceRoot, function()
-    if source == van then finish("DELIVERY FAILED: VAN DESTROYED.") end
+    if source ~= van then return end
+    finish("DELIVERY FAILED: VAN DESTROYED.")
+    resetVan()
 end)
 addEventHandler("onElementDestroy", resourceRoot, function()
     if not stopping and session and (source == van or source == session.destination.marker) then
@@ -159,4 +182,5 @@ end)
 addEventHandler("onResourceStop", resourceRoot, function()
     stopping = true
     finish("DELIVERY CANCELLED.")
+    if isTimer(recoveryTimer) then killTimer(recoveryTimer) end
 end)
