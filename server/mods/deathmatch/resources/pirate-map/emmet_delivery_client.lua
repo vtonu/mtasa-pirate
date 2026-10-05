@@ -81,3 +81,25 @@ addEventHandler("onClientRender", root, function()
     end
 end)
 addEventHandler("onClientResourceStop", resourceRoot, clearMission)
+
+-- MISSION VAN ARMOR
+local function isBullet(weapon)
+    return type(weapon) == "number" and ((weapon >= 22 and weapon <= 34) or weapon == 38)
+end
+
+addEventHandler("onClientVehicleDamage", root, function(_, weapon, loss)
+    if getElementData(source, "emmet:armored") ~= true or not isBullet(weapon) then return end
+    cancelEvent()
+    -- ONLY THE VEHICLE SYNCER APPLIES THE REDUCED HEALTH LOSS
+    if isElementSyncer(source) and type(loss) == "number" and loss > 0 then
+        setElementHealth(source, math.max(0, getElementHealth(source) - loss * 0.2))
+        setVehicleWheelStates(source, 0, 0, 0, 0)
+    end
+end)
+
+addEventHandler("onClientPlayerDamage", localPlayer, function(_, weapon)
+    local vehicle = getPedOccupiedVehicle(localPlayer)
+    if isElement(vehicle) and getElementData(vehicle, "emmet:armored") == true and isBullet(weapon) then
+        cancelEvent()
+    end
+end)

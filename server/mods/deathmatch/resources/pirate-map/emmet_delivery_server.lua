@@ -27,6 +27,8 @@ local function resetVan()
     setElementFrozen(van, true)
     setElementCollisionsEnabled(van, true)
     setVehicleDamageProof(van, true)
+    setVehicleWheelStates(van, 0, 0, 0, 0)
+    setElementData(van, "emmet:armored", false)
 end
 
 local function finish(message, success)
@@ -34,6 +36,7 @@ local function finish(message, success)
     if not current then return end
     session = nil
     if isTimer(current.timer) then killTimer(current.timer) end
+    if isElement(current.publicBlip) then destroyElement(current.publicBlip) end
     if isElement(current.destination.marker) then
         if isElement(current.player) then setElementVisibleTo(current.destination.marker, current.player, false) end
         setElementVisibleTo(current.destination.marker, root, false)
@@ -91,6 +94,8 @@ addEventHandler("emmet:start", resourceRoot, function()
     local destination = choices[math.random(#choices)]
     lastDestination = destination
     session = {player = client, destination = destination, phase = "pickup"}
+    session.publicBlip = createBlipAttachedTo(van, 41, 2, 255, 255, 255, 255, 0, 16383, root)
+    setElementData(van, "emmet:armored", true)
     session.timer = setTimer(function() finish("DELIVERY FAILED: VAN NOT COLLECTED.") end, 120000, 1)
     setElementData(resourceRoot, "emmet:busy", true)
     setVehicleLocked(van, false)
@@ -132,6 +137,21 @@ end)
 addEventHandler("onPlayerWasted", root, function()
     if session and source == session.player then finish("DELIVERY FAILED.") end
 end)
+
+-- PROTECT THE CABIN FROM THE HEADSHOT RESOURCE
+addEventHandler("onPlayerPreHeadshot", root, function(_, weapon)
+    if session and getPedOccupiedVehicle(source) == van
+        and ((weapon >= 22 and weapon <= 34) or weapon == 38) then cancelEvent() end
+end)
+
+-- KEEP MISSION TIRES INFLATED WITHOUT REPAIRING THE BODY
+setTimer(function()
+    if not session or not isElement(van) then return end
+    local frontLeft, rearLeft, frontRight, rearRight = getVehicleWheelStates(van)
+    if frontLeft ~= 0 or rearLeft ~= 0 or frontRight ~= 0 or rearRight ~= 0 then
+        setVehicleWheelStates(van, 0, 0, 0, 0)
+    end
+end, 250, 0)
 addEventHandler("onPlayerQuit", root, function()
     lastRequests[source] = nil
     if session and source == session.player then finish("DELIVERY CANCELLED.") end
