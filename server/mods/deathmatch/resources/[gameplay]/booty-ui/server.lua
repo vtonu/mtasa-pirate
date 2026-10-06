@@ -755,8 +755,18 @@ local function atShop(player)
     return getDistanceBetweenPoints3D(x, y, z, 2000.70, 1539.16, 12.65) <= 1.1
 end
 
-local function react(player, state, weapon)
+local function getShopClerk(player)
     local clerk = getCounterClerk(player)
+    if clerk then return clerk end
+    if not atShop(player) then return false end
+    clerk = getElementByID("pirateShipClerk")
+    if isElement(clerk) and getElementInterior(clerk) == getElementInterior(player)
+        and getElementDimension(clerk) == getElementDimension(player) then return clerk end
+    return false
+end
+
+local function react(player, state, weapon)
+    local clerk = getShopClerk(player)
     if clerk then triggerClientEvent(player, "bootyShop:clerkReaction", resourceRoot, clerk, state, weapon) end
 end
 
@@ -783,7 +793,7 @@ function openBootyUI(player)
     end
 
     playerShopState[player] = {}
-    triggerClientEvent(player, "bootyShop:openUI", resourceRoot, getShopPayload("SELECT A WEAPON.", true, player), getCounterClerk(player))
+    triggerClientEvent(player, "bootyShop:openUI", resourceRoot, getShopPayload("SELECT A WEAPON.", true, player), getShopClerk(player))
     return true
 end
 

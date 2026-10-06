@@ -4,7 +4,9 @@ local layouts = {
     {marker = "ammuNationCounter1", clerk = "ammuNationCounterClerkVet", interior = 1, dimensions = {12022, 12024}},
     {marker = "ammuNationCounter3", clerk = "ammuNationCounterClerkVet3", interior = 6, dimensions = {12020, 12021, 12023, 12025, 12027, 12028, 12030}},
     {marker = "ammuNationCounter4", clerk = "ammuNationCounterClerkVet4", interior = 6, dimensions = {12026}},
-    {marker = "ammuNationCounter5", clerk = "ammuNationCounterClerkVet5", interior = 7, dimensions = {12029}}
+    {marker = "ammuNationCounter5", clerk = "ammuNationCounterClerkVet5", interior = 7, dimensions = {12029}},
+    {marker = "ammuNationSpecialClerkMarker", clerk = "ammuNationSpecialClerk1", interior = 7, dimensions = {12029}},
+    {marker = "ammuNationSpecialClerkMarker2", clerk = "ammuNationSpecialClerk2", interior = 7, dimensions = {12029}}
 }
 local counters = {}
 local function closeShop(player)
@@ -57,6 +59,13 @@ end
 
 addEventHandler("onResourceStart", resourceRoot, function()
     for _, layout in ipairs(layouts) do createCounters(layout) end
+    local clerk = getElementByID("pirateShipClerk")
+    if isElement(clerk) then
+        setElementFrozen(clerk, true)
+        setElementData(clerk, "ammu:clerk", true)
+    else
+        outputDebugString("PIRATE SHIP CLERK MISSING", 1)
+    end
 end)
 
 -- DIMENSION CHANGES AND RESOURCE RESTARTS ALSO UPDATE ACCESS
