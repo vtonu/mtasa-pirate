@@ -34,6 +34,11 @@ addEventHandler("emmet:state", resourceRoot, function(state, first, second, thir
         if isElement(first) then vanBlip = createBlipAttachedTo(first, 0, 2, 255, 0, 0, 255) end
         notice, noticeUntil = second, getTickCount() + 6000
         playSoundFrontEnd(42)
+    elseif state == "pickupVan" then
+        if phase ~= "pickup" then return end
+        if isElement(vanBlip) then destroyElement(vanBlip) end
+        vanBlip = nil
+        if isElement(first) then vanBlip = createBlipAttachedTo(first, 0, 2, 255, 0, 0, 255) end
     elseif state == "delivery" then
         if isElement(vanBlip) then destroyElement(vanBlip) end
         vanBlip = nil

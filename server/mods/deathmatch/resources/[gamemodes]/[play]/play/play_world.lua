@@ -109,12 +109,17 @@ function initPlayWorld()
         local index = 1
         setWorldWeather(cycle[index])
         announceWeather(cycle[index])
-        weatherTimer = setTimer(function()
-            index = index % #cycle + 1
-            setWorldWeather(cycle[index])
-            announceWeather(cycle[index])
-            setTime(time[1], time[2])
-        end, getWorldSetting("weatherInterval"), 0)
+        local intervals = getWorldSetting("weatherIntervals") or {}
+        local function scheduleWeather()
+            weatherTimer = setTimer(function()
+                index = index % #cycle + 1
+                setWorldWeather(cycle[index])
+                announceWeather(cycle[index])
+                setTime(time[1], time[2])
+                scheduleWeather()
+            end, intervals[cycle[index]] or getWorldSetting("weatherInterval"), 1)
+        end
+        scheduleWeather()
     end
     setCloudsEnabled(getWorldSetting("cloudsEnabled"))
     setGravity(getWorldSetting("gravity"))

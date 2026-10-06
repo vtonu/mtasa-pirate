@@ -32,6 +32,7 @@ playWorldSettings = {
     weather = 18,
     weatherCycle = {18, 9},
     weatherInterval = 3 * 60 * 1000,
+    weatherIntervals = {[18] = 5 * 60 * 1000},
     cloudsEnabled = true,
     gravity = 0.008,
     explosionsEnabled = true
