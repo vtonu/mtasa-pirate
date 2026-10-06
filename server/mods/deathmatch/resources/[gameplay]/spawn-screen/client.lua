@@ -3,6 +3,29 @@
 -- ==========================================
 local screenW, screenH = guiGetScreenSize()
 local promptColor = tocolor(127, 255, 212)
+local promptFont = "default-bold"
+local promptScale = 2
+local promptText = "PRESS SPACE TO SPAWN"
+local promptBottomOffset = 100
+
+-- REFRESH CACHED STYLE WHEN THE CONFIG STARTS
+local function refreshPromptStyle()
+    local configResource = getResourceFromName("pirate-config")
+    if not configResource or getResourceState(configResource) ~= "running" then return end
+    local style = exports["pirate-config"]:getPromptStyle("spawn")
+    if type(style) ~= "table" then return end
+    promptColor = tocolor(unpack(style.color))
+    promptFont = style.font
+    promptScale = style.scale
+    promptText = style.text
+    promptBottomOffset = style.bottomOffset
+end
+
+addEventHandler("onClientResourceStart", root, function(startedResource)
+    if startedResource == getThisResource() or getResourceName(startedResource) == "pirate-config" then
+        setTimer(refreshPromptStyle, 100, 1)
+    end
+end)
 local view = false
 local requested = false
 local startedAt = 0
@@ -30,8 +53,8 @@ end)
 
 local function drawPrompt()
     if view then
-        dxDrawText("PRESS SPACE TO SPAWN", 0, screenH - 100, screenW, screenH,
-            promptColor, 2, "default-bold", "center", "top")
+        dxDrawText(promptText, 0, screenH - promptBottomOffset, screenW, screenH,
+            promptColor, promptScale, promptFont, "center", "top")
     end
 end
 

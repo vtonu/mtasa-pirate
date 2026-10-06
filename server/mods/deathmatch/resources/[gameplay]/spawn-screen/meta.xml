@@ -1,5 +1,6 @@
 <meta>
     <info author="Lifestyle" description="Join spawn screen" version="1.0" type="script"/>
+    <include resource="pirate-config"/>
     <script src="server.lua" type="server"/>
     <script src="client.lua" type="client"/>
     <export function="showSpawnScreen" type="server"/>

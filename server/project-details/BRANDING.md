@@ -1,7 +1,7 @@
 # BRANDING
 
 Local settings checked 2026-10-06. Solace may differ.
-This is a guide. A shared config is not connected yet.
+Shared config is connected to spawn and respawn only.
 Paths below start at `server/mods/deathmatch/resources/`.
 
 ## COLORS AND FONTS
@@ -45,7 +45,12 @@ Map XML owns placed vehicle positions and rotations.
 
 ## SHARED CONFIG PLAN
 
-Proposed: `[gameplay]/pirate-config/config.lua`, with camelCase keys.
+Edit `[gameplay]/pirate-config/config.lua` in VS Code.
+Connected keys: `colors.accent`, `fonts.prompt`, `text.spawn`, `text.respawn`,
+`ui.prompt.scale`, and `ui.prompt.bottomOffset` (pixels from the bottom).
+Color uses RGB plus optional alpha, each 0-255. Scale: 0.1-10. Offset: 0-2000.
+Fonts: default, default-bold, clear, arial, sans, pricedown, bankgothic, diploma, beckett.
+Invalid values use current defaults. Lua syntax errors must be fixed before starting.
 
 | Group | Settings |
 | --- | --- |
@@ -61,5 +66,13 @@ First keep current values and connect each system. Then merge repeated choices a
 Lua and browser UIs both need to read the config. Define startup order, fallbacks,
 validation, and restart behavior. Keep secrets and gameplay balance separate.
 
-Next: approve the config and first source files, connect spawn/respawn, then test on Solace.
-Connect the remaining systems one by one. Native HUD and image/model colors may need asset edits.
+## SAVE AND APPLY
+
+First install: upload pirate-config and the changed spawn-screen/play files. Run `refresh`,
+then `start pirate-config`, `restart spawn-screen`, and `restart play` when ready.
+Restarting play can affect active gameplay; do the first install between live tests.
+Future edits: save, push, upload config.lua, then `restart pirate-config`.
+Both prompts reload their style without a play restart. Confirm this on Solace:
+join and spawn; die and respawn; change a style value and restart the config while a prompt is visible.
+If the config stops, already running prompts keep their last loaded style.
+Other systems are not connected yet. Native HUD and image/model colors may need asset edits.
