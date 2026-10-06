@@ -6,6 +6,44 @@ local PLAYER_RESPAWN_AUTO_DELAY_MS = 60000
 local PLAYER_SPAWN_FREEZE_MS = 1000
 local PLAYER_FADE_TIME_SECONDS = 1
 local pendingPlayerRespawns = {}
+local hospitalReservations = {}
+
+local function isHospitalSpawnClear(spawnData, playerElement)
+    local reservedUntil = hospitalReservations[spawnData]
+    if reservedUntil and reservedUntil > getTickCount() then
+        return false
+    end
+
+    for _, elementType in ipairs({"vehicle", "player", "ped"}) do
+        for _, element in ipairs(getElementsByType(elementType)) do
+            if element ~= playerElement and getElementInterior(element) == 0 and getElementDimension(element) == 0 then
+                local x, y, z = getElementPosition(element)
+                local clearance = elementType == "vehicle" and 8 or 3
+                if math.abs(z - spawnData.z) < 5 and
+                    (x - spawnData.x)^2 + (y - spawnData.y)^2 < clearance^2 then
+                    return false
+                end
+            end
+        end
+    end
+    return true
+end
+
+local function getHospitalRespawn(deathPosition, playerElement)
+    local nearestSpawn
+    local nearestDistance
+    for _, spawnData in ipairs(hospitalSpawns) do
+        local distance = (spawnData.x - deathPosition.x)^2 + (spawnData.y - deathPosition.y)^2
+        if (not nearestDistance or distance < nearestDistance) and isHospitalSpawnClear(spawnData, playerElement) then
+            nearestSpawn = spawnData
+            nearestDistance = distance
+        end
+    end
+    if nearestSpawn then
+        hospitalReservations[nearestSpawn] = getTickCount() + 3000
+    end
+    return nearestSpawn or playerSpawn
+end
 
 local function setPlayerSpawnProtection(playerElement, state)
     setElementFrozen(playerElement, state)
@@ -76,14 +114,22 @@ local function finishPendingPlayerRespawn(playerElement)
         return
     end
 
+    if not isPedDead(playerElement) then
+        clearPendingPlayerRespawn(playerElement, true)
+        return
+    end
+
     local spawnData = pendingRespawn.spawnData
+    if spawnData.hospitalRespawn then
+        spawnData = getHospitalRespawn(spawnData, playerElement)
+    end
 
     clearPendingPlayerRespawn(playerElement, true)
     playSpawnPlayer(playerElement, spawnData)
 end
 
 local function showPlayerRespawnPrompt(playerElement, spawnData)
-    if not isElement(playerElement) then
+    if not isElement(playerElement) or not isPedDead(playerElement) then
         return
     end
 
@@ -126,7 +172,12 @@ function onPlayerWasted(totalAmmo, killerElement)
     onPlayerStatsWasted(killerElement)
     clearPendingPlayerRespawn(source, true)
 
-    setTimer(showPlayerRespawnPrompt, PLAYER_RESPAWN_DELAY_MS, 1, source, playerSpawn)
+    local spawnData = playerSpawn
+    if getElementInterior(source) == 0 and getElementDimension(source) == 0 then
+        local x, y = getElementPosition(source)
+        spawnData = {x = x, y = y, hospitalRespawn = true}
+    end
+    setTimer(showPlayerRespawnPrompt, PLAYER_RESPAWN_DELAY_MS, 1, source, spawnData)
 end
 
 function onPlayerRespawnRequest()

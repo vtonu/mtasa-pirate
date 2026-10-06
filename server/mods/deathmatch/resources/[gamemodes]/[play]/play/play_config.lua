@@ -24,6 +24,19 @@ playerSpawn = {
     skin = 303 -- Andre
 }
 
+-- HOSPITAL RESPAWNS
+hospitalSpawns = {
+    {x = 1606.77319, y = 1819.75854, z = 10.82800, rotation = 0},
+    {x = 1858.01367, y = 2236.92480, z = 11.12500, rotation = 0},
+    {x = -1514.66064, y = 2519.68188, z = 56.04676, rotation = 0},
+    {x = -2664.44775, y = 637.55707, z = 14.45312, rotation = 0},
+    {x = 1172.85095, y = -1323.72571, z = 15.39980, rotation = 0},
+    {x = 2035.82324, y = -1413.52197, z = 16.99219, rotation = 0},
+    {x = -2201.26147, y = -2307.73608, z = 30.62500, rotation = 0},
+    {x = 1241.80615, y = 327.34695, z = 19.75551, rotation = 0},
+    {x = -322.65298, y = 1057.22168, z = 19.74219, rotation = 0}
+}
+
 playWorldSettings = {
     gameType = "Custom",
     mapName = "4AM in Las Venturas",
