@@ -744,8 +744,14 @@ function quitHandler(player)
 end
 addEventHandler('onPlayerQuit', root, quitHandler)
 
+local function isWaitingForSpawn(player)
+    local screen = getResourceFromName("spawn-screen")
+    return screen and getResourceState(screen) == "running" and call(screen, "isWaitingForSpawn", player) == true
+end
+
 addEvent('onServerCall', true)
 addEventHandler('onServerCall', resourceRoot, function(fnName, ...)
+    if not client or isWaitingForSpawn(client) then return end
     source = client -- Some called functions require 'source' to be set to the triggering client
     local fnInfo = g_RPCFunctions[fnName]
 
@@ -788,6 +794,7 @@ end
 addEvent("onFreeroamLocalSettingChange", true)
 
 function handleSuicide()
+    if client and isWaitingForSpawn(client) then return end
     if source ~= client then
         return
     end
@@ -800,6 +807,7 @@ addEventHandler('onFreeroamSuicide', root, handleSuicide)
 
 addEvent('onFreeroamRemoveJetpack', true)
 addEventHandler('onFreeroamRemoveJetpack', root, function()
+    if client and isWaitingForSpawn(client) then return end
     if not client or source ~= client or not isPedWearingJetpack(client) then
         return
     end

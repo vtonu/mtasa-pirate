@@ -14,8 +14,19 @@ local function updateCamera()
 
     local seconds = (getTickCount() - startedAt) / 1000
     local bob = math.sin(seconds * 0.65) * 0.6
-    setCameraMatrix(view.x - 45, view.y - 25, view.z + 28 + bob, view.x - 5, view.y + 5, view.z)
+    local progress = math.min(seconds / 4, 1)
+    local drop = 2 * progress * progress * (3 - 2 * progress)
+    setCameraMatrix(view.x - 45, view.y - 25, view.z + 28 + bob - drop, view.x - 5, view.y + 5, view.z - drop)
 end
+
+addEventHandler("onClientKey", root, function(key, pressed)
+    if pressed and (view or getElementData(localPlayer, "spawnScreen:waiting") == true) and key ~= "space" then
+        cancelEvent()
+    end
+end, true, "high+10")
+addEventHandler("onClientPlayerDamage", localPlayer, function()
+    if view or getElementData(localPlayer, "spawnScreen:waiting") == true then cancelEvent() end
+end)
 
 local function drawPrompt()
     if view then

@@ -627,9 +627,9 @@
     <marker id="ammuNation2InteriorRangedoor2" type="cylinder" color="#1DEFC5FF" size="1" interior="4" dimension="0" alpha="255" posX="301.70001" posY="-75.4" posZ="1000.2" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="ammuNation2InteriorRangedoor3" type="cylinder" color="#1DEFC5FF" size="1" interior="4" dimension="0" alpha="255" posX="302.60001" posY="-57.7" posZ="1000.2" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <marker id="ammuNation2InteriorRangedoor4" type="cylinder" color="#1DEFC5FF" size="1" interior="4" dimension="0" alpha="255" posX="304.5" posY="-57.8" posZ="1000" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
-    <ped id="pirateShipClerk" interior="0" rotZ="0" dimension="0" model="1" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="2000.7" posY="1537.5" posZ="13.6" rotX="0" rotY="0" scale="1"></ped>
-    <ped id="ammuNationSpecialClerk1" interior="7" rotZ="90" dimension="0" model="1" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="316" posY="-133" posZ="999.59998" rotX="0" rotY="0" scale="1"></ped>
+    <ped id="pirateShipClerk" interior="0" rotZ="0" dimension="0" model="1" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="2000.7002" posY="1537.5" posZ="13.6" rotX="0" rotY="0" scale="1"></ped>
+    <ped id="ammuNationSpecialClerk1" interior="7" rotZ="0" dimension="0" model="1" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="316" posY="-133" posZ="999.59998" rotX="0" rotY="0" scale="1"></ped>
     <marker id="ammuNationSpecialClerkMarker" type="cylinder" color="#B9B445FF" size="1" interior="7" dimension="0" alpha="255" posX="314" posY="-133.8" posZ="998.5" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
-    <ped id="ammuNationSpecialClerk2" interior="7" rotZ="90" dimension="0" model="133" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="316.10001" posY="-136.89999" posZ="1004.1" rotX="0" rotY="0" scale="1"></ped>
+    <ped id="ammuNationSpecialClerk2" interior="7" rotZ="0" dimension="0" model="133" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="316.09961" posY="-136.90039" posZ="1004.1" rotX="0" rotY="0" scale="1"></ped>
     <marker id="ammuNationSpecialClerkMarker2" type="cylinder" color="#B9B445FF" size="1" interior="7" dimension="0" alpha="255" posX="313.79999" posY="-136.89999" posZ="1002.8" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
 </map>

@@ -61,6 +61,8 @@ addEventHandler("onResourceStart", resourceRoot, function()
     for _, layout in ipairs(layouts) do createCounters(layout) end
     local clerk = getElementByID("pirateShipClerk")
     if isElement(clerk) then
+        setElementCollisionsEnabled(clerk, false)
+        setElementAlpha(clerk, 255)
         setElementFrozen(clerk, true)
         setElementData(clerk, "ammu:clerk", true)
     else

@@ -2830,6 +2830,7 @@ function toggleMap()
 end
 
 function toggleFRWindow()
+    if getElementData(localPlayer, "spawnScreen:waiting") == true then return end
     if isWindowOpen(wndMain) then
         showCursor(false)
         hideAllWindows()
