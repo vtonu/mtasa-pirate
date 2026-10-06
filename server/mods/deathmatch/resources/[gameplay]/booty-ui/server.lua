@@ -5,6 +5,12 @@ local playerShopState = {}
 -- ==========================================
 
 local WEAPONS = {
+    armour = {
+        name = "Armour", symbol = "ARM", category = "stealth", price = 10000,
+        winningRate = 70, stealth = 75, ballistics = 75, heavy = 25,
+        damage = "PROTECTION", range = "BODY", capacity = "100", handling = "SOFT VEST",
+        description = "One-time body armour. Choose a tier for greater durability. Weed perks can regenerate armour."
+    },
     brass_knuckles = {
         name = "Brass Knuckles",
         symbol = "BK",
@@ -733,6 +739,16 @@ local function getWeaponPayload()
         return left.category < right.category
     end)
 
+    local armorIndex, katanaIndex
+    for index, item in ipairs(payload) do
+        if item.id == "armour" then armorIndex = index end
+    end
+    local armor = table.remove(payload, armorIndex)
+    for index, item in ipairs(payload) do
+        if item.id == "katana" then katanaIndex = index break end
+    end
+    table.insert(payload, katanaIndex + 1, armor)
+
     return payload
 end
 
@@ -777,7 +793,10 @@ local function getShopPayload(note, resetSelection, player)
         stock = "Available",
         note = note or "SELECT A WEAPON.",
         resetSelection = resetSelection == true,
-        weapons = getWeaponPayload()
+        weapons = getWeaponPayload(),
+        armorTiers = bootyArmorTiers,
+        armorTier = getElementData(player, "booty:armorTier") or false,
+        armor = getPedArmor(player)
     }
 end
 
@@ -809,8 +828,13 @@ addEventHandler("bootyShop:requestOpen", resourceRoot, function()
     openBootyUI(client)
 end)
 
-local function purchaseWeapon(player, weaponId)
+local function purchaseWeapon(player, weaponId, armorTier)
     local weapon = WEAPONS[weaponId]
+    if weaponId == "armour" then
+        local tier = bootyArmorTiers[armorTier]
+        if not tier then return end
+        weapon = {name = tier.name, price = tier.price}
+    end
 
     if not weapon or not atShop(player) then
         updateShop(player, "YOU MUST REMAIN AT THE BOOTY DESK.")
@@ -834,7 +858,9 @@ local function purchaseWeapon(player, weaponId)
 
     local granted = false
 
-    if weaponId == "jetpack" then
+    if weaponId == "armour" then
+        granted = equipBootyArmor(player, armorTier)
+    elseif weaponId == "jetpack" then
         granted = not isPedWearingJetpack(player) and setPedWearingJetpack(player, true) == true
     elseif weapon.weapon == 0 then
         setPedWeaponSlot(player, 0)
@@ -869,9 +895,16 @@ addEventHandler("bootyShop:uiAction", resourceRoot, function(actionName)
     if source ~= resourceRoot or not playerShopState[client] or not atShop(client) then return end
 
     local weaponId = actionName:match("^select:(.+)$")
+    local armorTier = actionName:match("^armorTier:(.+)$")
+    if armorTier and bootyArmorTiers[armorTier] and playerShopState[client].weaponId == "armour" then
+        playerShopState[client].armorTier = armorTier
+        react(client, "browse")
+        return
+    end
     if weaponId and WEAPONS[weaponId] then
         playerShopState[client] = {
             weaponId = weaponId,
+            armorTier = weaponId == "armour" and "soft" or nil,
             insufficientFunds = 0
         }
         react(client, "browse", WEAPONS[weaponId].weapon)
@@ -885,7 +918,7 @@ addEventHandler("bootyShop:uiAction", resourceRoot, function(actionName)
             return
         end
 
-        purchaseWeapon(client, state.weaponId)
+        purchaseWeapon(client, state.weaponId, state.armorTier)
     end
 end)
 

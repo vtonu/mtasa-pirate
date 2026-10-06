@@ -210,6 +210,7 @@ function onVehicleExit()
 end
 
 function onVehicleExplode()
+    if not isElement(source) or getElementType(source) ~= "vehicle" then return end
     if getElementData(source, "emmet:missionVan") == true then return end
     if arePlayExplosionsEnabled and not arePlayExplosionsEnabled() then
         return false

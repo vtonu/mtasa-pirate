@@ -319,6 +319,11 @@
         padding: 12px 12px 20px;
       }
 
+      .armor-tiers { display: flex; gap: 5px; padding: 7px; }
+      .armor-tiers[hidden] { display: none; }
+      .armor-tier { flex: 1; min-width: 0; padding: 7px 3px; border: 1px solid rgba(0, 255, 102, 0.3); background: #001409; color: #fff; font: inherit; font-size: 9px; cursor: pointer; }
+      .armor-tier.selected { border-color: var(--green); background: #083321; }
+
       .bar-row {
         margin-bottom: 7px;
       }
@@ -830,6 +835,11 @@
               <span id="preview-weapon-slot">CURRENT SLOT: --</span>
               <strong id="preview-weapon-action">--</strong>
             </div>
+            <div class="armor-tiers" id="armor-tiers" hidden>
+              <button class="armor-tier" type="button" tabindex="-1" data-tier="soft" onclick="selectArmorTier('soft')">SOFT VEST<br>$10,000 · 1X</button>
+              <button class="armor-tier" type="button" tabindex="-1" data-tier="reinforced" onclick="selectArmorTier('reinforced')">REINFORCED VEST<br>$20,000 · 2X</button>
+              <button class="armor-tier" type="button" tabindex="-1" data-tier="hard" onclick="selectArmorTier('hard')">HARD PLATE<br>$50,000 · 4X</button>
+            </div>
           </div>
 
           <div class="notification-wrap">
@@ -869,6 +879,23 @@
       let shopData = { weapons: [], stock: "AVAILABLE" };
       let selectedCategory = "stealth";
       let selectedWeapon = null;
+      let selectedArmorTier = "soft";
+
+      function selectArmorTier(tier) {
+        if (!selectedWeapon || selectedWeapon.id !== "armour" || !shopData.armorTiers[tier]) return;
+        selectedArmorTier = tier;
+        displayWeapon(selectedWeapon);
+        triggerAction(`armorTier:${tier}`);
+      }
+
+      function renderArmorTiers() {
+        const armor = selectedWeapon && selectedWeapon.id === "armour";
+        document.getElementById("armor-tiers").hidden = !armor;
+        document.querySelectorAll(".armor-tier").forEach((button) => {
+          button.classList.toggle("selected", button.dataset.tier === selectedArmorTier);
+        });
+        document.querySelector(".buy-btn").textContent = armor ? "BUY SELECTED ARMOUR" : "BUY SELECTED WEAPON";
+      }
 
       function setText(id, value) {
         document.getElementById(id).textContent = value;
@@ -900,6 +927,7 @@
       let previewInventory = [];
 
       function renderWeaponPreview() {
+        renderArmorTiers();
         const weapon = selectedWeapon;
         const image = document.getElementById("preview-weapon-image");
         const placeholder = document.getElementById("preview-weapon-placeholder");
@@ -918,6 +946,16 @@
           setText("preview-weapon-owned", "--");
           setText("preview-weapon-slot", "CURRENT SLOT: --");
           setText("preview-weapon-action", "--");
+          return;
+        }
+        if (weapon.id === "armour") {
+          const tier = shopData.armorTiers[selectedArmorTier];
+          setText("preview-weapon-name", tier.name);
+          setText("preview-weapon-detail", `${tier.durability} DURABILITY · 100 ARMOUR`);
+          const equipped = shopData.armorTiers[shopData.armorTier];
+          setText("preview-weapon-owned", equipped ? `EQUIPPED: ${equipped.name}` : "STANDARD ARMOUR");
+          setText("preview-weapon-slot", `ARMOUR: ${Math.round(shopData.armor || 0)} / 100`);
+          setText("preview-weapon-action", "REPLACES AND REFILLS");
           return;
         }
         const current = previewInventory.find((item) => item.slot === weapon.slot);
@@ -944,7 +982,8 @@
       function displayWeapon(weapon) {
         selectedWeapon = weapon;
         setText("weapon-id", weapon.weapon == null ? "N/A" : weapon.weapon);
-        setText("price", `$${weapon.price}`);
+        const tier = weapon.id === "armour" && shopData.armorTiers[selectedArmorTier];
+        setText("price", `$${tier ? tier.price : weapon.price}`);
         setText(
           "stock",
           weapon.available === false ? "UNAVAILABLE" : "AVAILABLE",
@@ -953,7 +992,7 @@
         setText("damage", weapon.damage);
         setText("range", weapon.range);
         setText("capacity", weapon.capacity);
-        setText("handling", weapon.handling);
+        setText("handling", tier ? tier.durability + " DURABILITY" : weapon.handling);
         setText("note", weapon.description);
         setBar("stealth", weapon.stealth);
         setBar("ballistics", weapon.ballistics);
@@ -1003,6 +1042,7 @@
             button.append(name);
 
             button.onclick = () => {
+              if (weapon.id === "armour") selectedArmorTier = "soft";
               displayWeapon(weapon);
               renderWeapons();
               triggerAction(`select:${weapon.id}`);

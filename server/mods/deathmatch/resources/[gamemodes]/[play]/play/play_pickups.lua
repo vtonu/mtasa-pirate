@@ -129,6 +129,7 @@ local function onPickupHit(playerElement)
         -- Armor Pickup
     elseif pickupInfo.type == "armor" then
 
+        triggerEvent("bootyArmorReset", playerElement)
         setPedArmor(playerElement, 100)
 
         -- Loco Skull Pickup
