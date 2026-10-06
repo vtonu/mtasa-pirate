@@ -42,10 +42,19 @@ local function onPlayerLeaveGarden(leftElement, matchingDimension)
     setElementData(leftElement, "atWeedGarden", false)
 end
 
-addEventHandler("onResourceStart", resourceRoot, function()
-    local gardenMarker = createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 127, 255, 212, 150)
+local function createWeedShop(x, y, z, markerRadius, alpha, markerId)
+    local gardenMarker = createMarker(x, y, z, "cylinder", markerRadius, 127, 255, 212, alpha)
+    if markerId then
+        setElementID(gardenMarker, markerId)
+    end
     createBlipAttachedTo(gardenMarker, 63, 2, 255, 255, 255, 255, 0, 65535)
-    gardenCol = createColSphere(MARKER_X, MARKER_Y, MARKER_Z, SHOP_COL_RADIUS)
-    addEventHandler("onColShapeHit", gardenCol, onPlayerEnterGarden)
-    addEventHandler("onColShapeLeave", gardenCol, onPlayerLeaveGarden)
+    local shopCol = createColSphere(x, y, z, SHOP_COL_RADIUS)
+    addEventHandler("onColShapeHit", shopCol, onPlayerEnterGarden)
+    addEventHandler("onColShapeLeave", shopCol, onPlayerLeaveGarden)
+    return shopCol
+end
+
+addEventHandler("onResourceStart", resourceRoot, function()
+    gardenCol = createWeedShop(MARKER_X, MARKER_Y, MARKER_Z, MARKER_RADIUS, 150)
+    createWeedShop(1587.70569, 1910.43542, 9.82031, 1, 255, "weedShopLVHospital")
 end)
