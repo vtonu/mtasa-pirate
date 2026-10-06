@@ -321,8 +321,7 @@
 
       .armor-tiers { display: flex; gap: 5px; padding: 7px; }
       .armor-tiers[hidden] { display: none; }
-      .armor-tier { flex: 1; min-width: 0; padding: 7px 3px; border: 1px solid rgba(0, 255, 102, 0.3); background: #001409; color: #fff; font: inherit; font-size: 9px; cursor: pointer; }
-      .armor-tier.selected { border-color: var(--green); background: #083321; }
+      .armor-tier { flex: 1; min-width: 0; padding: 7px 3px; border: 1px solid #b88cff; background: rgba(11, 31, 31, 0.48); color: #fff; font: inherit; font-size: 9px; cursor: pointer; }
 
       .bar-row {
         margin-bottom: 7px;
@@ -582,6 +581,11 @@
         background: rgba(127, 255, 212, 0.24);
         box-shadow: inset 0 -2px #7fffd4;
       }
+      .weapon-tile.armour-tile:hover, .armor-tier:hover { background: rgba(184, 140, 255, 0.14); }
+      .weapon-tile.armour-tile.selected, .armor-tier.selected {
+        background: linear-gradient(to bottom, rgba(184, 140, 255, 0.08), rgba(184, 140, 255, 0.24));
+        box-shadow: inset 0 -2px #b88cff;
+      }
       .category-btn, .strain-check, .close-btn, .buy-btn, .action-btn,
       .note, .note-icon, .weapon-display, .health-scope { border-radius: 0; }
       .category-btn { background: rgba(11, 31, 31, 0.4); }
@@ -641,6 +645,8 @@
       .preview-art.fire-art { filter: saturate(1.2) brightness(1.1); }
       .preview-art.grey-art { filter: grayscale(1) brightness(1.12); }
       .preview-art.optics-art { filter: saturate(0.8) brightness(1.05); }
+      .preview-art.armour-art { filter: none; }
+      .preview-detail[hidden] { display: none; }
       .preview-placeholder { text-align: center; font-size: 28px; color: var(--green-soft); opacity: 0.45; }
       .preview-placeholder[hidden] { display: none; }
       .preview-copy { min-width: 0; }
@@ -836,9 +842,9 @@
               <strong id="preview-weapon-action">--</strong>
             </div>
             <div class="armor-tiers" id="armor-tiers" hidden>
-              <button class="armor-tier" type="button" tabindex="-1" data-tier="soft" onclick="selectArmorTier('soft')">SOFT VEST<br>$10,000 · 1X</button>
-              <button class="armor-tier" type="button" tabindex="-1" data-tier="reinforced" onclick="selectArmorTier('reinforced')">REINFORCED VEST<br>$20,000 · 2X</button>
-              <button class="armor-tier" type="button" tabindex="-1" data-tier="hard" onclick="selectArmorTier('hard')">HARD PLATE<br>$50,000 · 4X</button>
+              <button class="armor-tier" type="button" tabindex="-1" data-tier="soft" onclick="selectArmorTier('soft')">SOFT VEST</button>
+              <button class="armor-tier" type="button" tabindex="-1" data-tier="reinforced" onclick="selectArmorTier('reinforced')">REINFORCED VEST</button>
+              <button class="armor-tier" type="button" tabindex="-1" data-tier="hard" onclick="selectArmorTier('hard')">HARD PLATE</button>
             </div>
           </div>
 
@@ -923,7 +929,8 @@
 
 
       const weaponImages = {"1": "brassknuckle.png", "2": "golfclub.png", "3": "nitestick.png", "4": "knifecur.png", "5": "bat.png", "6": "shovel.png", "7": "poolcue.png", "8": "katana.png", "9": "chnsaw.png", "10": "gun_dildo1.png", "12": "gun_vibe1.png", "14": "flowera.png", "15": "gun_cane.png", "16": "grenade.png", "17": "teargas.png", "18": "molotov.png", "22": "colt45.png", "23": "Silenced.png", "24": "desert_eagle.png", "25": "chromegun.png", "26": "sawnoff.png", "27": "shotgspa.png", "28": "micro_uzi.png", "29": "mp5lng.png", "30": "ak47.png", "31": "m4.png", "32": "tec9.png", "33": "cuntgun.png", "34": "sniper.png", "35": "rocketla.png", "36": "heatseek.png", "37": "flame.png", "38": "minigun.png", "39": "satchel.png", "42": "fireextinguisher.png", "40": "40.svg", "41": "41.svg", "44": "44.svg", "46": "46.svg", "jetpack": "jetpack.svg", "45": "45.svg"};
-      Object.assign(weaponImages, {1: "brassknuckle.svg", 14: "leaf.svg", 17: "teargas.svg", 18: "molotov.svg", 22: "colt45.svg", 23: "silenced.svg", 28: "micro_uzi.svg", 29: "mp5.svg", 32: "tec9.svg"});
+      Object.assign(weaponImages, {armour: "armour.svg", 1: "brassknuckle.svg", 14: "leaf.svg", 17: "teargas.svg", 18: "molotov.svg", 22: "colt45.svg", 23: "silenced.svg", 28: "micro_uzi.svg", 29: "mp5.svg", 32: "tec9.svg"});
+      const itemReadouts = {armour: "100% BODY ARMOR", knife: "ONE BLADE", katana: "ONE BLADE", night_vision: "ONE PAIR", thermal: "ONE PAIR", flowers: "ONE BOUQUET", jetpack: "ONE PACK", brass_knuckles: "1", baseball_bat: "1", golf_club: "1", pool_cue: "1", nightstick: "1", shovel: "1", cane: "1"};
       let previewInventory = [];
 
       function renderWeaponPreview() {
@@ -932,6 +939,8 @@
         const image = document.getElementById("preview-weapon-image");
         const placeholder = document.getElementById("preview-weapon-placeholder");
         const file = weapon && weaponImages[weapon.weapon == null ? weapon.id : weapon.weapon];
+        image.classList.toggle("armour-art", !!weapon && weapon.id === "armour");
+        document.getElementById("preview-weapon-detail").hidden = !!weapon && weapon.id === "armour";
         image.classList.toggle("fire-art", !!weapon && weapon.weapon === 37);
         image.classList.toggle("optics-art", !!weapon && (weapon.weapon === 44 || weapon.weapon === 45));
         image.hidden = !file;
@@ -951,7 +960,7 @@
         if (weapon.id === "armour") {
           const tier = shopData.armorTiers[selectedArmorTier];
           setText("preview-weapon-name", tier.name);
-          setText("preview-weapon-detail", `${tier.durability} DURABILITY · 100 ARMOUR`);
+          setText("preview-weapon-detail", "");
           const equipped = shopData.armorTiers[shopData.armorTier];
           setText("preview-weapon-owned", equipped ? `EQUIPPED: ${equipped.name}` : "STANDARD ARMOUR");
           setText("preview-weapon-slot", `ARMOUR: ${Math.round(shopData.armor || 0)} / 100`);
@@ -991,7 +1000,7 @@
         renderWeaponPreview();
         setText("damage", weapon.damage);
         setText("range", weapon.range);
-        setText("capacity", weapon.capacity);
+        setText("capacity", itemReadouts[weapon.id] || weapon.capacity);
         setText("handling", tier ? tier.durability + " DURABILITY" : weapon.handling);
         setText("note", weapon.description);
         setBar("stealth", weapon.stealth);
@@ -1030,6 +1039,7 @@
           .forEach((weapon) => {
             const button = document.createElement("button");
             button.className = "weapon-tile";
+            if (weapon.id === "armour") button.classList.add("armour-tile");
             button.tabIndex = -1;
             button.style.setProperty("--weapon-color", colors[weapon.category]);
             button.title = weapon.name;
