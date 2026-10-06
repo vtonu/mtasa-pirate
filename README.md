@@ -1,4 +1,4 @@
-# Project Details (mtasa-pirate v1.3.7)
+# Project Details (mtasa-pirate v1.3.8)
 
 <img width="1920" height="1080" alt="mtasa-pirate-openbeta" src="https://github.com/user-attachments/assets/bee0cba0-5b55-4744-9ff9-d74f14e8e4cc" />
 
@@ -15,6 +15,7 @@ MTA:SA freeroam server for custom gameplay, content creation, and playing with f
 - Loco Skull vehicle missions, the Airyard route, and Rustler bombing.
 - Booty Desk weapon shop with item previews and live inventory info.
 - More Ammu-Nation locations, improved interior markers, map editor updates, and weed gravity fixes for aircraft.
+- Hospital blips and respawns, armor shop levels, and more Ammu-Nation clerks and markers.
 
 ## Controls
 
