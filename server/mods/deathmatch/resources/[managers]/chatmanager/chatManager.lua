@@ -88,12 +88,12 @@ local function handlePlayerChat(chatMessage, chatMessageType)
 	end
 
 	local messageWithoutHEX = removeStringHEX(chatMessage)
-	local messagePlayerName = getPlayerNickname(source)
-	local messageText = messagePlayerName..": #7FFFD4"..messageWithoutHEX
+	local messagePlayerName = removeStringHEX(getPlayerNickname(source))
+	local messageText = messagePlayerName..": "..messageWithoutHEX
 	local messageLog = "CHAT: "..messagePlayerName.." : "..messageWithoutHEX
 	local messageReceiver = root
-	local messageR, messageG, messageB = getPlayerColor(source)
-	local messageColorCoded = true
+	local messageR, messageG, messageB = 255, 255, 255
+	local messageColorCoded = false
 
 	outputServerLog(messageLog)
 	outputChatBox(messageText, messageReceiver, messageR, messageG, messageB, messageColorCoded)
