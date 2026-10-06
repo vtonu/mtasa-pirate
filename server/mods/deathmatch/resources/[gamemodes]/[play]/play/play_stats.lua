@@ -2,10 +2,10 @@
 -- PLAY STATS
 -- ==========================================
 local ZOMBIE_KILL_REWARDS = {
-    [0] = 1500, -- KNIFE
-    [1] = 1000, -- CHAINSAW
-    [2] = 400, -- UNARMED RUNNER
-    [3] = 700 -- BASEBALL BAT
+    [0] = 3000, -- KNIFE
+    [1] = 2000, -- CHAINSAW
+    [2] = 800, -- UNARMED RUNNER
+    [3] = 1400 -- BASEBALL BAT
 }
 local rewardedZombies = setmetatable({}, {__mode = "k"})
 

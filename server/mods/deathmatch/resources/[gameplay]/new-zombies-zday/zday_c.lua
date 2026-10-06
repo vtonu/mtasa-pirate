@@ -19,6 +19,8 @@ local colshapes = {}
 local mySteps = {}
 local nextTargetRequest = 0
 local groundReadyAt = 0
+local meleeSpawnPauseUntil = 0
+local meleeWeapons = {[0] = true, [4] = true, [8] = true}
 
 -- MELEE APPROACH RANGES
 local attackRanges = {[0] = 1.0, [4] = 1.0, [5] = 1.3, [9] = 1.1}
@@ -96,10 +98,25 @@ local function onDamage(attacker,weapon,bodypart,loss)
 
 	if type(loss) ~= "number" or loss ~= loss or loss <= 0 or loss == math.huge then return end
 	if attacker and isElement(attacker) and attacker == localPlayer then
+		if meleeWeapons[weapon] and not isPassive(localPlayer) and isZombieWeather()
+			and not isPedInVehicle(localPlayer) and getElementInterior(localPlayer) == 0
+			and getElementDimension(source) == getElementDimension(localPlayer) then
+			local x,y,z = getElementPosition(localPlayer)
+			local zx,zy,zz = getElementPosition(source)
+			if getDistanceBetweenPoints3D(x,y,z,zx,zy,zz) <= 3 then
+				meleeSpawnPauseUntil = getTickCount() + 5000
+			end
+		elseif not meleeWeapons[weapon] then
+			meleeSpawnPauseUntil = 0
+		end
 		triggerServerEvent("Zday:damageZombie",source,attacker,weapon,bodypart,loss)
 	end
 
 end
+
+addEventHandler("onClientPlayerWeaponSwitch",localPlayer,function()
+	if not meleeWeapons[getPedWeapon(localPlayer)] then meleeSpawnPauseUntil = 0 end
+end)
 
 local function onWasted(killer)
 
@@ -123,6 +140,7 @@ end
 
 local function resetPlayer()
 
+	if source == localPlayer then meleeSpawnPauseUntil = 0 end
 	playersDoomed[source] = nil
 	playersEatable[source] = nil
 	playerEated[source] = nil
@@ -399,9 +417,22 @@ end
 
 local function spawnZombie()
 
+	if not isZombieWeather() or isPedDead(localPlayer) or isPassive(localPlayer)
+		or isPedInVehicle(localPlayer) or getElementInterior(localPlayer) ~= 0
+		or not meleeWeapons[getPedWeapon(localPlayer)] then
+		meleeSpawnPauseUntil = 0
+	end
+
 	if not isZombieWeather() or isPedDead(localPlayer) or getElementInterior(localPlayer) ~= 0
 		or getLocalZombieCount() >= maxZombies then
 		setTimer(spawnZombie,math.random(minInterval,maxInterval),1)
+		return
+	end
+
+	-- MELEE HITS DELAY NEW SPAWNS; EXISTING ZOMBIES KEEP ATTACKING
+	local meleePauseRemaining = meleeSpawnPauseUntil - getTickCount()
+	if meleePauseRemaining > 0 then
+		setTimer(spawnZombie,math.min(meleePauseRemaining,250),1)
 		return
 	end
 
