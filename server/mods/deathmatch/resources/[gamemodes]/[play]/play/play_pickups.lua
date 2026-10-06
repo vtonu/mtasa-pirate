@@ -31,7 +31,7 @@ local function createPlayPickup(pickupData)
         pickupElement = createPickup(posX, posY, posZ, 0, 100, 0)
 
         blipIcon = 21
-        red, green, blue = 255, 0, 0
+        red, green, blue = 238, 20, 38
 
         -- Armor Pickup
     elseif pickupType == "armor" then
@@ -39,7 +39,7 @@ local function createPlayPickup(pickupData)
         pickupElement = createPickup(posX, posY, posZ, 1, 100, 0)
 
         blipIcon = 45
-        red, green, blue = 0, 120, 255
+        red, green, blue = 127, 255, 212
 
         -- Loco Skull Pickup
     elseif pickupType == "loco" then

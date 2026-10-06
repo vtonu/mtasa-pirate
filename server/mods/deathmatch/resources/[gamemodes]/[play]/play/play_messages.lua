@@ -1,10 +1,10 @@
 -- ==========================================
 -- PLAY MESSAGE HELPERS
 -- ==========================================
-local PLAY_COLOR = {127, 255, 212} -- aquamarine
-local ERROR_COLOR = {255, 0, 0} -- red
-local JOIN_COLOR = {255, 105, 180} -- pink
-local NOTIFICATION_COLOR = {255, 250, 80} -- yellow
+local PLAY_COLOR = {127, 255, 212} -- MINT
+local ERROR_COLOR = {238, 20, 38} -- RED
+local JOIN_COLOR = {127, 255, 212} -- MINT
+local NOTIFICATION_COLOR = {255, 230, 109} -- SATIVA YELLOW
 
 local MESSAGE_DEFINITIONS = {
     configMissingPickups = {

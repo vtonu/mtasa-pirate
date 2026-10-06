@@ -1,9 +1,11 @@
 local active = false
 local targetBlip
 local pressedThisVisit = false
+local startRequestUntil = 0
 local blinkTimer
 local blinkVisible = true
 local parachutePrompt = false
+local parachuteRequestUntil = 0
 local rooftopBlip
 local rooftopPrompt = false
 local hunterVehicle
@@ -38,12 +40,15 @@ local function showAiryard()
 end
 
 bindKey("h", "down", function()
-    if pressedThisVisit or not atDesk() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
+    if pressedThisVisit or getTickCount() < startRequestUntil or not atDesk()
+        or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
+    startRequestUntil = getTickCount() + 5000
     triggerServerEvent("airyard:start", resourceRoot)
 end)
 
 addEvent("airyard:started", true)
 addEventHandler("airyard:started", resourceRoot, function()
+    startRequestUntil = 0
     playSoundFrontEnd(42)
     active = true
     parachutePrompt = false
@@ -65,7 +70,9 @@ addEventHandler("airyard:finished", resourceRoot, function()
 end)
 
 bindKey("h", "down", function()
-    if parachutePrompt and atAiryard() and not isChatBoxInputActive() and not isConsoleActive() and not isMainMenuActive() then
+    if parachutePrompt and atAiryard() and getTickCount() >= parachuteRequestUntil
+        and not isChatBoxInputActive() and not isConsoleActive() and not isMainMenuActive() then
+        parachuteRequestUntil = getTickCount() + 5000
         triggerServerEvent("airyard:parachute", resourceRoot)
     end
 end)
@@ -73,17 +80,20 @@ end)
 local function attachHunterBlip(vehicle)
     hunterVehicle = vehicle
     if isElement(rooftopBlip) then destroyElement(rooftopBlip) end
-    if isElement(vehicle) then rooftopBlip = createBlipAttachedTo(vehicle, 19, 2, 255, 80, 80, 255) end
+    if isElement(vehicle) then rooftopBlip = createBlipAttachedTo(vehicle, 19, 2, 238, 20, 38, 255) end
 end
 
 addEvent("airyard:parachuteReady", true)
 addEventHandler("airyard:parachuteReady", resourceRoot, function(vehicle)
+    parachuteRequestUntil = 0
     parachutePrompt = false
     attachHunterBlip(vehicle)
 end)
 
 addEvent("airyard:reset", true)
 addEventHandler("airyard:reset", resourceRoot, function()
+    startRequestUntil = 0
+    parachuteRequestUntil = 0
     active = false
     parachutePrompt = false
     pressedThisVisit = false
@@ -111,16 +121,16 @@ addEventHandler("onClientRender", root, function()
         if not parachutePrompt or not atAiryard() then return end
     end
     showAiryard()
-    if pressedThisVisit then return end
+    if pressedThisVisit or getTickCount() < startRequestUntil or getTickCount() < parachuteRequestUntil then return end
     local w, h = guiGetScreenSize()
     local width = math.min(420, w - 32)
     local left, top = (w - width) / 2, h * 0.82
-    local prompt = parachutePrompt and atAiryard() and "PRESS [H] TO EQUIP PARACHUTE" or "PRESS [H] TO START"
+    local prompt = parachutePrompt and atAiryard() and "PRESS 'H' TO EQUIP PARACHUTE" or "PRESS 'H' TO START"
     local font = "unifont"
     local scale = math.min(1, (width - 32) / dxGetTextWidth(prompt, 1, font))
-    dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 124))
-    dxDrawRectangle(left, top, width, 1, tocolor(220, 255, 239, 55))
+    dxDrawRectangle(left, top, width, 48, tocolor(31, 31, 31, 124))
+    dxDrawRectangle(left, top, width, 1, tocolor(127, 255, 212, 55))
     dxDrawRectangle(left, top, 2, 48, tocolor(127, 255, 212, 200))
     dxDrawText(prompt, left + 12, top, left + width - 12, top + 48,
-        tocolor(238, 255, 247, 245), scale, font, "center", "center", false, false, false, false)
+        tocolor(127, 255, 212, 245), scale, font, "center", "center", false, false, false, false)
 end)

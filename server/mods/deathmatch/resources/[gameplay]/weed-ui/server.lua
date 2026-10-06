@@ -1,4 +1,5 @@
 local previewState = {}
+local perkClockRequests = {}
 local playerShopState = {}
 local playerPerks = {}
 
@@ -271,6 +272,16 @@ local function getPerkPreview(player)
     }
 end
 
+-- SEND ONLY THE REQUESTING PLAYER THEIR CURRENT PERK TIMER
+addEvent("weedGarden:requestPerkClock", true)
+addEventHandler("weedGarden:requestPerkClock", resourceRoot, function()
+    if source ~= resourceRoot or not isElement(client) then return end
+    local now = getTickCount()
+    if now < (perkClockRequests[client] or 0) then return end
+    perkClockRequests[client] = now + 1000
+    triggerClientEvent(client, "weedGarden:perkClock", resourceRoot, getPerkPreview(client))
+end)
+
 local function addPreviewData(player, payload)
     payload = payload or {}
     payload.perkPreview = getPerkPreview(player)
@@ -380,6 +391,7 @@ local function restorePlayerPerks(player)
     playerPerks[player] = nil
     if isElement(player) then
         triggerClientEvent(player, "weedGarden:perkPreview", resourceRoot, getPerkPreview(player))
+        triggerClientEvent(player, "weedGarden:perkClock", resourceRoot, getPerkPreview(player))
     end
 end
 
@@ -473,6 +485,8 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
         restorePlayerPerks(targetPlayer)
         sendWeedNotification(targetPlayer, "Your equipped weed perks have worn off.")
     end, package.duration, 1, player)
+
+    triggerClientEvent(player, "weedGarden:perkClock", resourceRoot, getPerkPreview(player))
 
     return true
 end
@@ -727,6 +741,7 @@ addEventHandler("onPlayerDamage", root, function(attacker, weapon, bodypart, los
 end, false, "low")
 
 addEventHandler("onPlayerQuit", root, function()
+    perkClockRequests[source] = nil
     previewState[source] = nil
     playerShopState[source] = nil
     restorePlayerPerks(source)

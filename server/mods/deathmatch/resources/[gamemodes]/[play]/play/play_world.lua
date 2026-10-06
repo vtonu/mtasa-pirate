@@ -23,7 +23,7 @@ end
 
 local function announceWeather(weather)
     if weather == 9 and lastWeather ~= 9 then
-        outputChatBox("☠ It's getting spooky outside, be careful!", root, 255, 70, 70)
+        outputChatBox("☠ It's getting spooky outside, be careful!", root, 238, 20, 38)
     end
     lastWeather = weather
 end

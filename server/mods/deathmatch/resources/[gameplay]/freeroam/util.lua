@@ -221,7 +221,7 @@ function xmlToTable(xmlFile, leafAttrs)
     -- and returns it as a table of the form { 'group', name='groupname', children={ {'leafName', leafattr1='attr1', ...}, ... } }
     local xml = getResourceConfig(xmlFile)
     if not xml then
-        outputChatBox(xmlFile .. ' could not be opened')
+        outputChatBox(xmlFile .. ' could not be opened', 127, 255, 212)
         return false
     end
     local result = {}

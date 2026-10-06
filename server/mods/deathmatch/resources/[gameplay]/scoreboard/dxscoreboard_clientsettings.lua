@@ -21,10 +21,10 @@ settings = {
 	["content_color"] = {}
 }
 defaultSettings = {
-	["useanimation"] = true,
-	["toggleable"] = false,
-	["showserverinfo"] = false,
-	["showgamemodeinfo"] = false,
+	["useanimation"] = false,
+	["toggleable"] = true,
+	["showserverinfo"] = true,
+	["showgamemodeinfo"] = true,
 	["showteams"] = true,
 	["usecolors"] = true,
 	["drawspeed"] = 5.5,
@@ -32,7 +32,7 @@ defaultSettings = {
 	["columnfont"] = "default-bold",
 	["contentfont"] = "default-bold",
 	["teamfont"] = "clear",
-	["serverinfofont"] = "default",
+	["serverinfofont"] = "bankgothic",
 	["bg_color"] = {
 		["r"] = 0,
 		["g"] = 0,
@@ -40,10 +40,10 @@ defaultSettings = {
 		["a"] = 170
 	},
 	["selection_color"] = {
-		["r"] = 82,
-		["g"] = 103,
-		["b"] = 188,
-		["a"] = 170
+		["r"] = 130,
+		["g"] = 146,
+		["b"] = 205,
+		["a"] = 86
 	},
 	["highlight_color"] = {
 		["r"] = 255,
@@ -145,6 +145,8 @@ fontIndexes = {
 }
 fontNames = { "default", "default-bold", "clear", "arial", "sans","pricedown", "bankgothic", "diploma", "beckett" }
 
+local joinPresetApplied = false
+
 function readScoreboardSettings()
 	local settingsFile = xmlLoadFile( "settings.xml" )
 	if not settingsFile then
@@ -216,6 +218,22 @@ function readScoreboardSettings()
 			xmlNodeSetAttribute( content_colorTag, "b", tostring( defaultSettings.content_color.b ) )
 			xmlNodeSetAttribute( content_colorTag, "a", tostring( defaultSettings.content_color.a ) )
 		xmlSaveFile( settingsFile )
+	end
+
+	-- APPLY THE SERVER PRESET ONCE; ALLOW SETTINGS CHANGES AFTER JOIN
+	if not joinPresetApplied then
+		for key, value in pairs( defaultSettings ) do
+			local tag = xmlFindChild( settingsFile, key, 0 ) or xmlCreateChild( settingsFile, key )
+			if type( value ) == "table" then
+				for channel, amount in pairs( value ) do
+					xmlNodeSetAttribute( tag, channel, tostring( amount ) )
+				end
+			else
+				xmlNodeSetValue( tag, tostring( value ) )
+			end
+		end
+		xmlSaveFile( settingsFile )
+		joinPresetApplied = true
 	end
 
 	local useanimationTag = xmlFindChild( settingsFile, "useanimation", 0 )

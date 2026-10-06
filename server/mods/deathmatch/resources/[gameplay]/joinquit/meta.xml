@@ -10,7 +10,7 @@
 		/>
 		<setting name="*defaultColor"
 			friendlyname="Default Color"
-			value="[[78, 87, 104]]"
+			value="[[127, 255, 212]]"
 			accept=""
 			desc="If show color codes is set to true, this controls what color to output messages in"
 		/>

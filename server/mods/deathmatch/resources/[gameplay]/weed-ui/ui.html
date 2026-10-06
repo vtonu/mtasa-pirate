@@ -8,12 +8,12 @@
 
       :root {
         --green: #7fffd4;
-        --green-soft: #a8f6df;
-        --mint: #c9fff0;
+        --green-soft: #7fffd4;
+        --mint: #7fffd4;
         --amber: #ffe66d;
-        --red: #ff4b6a;
-        --panel: rgba(0, 24, 24, 0.66);
-        --panel-deep: rgba(0, 12, 12, 0.76);
+        --red: #ee1426;
+        --panel: rgba(19, 19, 19, 0.66);
+        --panel-deep: rgba(9, 9, 9, 0.76);
         --line: rgba(127, 255, 212, 0.34);
       }
 
@@ -48,7 +48,7 @@
             rgba(127, 255, 212, 0.05),
             transparent 32%
           ),
-          linear-gradient(135deg, rgba(0, 24, 24, 0.82), rgba(0, 10, 12, 0.62));
+          linear-gradient(135deg, rgba(19, 19, 19, 0.82), rgba(8, 8, 8, 0.62));
         box-shadow:
           inset 0 0 32px rgba(127, 255, 212, 0.045),
           0 0 14px rgba(127, 255, 212, 0.07);
@@ -77,7 +77,7 @@
         align-items: center;
         justify-content: space-between;
         padding: 0 18px;
-        background: rgba(0, 34, 34, 0.52);
+        background: rgba(27, 27, 27, 0.52);
         border-bottom: 1px solid var(--line);
         cursor: move;
         user-select: none;
@@ -112,7 +112,7 @@
       .close-btn {
         width: 34px;
         height: 34px;
-        border: 1px solid rgba(185, 255, 210, 0.55);
+        border: 1px solid rgba(127, 255, 212, 0.55);
         border-radius: 6px;
         color: var(--mint);
         background: rgba(0, 0, 0, 0.22);
@@ -200,7 +200,7 @@
             rgba(127, 255, 212, 0.07) 1px,
             transparent 1px
           ),
-          rgba(0, 14, 14, 0.48);
+          rgba(11, 11, 11, 0.48);
         background-size: 28px 28px;
       }
 
@@ -254,7 +254,7 @@
         border: 1px solid var(--strain-color);
         border-radius: 0;
         color: var(--strain-color);
-        background: rgba(0, 14, 14, 0.78);
+        background: rgba(11, 11, 11, 0.78);
         font-family: "Share Tech Mono", monospace;
         text-align: center;
         cursor: pointer;
@@ -266,13 +266,13 @@
       }
 
       .strain-tile:hover {
-        background: rgba(0, 20, 22, 0.82);
+        background: rgba(16, 16, 16, 0.82);
         transform: translateY(-1px);
       }
 
       .strain-tile.selected {
         transform: translateY(1px) scale(0.985);
-        background: rgba(0, 8, 10, 0.88);
+        background: rgba(6, 6, 6, 0.88);
         box-shadow:
           inset 0 3px 9px rgba(0, 0, 0, 0.72),
           inset 0 0 10px rgba(127, 255, 212, 0.05);
@@ -296,7 +296,7 @@
       }
 
       .strain-tile.selected .strain-check {
-        color: #041007;
+        color: #0d0d0d;
         background: var(--strain-color);
         box-shadow: 0 0 6px var(--strain-color);
       }
@@ -362,11 +362,11 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        border: 1px solid rgba(185, 255, 210, 0.55);
-        background: rgba(0, 30, 10, 0.5);
+        border: 1px solid rgba(127, 255, 212, 0.55);
+        background: rgba(22, 22, 22, 0.5);
         box-shadow:
-          0 0 34px rgba(0, 255, 102, 0.2),
-          inset 0 0 22px rgba(0, 255, 102, 0.18);
+          0 0 34px rgba(127, 255, 212, 0.2),
+          inset 0 0 22px rgba(127, 255, 212, 0.18);
       }
 
       .leaf {
@@ -375,12 +375,12 @@
         height: 72px;
         background: linear-gradient(
           180deg,
-          rgba(185, 255, 210, 0.96),
-          rgba(0, 255, 102, 0.36)
+          rgba(127, 255, 212, 0.96),
+          rgba(127, 255, 212, 0.36)
         );
         border-radius: 48% 52% 48% 52%;
         transform-origin: 50% 90%;
-        box-shadow: 0 0 16px rgba(0, 255, 102, 0.28);
+        box-shadow: 0 0 16px rgba(127, 255, 212, 0.28);
       }
 
       .leaf:nth-child(1) {
@@ -436,17 +436,17 @@
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        border: 1px solid rgba(0, 255, 102, 0.22);
+        border: 1px solid rgba(127, 255, 212, 0.22);
         border-radius: 7px;
         background:
-          radial-gradient(circle, rgba(0, 255, 102, 0.11), transparent 64%),
-          rgba(0, 8, 3, 0.48);
+          radial-gradient(circle, rgba(127, 255, 212, 0.11), transparent 64%),
+          rgba(6, 6, 6, 0.48);
       }
 
       .health-scope .scope-ring {
         width: 88px;
         max-width: none;
-        border-color: rgba(0, 255, 102, 0.42);
+        border-color: rgba(127, 255, 212, 0.42);
       }
 
       .health-scope .scope-ring.inner {
@@ -502,12 +502,12 @@
       }
 
       .health-scope .core-text strong {
-        color: #88ffaa;
+        color: #7fffd4;
         font-size: 13px;
       }
 
       .health-scope .core-text {
-        text-shadow: 0 0 10px #00ff66;
+        text-shadow: 0 0 10px #7fffd4;
       }
 
       .health-scope .core-text span {
@@ -540,7 +540,7 @@
         height: 10px;
         overflow: hidden;
         border: 1px solid rgba(127, 255, 212, 0.36);
-        background: rgba(0, 14, 14, 0.66);
+        background: rgba(11, 11, 11, 0.66);
       }
 
       .fill {
@@ -596,7 +596,7 @@
         align-items: start;
         overflow: hidden;
         padding: 10px;
-        border: 1px solid rgba(185, 255, 226, 0.16);
+        border: 1px solid rgba(127, 255, 212, 0.16);
         border-radius: 0;
         color: var(--mint);
         background: var(--panel-deep);
@@ -611,8 +611,8 @@
         justify-content: center;
         border: 0;
         border-radius: 0;
-        color: #172c27;
-        background: #78e6a0;
+        color: #272727;
+        background: #7fffd4;
         font-family: "Share Tech Mono", "Consolas", monospace;
         font-size: 17px;
         box-shadow: none;
@@ -660,7 +660,7 @@
         border: 1px solid rgba(127, 255, 212, 0.38);
         border-radius: 0;
         color: var(--green);
-        background: rgba(0, 32, 34, 0.46);
+        background: rgba(25, 25, 25, 0.46);
         font-family: "Share Tech Mono", monospace;
         font-size: 12px;
         cursor: pointer;
@@ -674,14 +674,14 @@
 
       .buy-btn {
         color: #fff;
-        background: rgba(0, 20, 22, 0.58);
+        background: rgba(16, 16, 16, 0.58);
       }
 
       .buy-btn.selected,
       .action-btn.cart-selected {
         color: #fff;
         border-color: var(--green);
-        background: rgba(0, 8, 10, 0.88);
+        background: rgba(6, 6, 6, 0.88);
         box-shadow:
           0 0 7px rgba(127, 255, 212, 0.22),
           inset 0 3px 8px rgba(0, 0, 0, 0.72);
@@ -723,30 +723,30 @@
       /* HUD COLORS AND SURFACES */
       :root {
         --green: #7fffd4;
-        --green-soft: #b5e7d8;
-        --mint: #e8fff6;
+        --green-soft: #7fffd4;
+        --mint: #7fffd4;
         --panel: transparent;
-        --panel-deep: rgba(9, 25, 25, 0.48);
-        --line: rgba(185, 255, 226, 0.16);
+        --panel-deep: rgba(22, 22, 22, 0.48);
+        --line: rgba(127, 255, 212, 0.16);
       }
 
       .shop-ui,
       .garden-ui {
-        border-color: rgba(210, 255, 239, 0.18);
+        border-color: rgba(127, 255, 212, 0.18);
         border-radius: 1px;
         background: linear-gradient(
           135deg,
-          rgba(26, 51, 48, 0.56),
-          rgba(8, 20, 23, 0.46)
+          rgba(45, 45, 45, 0.56),
+          rgba(18, 18, 18, 0.46)
         );
-        box-shadow: inset 0 1px rgba(240, 255, 248, 0.12);
+        box-shadow: inset 0 1px rgba(127, 255, 212, 0.12);
       }
       .shop-ui::before,
       .garden-ui::before {
         display: none;
       }
       .topbar {
-        background: rgba(205, 255, 232, 0.035);
+        background: rgba(127, 255, 212, 0.035);
         border-bottom-color: var(--line);
       }
       h1,
@@ -781,20 +781,20 @@
       .eyebrow,
       .bar-meta,
       .readout span {
-        color: #b5e7d8;
+        color: #7fffd4;
       }
       .readout {
         border-color: transparent;
         border-radius: 0;
-        background: rgba(202, 255, 233, 0.045);
+        background: rgba(127, 255, 212, 0.045);
       }
       .bar {
         border: 0;
-        background: rgba(218, 255, 239, 0.12);
+        background: rgba(127, 255, 212, 0.12);
       }
       .weapon-tile,
       .strain-tile {
-        background: rgba(11, 31, 31, 0.48);
+        background: rgba(27, 27, 27, 0.48);
       }
       .weapon-tile:hover,
       .strain-tile:hover {
@@ -817,26 +817,26 @@
         border-radius: 0;
       }
       .category-btn {
-        background: rgba(11, 31, 31, 0.4);
+        background: rgba(27, 27, 27, 0.4);
       }
       .category-btn.selected,
       .category-btn:hover {
         box-shadow: none;
       }
       .note {
-        border-color: rgba(185, 255, 226, 0.16);
+        border-color: rgba(127, 255, 212, 0.16);
         background: var(--panel-deep);
       }
       .note-icon {
-        color: #172c27;
-        background: #78e6a0;
+        color: #272727;
+        background: #7fffd4;
         border: 0;
         box-shadow: none;
       }
       .weapon-display,
       .health-scope {
         border-color: transparent;
-        background: rgba(202, 255, 233, 0.035);
+        background: rgba(127, 255, 212, 0.035);
       }
       .scope-ring {
         opacity: 0.25;
@@ -850,13 +850,13 @@
         background: transparent;
       }
       .close-btn:hover {
-        color: #f2b080;
-        background: rgba(242, 176, 128, 0.12);
+        color: #ffe66d;
+        background: rgba(255, 230, 109, 0.12);
         box-shadow: none;
       }
       .buy-btn,
       .action-btn {
-        color: #e8fff6;
+        color: #7fffd4;
         border-color: rgba(127, 255, 212, 0.48);
         background: rgba(127, 255, 212, 0.13);
         box-shadow: none;
@@ -869,12 +869,12 @@
       }
       .buy-btn.selected,
       .action-btn.cart-selected {
-        color: #102c25;
+        color: #262626;
         background: #7fffd4;
         box-shadow: none;
       }
       button:focus-visible {
-        outline: 1px solid #f2b080;
+        outline: 1px solid #ffe66d;
         outline-offset: 2px;
       }
 
@@ -947,7 +947,7 @@
         gap: 8px;
         padding: 6px 9px;
         border-top: 1px solid var(--line);
-        background: rgba(9, 25, 25, 0.35);
+        background: rgba(22, 22, 22, 0.35);
         color: var(--green-soft);
         font-size: 9px;
         line-height: 1.25;
@@ -977,14 +977,14 @@
       @keyframes insufficient-funds-pulse {
         0%,
         100% {
-          border-color: rgba(185, 255, 226, 0.16);
+          border-color: rgba(127, 255, 212, 0.16);
           background: var(--panel-deep);
           box-shadow: none;
         }
         35% {
-          border-color: rgba(230, 115, 115, 0.38);
-          background: rgba(57, 31, 32, 0.94);
-          box-shadow: inset 0 0 16px rgba(230, 115, 115, 0.05);
+          border-color: rgba(238, 20, 38, 0.38);
+          background: rgba(37, 37, 37, 0.94);
+          box-shadow: inset 0 0 16px rgba(238, 20, 38, 0.05);
         }
       }
 
@@ -1149,7 +1149,7 @@
                 <span class="legend-item" style="--strain-color: #ffe66d"
                   >Sativa</span
                 >
-                <span class="legend-item" style="--strain-color: #00ff9d"
+                <span class="legend-item" style="--strain-color: #7fffd4"
                   >Hybrid</span
                 >
               </div>
@@ -1451,7 +1451,7 @@
       const strainColors = {
         indica: "#b88cff",
         sativa: "#ffe66d",
-        hybrid: "#00ff9d",
+        hybrid: "#7fffd4",
       };
 
       const strainStats = {

@@ -333,7 +333,7 @@ addEventHandler("onResourceStart", resourceRoot, function()
         if room.internal or room.createEntrance then
             local marker = getElementByID(room.entrances[1])
                 or createMarker(room.entranceX, room.entranceY, room.entranceZ + 0.6,
-                    "arrow", room.markerSize or 0.6, 4, 210, 193, 255)
+                    "arrow", room.markerSize or 0.6, 127, 255, 212, 255)
             if isElement(marker) then
                 setElementID(marker, room.entrances[1])
                 if room.customArrows then
@@ -357,7 +357,7 @@ addEventHandler("onResourceStart", resourceRoot, function()
         end
         if room.exitID then
             room.exitMarker = getElementByID(room.exitID)
-                or createMarker(room.x, room.y, room.z + 0.6, "arrow", room.markerSize or 0.6, 4, 210, 193, 255)
+                or createMarker(room.x, room.y, room.z + 0.6, "arrow", room.markerSize or 0.6, 127, 255, 212, 255)
             if isElement(room.exitMarker) then
                 setElementID(room.exitMarker, room.exitID)
                 if room.customArrows then

@@ -17,7 +17,7 @@ function isPedTerminated(player)
 end
 
 function errMsg(msg, player)
-    outputChatBox(msg, player or root, 255, 0, 0)
+    outputChatBox(msg, player or root, 238, 20, 38)
 end
 
 function stripHex(str)

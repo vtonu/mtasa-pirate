@@ -8,8 +8,8 @@ config = {
         prompt = "default-bold"
     },
     text = {
-        spawn = "PRESS SPACE TO SPAWN",
-        respawn = "PRESS SPACE TO RESPAWN"
+        spawn = "PRESS 'SPACE' TO SPAWN",
+        respawn = "PRESS 'SPACE' TO RESPAWN"
     },
     ui = {
         prompt = {

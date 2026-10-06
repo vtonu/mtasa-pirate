@@ -37,7 +37,7 @@ function renderMessages()
     local now = getTickCount()
 
     local lineHeight = 20
-    local font = 'default'
+    local font = "unifont"
 
     local marginRight = tonumber(getSetting('drawMarginRight')) or 0.01
     local marginBottom = tonumber(getSetting('drawMarginBottom')) or 0.55

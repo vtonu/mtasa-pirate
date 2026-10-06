@@ -19,10 +19,10 @@ function drawSpeedo()
         dxDrawImage(dialX, dialY, dialSize, dialSize, "images/boost_arc.png", 0, 0, 0, base_color)
     end
     dxDrawText(mph, dialX, dialY + 77 * scale, dialX + dialSize, dialY + 125 * scale,
-        boost and tocolor(181, 234, 255, 245) or tocolor(255, 255, 255, 245),
-        2.5 * scale, "default", "center", "center")
+        boost and tocolor(127, 255, 212, 245) or tocolor(255, 255, 255, 245),
+        2.5 * scale, "unifont", "center", "center")
     dxDrawText("MPH", dialX, dialY + 128 * scale, dialX + dialSize, dialY + 145 * scale,
-        tocolor(255, 255, 255, 190), 0.85 * scale, "default", "center", "center")
+        tocolor(255, 255, 255, 190), 0.85 * scale, "unifont", "center", "center")
 
     local image = areVehicleLightsOn(veh) and "images/lights_1.png" or "images/lights_0.png"
     dxDrawImage(dialX + 133 * scale, dialY + 244 * scale, 34 * scale, 34 * scale, image, 0, 0, 0, base_color)
@@ -39,10 +39,10 @@ function drawSpeedo()
         local barX, barY = dialX + 100 * scale, dialY + 207 * scale
         local barWidth, barHeight = 100 * scale, 4 * scale
         dxDrawText("NITRO", barX, barY - 17 * scale, barX + barWidth, barY - 3 * scale,
-            tocolor(255, 255, 255, 190), 0.7 * scale, "default", "center", "center")
+            tocolor(255, 255, 255, 190), 0.7 * scale, "unifont", "center", "center")
         dxDrawRectangle(barX, barY, barWidth, barHeight, tocolor(255, 255, 255, 40))
         dxDrawRectangle(barX, barY, barWidth * math.min(math.max(nitroLevel, 0), 1), barHeight,
-            boost and tocolor(181, 234, 255, 230) or tocolor(127, 255, 212, 230))
+            boost and tocolor(127, 255, 212, 230) or tocolor(127, 255, 212, 230))
     end
 end
 

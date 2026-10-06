@@ -768,7 +768,7 @@ function doDrawScoreboard( rtPass, onlyAnim, sX, sY )
 					end
 
 					if column.name == "play.scoreboard.money" then
-						r, g, b = 54, 104, 44
+						r, g, b = 127, 255, 212
 					elseif column.name == "play.scoreboard.team" and perkColors[content] then
 						r, g, b = unpack(perkColors[content])
 					end

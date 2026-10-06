@@ -24,7 +24,7 @@ local function canPlayerChat(playerElement, playerMessage)
 		local chatDelayPassed = getOrSetPlayerDelay(playerElement, "chat_delay", CHAT_MANAGER_CHAT_DELAY)
 
 		if (not chatDelayPassed) then
-			outputChatBox("Stop spamming main chat!", playerElement, 255, 255, 255, false)
+			outputChatBox("Stop spamming main chat!", playerElement, 238, 20, 38, false)
 
 			return false
 		end
@@ -37,7 +37,7 @@ local function canPlayerChat(playerElement, playerMessage)
 		chatSavedMessages[playerElement] = playerMessage
 
 		if (chatLastPlayerMessageEqual) then
-			outputChatBox("Stop repeating yourself!", playerElement, 255, 255, 255, false)
+			outputChatBox("Stop repeating yourself!", playerElement, 238, 20, 38, false)
 
 			return false
 		end
@@ -89,7 +89,7 @@ local function handlePlayerChat(chatMessage, chatMessageType)
 
 	local messageWithoutHEX = removeStringHEX(chatMessage)
 	local messagePlayerName = getPlayerNickname(source)
-	local messageText = messagePlayerName..": #ffffff"..messageWithoutHEX
+	local messageText = messagePlayerName..": #7FFFD4"..messageWithoutHEX
 	local messageLog = "CHAT: "..messagePlayerName.." : "..messageWithoutHEX
 	local messageReceiver = root
 	local messageR, messageG, messageB = getPlayerColor(source)

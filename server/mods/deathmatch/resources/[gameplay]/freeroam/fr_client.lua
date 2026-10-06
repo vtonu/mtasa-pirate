@@ -662,7 +662,7 @@ function saveOutfit()
         setControlText(wndOutfits, 'outfitname', '')
         saveOutfits()
     else
-        outputChatBox('Please enter a name for the outfit')
+        outputChatBox('Please enter a name for the outfit', 127, 255, 212)
     end
 end
 
@@ -1341,7 +1341,7 @@ function setPlayerPosition(x, y, z, skipDeadCheck)
         customSpawnTable = {x, y, z, dim, int}
         fadeCamera(false, 0)
         addEventHandler("onClientPreRender", root, forceFade)
-        outputChatBox("You will be respawned to your specified location", 0, 255, 0)
+        outputChatBox("You will be respawned to your specified location", 127, 255, 212)
         return
     end
 
@@ -1536,12 +1536,12 @@ function getPosCommand(cmd, playerName)
     local px, py, pz = getElementPosition(player)
     local vehicle = getPedOccupiedVehicle(player)
     if vehicle then
-        outputChatBox(sentenceStart .. 'in a ' .. getVehicleName(vehicle), 0, 255, 0)
+        outputChatBox(sentenceStart .. 'in a ' .. getVehicleName(vehicle), 127, 255, 212)
     else
-        outputChatBox(sentenceStart .. 'on foot', 0, 255, 0)
+        outputChatBox(sentenceStart .. 'on foot', 127, 255, 212)
     end
     outputChatBox(sentenceStart .. 'at {' .. string.format("%.5f", px) .. ', ' .. string.format("%.5f", py) .. ', ' ..
-                      string.format("%.5f", pz) .. '}', 0, 255, 0)
+                      string.format("%.5f", pz) .. '}', 127, 255, 212)
 end
 addCommandHandler('getpos', getPosCommand)
 addCommandHandler('gp', getPosCommand)
@@ -1585,7 +1585,7 @@ function setPosCommand(cmd, x, y, z, r)
 
     if (message ~= "") then
         outputChatBox(message .. "arguments were not provided. Using your current " .. message .. "values instead.",
-            255, 255, 0)
+            127, 255, 212)
     end
 
     setPlayerPosition(tonumber(x) or px, tonumber(y) or py, tonumber(z) or pz)
@@ -2469,7 +2469,7 @@ local perkDisplay = {
     },
     hybrid = {
         text = "Hybrid",
-        color = {0, 255, 157}
+        color = {127, 255, 212}
     }
 }
 
@@ -2487,6 +2487,8 @@ local function updateModeDisplay(state)
     end
 end
 
+local perkDeadline = 0
+
 local function updatePerkDisplay()
     local perk = perkDisplay[getElementData(localPlayer, "weed.perk")]
     local perkLabel = getControl(wndMain, "perk")
@@ -2496,13 +2498,45 @@ local function updatePerkDisplay()
     end
 
     if perk then
-        guiSetText(perkLabel, perk.text)
+        local text = perk.text
+        if perkDeadline > 0 then
+            local seconds = math.max(0, math.ceil((perkDeadline - getTickCount()) / 1000))
+            text = string.format("%s (%02d:%02d)", text, math.floor(seconds / 60), seconds % 60)
+        end
+        guiSetText(perkLabel, text)
         guiLabelSetColor(perkLabel, unpack(perk.color))
     else
         guiSetText(perkLabel, "None")
         guiLabelSetColor(perkLabel, 255, 255, 255)
     end
 end
+
+local function requestPerkClock()
+    local weed = getResourceFromName("weed-ui")
+    if weed and getResourceState(weed) == "running" then
+        triggerServerEvent("weedGarden:requestPerkClock", getResourceRootElement(weed))
+    end
+end
+
+addEvent("weedGarden:perkClock", true)
+addEventHandler("weedGarden:perkClock", root, function(preview)
+    local weed = getResourceFromName("weed-ui")
+    if not weed or source ~= getResourceRootElement(weed) or type(preview) ~= "table" then return end
+    local remaining = preview.remaining
+    if type(remaining) ~= "number" or remaining ~= remaining or remaining < 0 or remaining == math.huge then return end
+    perkDeadline = remaining > 0 and getTickCount() + remaining or 0
+    updatePerkDisplay()
+end)
+
+addEventHandler("onClientResourceStart", root, function(startedResource)
+    if startedResource == getThisResource() or getResourceName(startedResource) == "weed-ui" then
+        setTimer(requestPerkClock, 100, 1)
+    end
+end)
+
+setTimer(function()
+    if wndMain and isWindowOpen(wndMain) then updatePerkDisplay() end
+end, 1000, 0)
 
 local function getPassiveOwner(element)
     if not isElement(element) then
@@ -2783,7 +2817,7 @@ wndMain = {
 }
 
 function errMsg(msg)
-    outputChatBox(msg, 255, 0, 0)
+    outputChatBox(msg, 238, 20, 38)
 end
 
 addEventHandler('onClientResourceStart', resourceRoot, function()
@@ -2842,6 +2876,8 @@ function toggleFRWindow()
         end
         showCursor(true)
         showAllWindows()
+        requestPerkClock()
+        updatePerkDisplay()
     end
 end
 
@@ -2961,6 +2997,7 @@ addEventHandler("onClientElementDataChange", localPlayer, function(dataName)
     if dataName == "freeroam.passive" then
         syncPassiveMode()
     elseif dataName == "weed.perk" then
+        if not getElementData(localPlayer, "weed.perk") then perkDeadline = 0 end
         updatePerkDisplay()
     end
 end)

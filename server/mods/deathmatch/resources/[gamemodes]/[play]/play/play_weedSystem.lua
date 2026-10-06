@@ -10,6 +10,8 @@ local GARDEN_REWARD_MONEY = 250
 local GARDEN_REWARD_POINTS = 1
 
 local gardenCol = nil
+local gardenWelcomeCooldowns = {}
+local GARDEN_WELCOME_COOLDOWN_MS = 120000
 
 local function onPlayerEnterGarden(hitElement, matchingDimension)
     if not matchingDimension then
@@ -20,7 +22,18 @@ local function onPlayerEnterGarden(hitElement, matchingDimension)
     end
 
     setElementData(hitElement, "atWeedGarden", true)
+
+    if getElementInterior(hitElement) ~= 0 or isPedDead(hitElement) then return end
+    local now = getTickCount()
+    if not gardenWelcomeCooldowns[hitElement] or now >= gardenWelcomeCooldowns[hitElement] then
+        gardenWelcomeCooldowns[hitElement] = now + GARDEN_WELCOME_COOLDOWN_MS
+        outputChatBox("[NOTIFICATION] Welcome to the weed garden!", hitElement, 255, 230, 109)
+    end
 end
+
+addEventHandler("onPlayerQuit", root, function()
+    gardenWelcomeCooldowns[source] = nil
+end)
 
 local function onPlayerLeaveGarden(leftElement, matchingDimension)
     if getElementType(leftElement) ~= "player" then

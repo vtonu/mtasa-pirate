@@ -2,6 +2,7 @@ local screenW, screenH = guiGetScreenSize()
 local uiBrowser
 local uiBrowserElement
 local currentPayload = {}
+local openRequestUntil = 0
 local isDragging = false
 local dragOffsetX = 0
 local dragOffsetY = 0
@@ -134,6 +135,7 @@ local function sendPayloadToBrowser(payload)
 end
 
 local function createBootyUI(payload, clerk)
+    openRequestUntil = 0
     if isElement(uiBrowserElement) then
         sendPayloadToBrowser(payload)
         return
@@ -165,6 +167,7 @@ local function createBootyUI(payload, clerk)
 end
 
 local function closeBootyUI()
+    openRequestUntil = 0
     if isElement(uiBrowserElement) and isElement(activeClerk) then animateClerk("goodbye") end
     if isTimer(previewTimer) then killTimer(previewTimer) end
     previewTimer = nil
@@ -255,7 +258,7 @@ local lockoutUntilTick = 0
 
 local function handleShopToggle()
     if (getElementData(localPlayer, "atBootyShop") ~= true and not isElement(getElementData(localPlayer, "ammu:shopClerk")))
-        or isElement(uiBrowserElement) or isPedDead(localPlayer)
+        or isElement(uiBrowserElement) or getTickCount() < openRequestUntil or isPedDead(localPlayer)
         or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
     local currentTick = getTickCount()
 
@@ -276,6 +279,7 @@ local function handleShopToggle()
     end
 
     if getElementData(localPlayer, "atBootyShop") == true or isElement(getElementData(localPlayer, "ammu:shopClerk")) then
+        openRequestUntil = currentTick + 5000
         triggerServerEvent("bootyShop:requestOpen", resourceRoot)
     end
 end
@@ -284,19 +288,20 @@ end
 addEventHandler("onClientRender", root, function()
     local ammu = isElement(getElementData(localPlayer, "ammu:shopClerk"))
     if (getElementData(localPlayer, "atBootyShop") ~= true and not ammu) or isElement(uiBrowserElement)
+        or getTickCount() < openRequestUntil
         or isPedDead(localPlayer) or isCursorShowing() or isChatBoxInputActive()
         or isConsoleActive() or isMainMenuActive() then return end
     local w, h = guiGetScreenSize()
     local width = math.min(420, w - 32)
     local left, top = (w - width) / 2, h * 0.82
-    local prompt = ammu and "PRESS [H] TO OPEN WEAPON SHOP" or "PRESS [H] TO OPEN BOOTY SHOP"
+    local prompt = "PRESS 'H' TO OPEN SHOP"
     local font = "unifont"
     local scale = math.min(1, (width - 32) / dxGetTextWidth(prompt, 1, font))
-    dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 124))
-    dxDrawRectangle(left, top, width, 1, tocolor(220, 255, 239, 55))
+    dxDrawRectangle(left, top, width, 48, tocolor(31, 31, 31, 124))
+    dxDrawRectangle(left, top, width, 1, tocolor(127, 255, 212, 55))
     dxDrawRectangle(left, top, 2, 48, tocolor(127, 255, 212, 200))
     dxDrawText(prompt, left + 12, top, left + width - 12, top + 48,
-        tocolor(238, 255, 247, 245), scale, font, "center", "center", false, false, false, false)
+        tocolor(127, 255, 212, 245), scale, font, "center", "center", false, false, false, false)
 end)
 
 addEventHandler("onClientKey", root, function(button)

@@ -32,7 +32,7 @@ local function onPlayerLeaveShop(leftElement)
 end
 
 addEventHandler("onResourceStart", resourceRoot, function()
-    createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 127, 255, 212, 150)
+    createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 255, 230, 109, 150)
     shopCol = createColSphere(MARKER_X, MARKER_Y, MARKER_Z, SHOP_COL_RADIUS)
     addEventHandler("onColShapeHit", shopCol, onPlayerEnterShop)
     addEventHandler("onColShapeLeave", shopCol, onPlayerLeaveShop)

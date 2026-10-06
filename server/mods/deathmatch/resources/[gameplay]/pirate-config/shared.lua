@@ -23,7 +23,7 @@ function getPromptStyle(name)
     local prompt = type(ui.prompt) == "table" and ui.prompt or {}
     local font = type(fonts.prompt) == "string" and promptFonts[fonts.prompt] and fonts.prompt or "default-bold"
     local label = type(text[name]) == "string" and text[name] ~= "" and text[name]
-        or (name == "spawn" and "PRESS SPACE TO SPAWN" or "PRESS SPACE TO RESPAWN")
+        or (name == "spawn" and "PRESS 'SPACE' TO SPAWN" or "PRESS 'SPACE' TO RESPAWN")
     return {
         color = {
             numberInRange(accent[1], 0, 255, 127),

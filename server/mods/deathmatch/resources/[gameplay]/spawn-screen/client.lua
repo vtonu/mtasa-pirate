@@ -5,7 +5,7 @@ local screenW, screenH = guiGetScreenSize()
 local promptColor = tocolor(127, 255, 212)
 local promptFont = "default-bold"
 local promptScale = 2
-local promptText = "PRESS SPACE TO SPAWN"
+local promptText = "PRESS 'SPACE' TO SPAWN"
 local promptBottomOffset = 100
 
 -- REFRESH CACHED STYLE WHEN THE CONFIG STARTS

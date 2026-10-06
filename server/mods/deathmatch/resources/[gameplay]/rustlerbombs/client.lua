@@ -8,7 +8,7 @@ local shotsFired = 0
 local delayBetweenShots = 625
 local delayBetweenReloads = 5000
 local hudColor = tocolor(127, 255, 212)
-local hudFont = "default-bold"
+local hudFont = "unifont"
 
 function drawHud()
     if reloading then

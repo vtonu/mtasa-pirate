@@ -2,6 +2,7 @@
 local phase, vanBlip, targetBlip, deadline, location
 local notice, noticeUntil = nil, 0
 local nextRequest = 0
+local requestUntil = 0
 
 local function clearMission()
     if isElement(vanBlip) then destroyElement(vanBlip) end
@@ -20,25 +21,28 @@ local function atStart()
 end
 
 bindKey("h", "down", function()
-    if phase or not atStart() or getTickCount() < nextRequest or isChatBoxInputActive()
+    if phase or not atStart() or getTickCount() < nextRequest or getTickCount() < requestUntil
+        or (notice and getTickCount() < noticeUntil) or isChatBoxInputActive()
         or isConsoleActive() or isMainMenuActive() then return end
     nextRequest = getTickCount() + 1000
+    requestUntil = getTickCount() + 5000
     triggerServerEvent("emmet:start", resourceRoot)
 end)
 
 addEvent("emmet:state", true)
 addEventHandler("emmet:state", resourceRoot, function(state, first, second, third)
+    requestUntil = 0
     if state == "pickup" then
         clearMission()
         phase = "pickup"
-        if isElement(first) then vanBlip = createBlipAttachedTo(first, 0, 2, 255, 0, 0, 255) end
+        if isElement(first) then vanBlip = createBlipAttachedTo(first, 0, 2, 238, 20, 38, 255) end
         notice, noticeUntil = second, getTickCount() + 6000
         playSoundFrontEnd(42)
     elseif state == "pickupVan" then
         if phase ~= "pickup" then return end
         if isElement(vanBlip) then destroyElement(vanBlip) end
         vanBlip = nil
-        if isElement(first) then vanBlip = createBlipAttachedTo(first, 0, 2, 255, 0, 0, 255) end
+        if isElement(first) then vanBlip = createBlipAttachedTo(first, 0, 2, 238, 20, 38, 255) end
     elseif state == "delivery" then
         if isElement(vanBlip) then destroyElement(vanBlip) end
         vanBlip = nil
@@ -62,18 +66,18 @@ local function drawPanel(text, top)
     local width = math.min(520, w - 32)
     local left = (w - width) / 2
     local scale = math.min(1, (width - 32) / dxGetTextWidth(text, 1, "unifont"))
-    dxDrawRectangle(left, top, width, 48, tocolor(16, 35, 34, 124))
-    dxDrawRectangle(left, top, width, 1, tocolor(220, 255, 239, 55))
+    dxDrawRectangle(left, top, width, 48, tocolor(31, 31, 31, 124))
+    dxDrawRectangle(left, top, width, 1, tocolor(127, 255, 212, 55))
     dxDrawRectangle(left, top, 2, 48, tocolor(127, 255, 212, 200))
     dxDrawText(text, left + 12, top, left + width - 12, top + 48,
-        tocolor(238, 255, 247, 245), scale, "unifont", "center", "center")
+        tocolor(127, 255, 212, 245), scale, "unifont", "center", "center")
 end
 
 local function drawMissionText(text, top)
     local w = guiGetScreenSize()
     local scale = math.min(1, (w - 32) / dxGetTextWidth(text, 1, "unifont"))
     dxDrawText(text, 16, top, w - 16, top + 32,
-        tocolor(238, 255, 247, 245), scale, "unifont", "center", "center")
+        tocolor(127, 255, 212, 245), scale, "unifont", "center", "center")
 end
 
 addEventHandler("onClientRender", root, function()
@@ -85,11 +89,11 @@ addEventHandler("onClientRender", root, function()
         local seconds = math.max(0, math.ceil((deadline - now) / 1000))
         dxDrawText(string.format("DELIVERY TIME: %02d:%02d", math.floor(seconds / 60), seconds % 60),
             16, h * 0.88, w - 16, h * 0.88 + 32,
-            tocolor(238, 255, 247, 245), 1, "unifont", "center", "center")
+            tocolor(127, 255, 212, 245), 1, "unifont", "center", "center")
         if location then
             dxDrawText("DELIVERY TO: " .. location,
                 16, h * 0.88 + 24, w - 16, h * 0.88 + 56,
-                tocolor(238, 255, 247, 245), 1, "unifont", "center", "center")
+                tocolor(127, 255, 212, 245), 1, "unifont", "center", "center")
         end
     end
     if phase == "pickup" then
@@ -97,8 +101,8 @@ addEventHandler("onClientRender", root, function()
     elseif notice and now < noticeUntil then
         drawMissionText(notice, h * 0.88)
     end
-    if not phase and atStart() then
-        drawPanel(getElementData(localPlayer, "emmet:busy") and "DELIVERY VAN RESETTING" or "PRESS [H] TO START", h * 0.82)
+    if not phase and atStart() and now >= requestUntil and (not notice or now >= noticeUntil) then
+        drawPanel(getElementData(localPlayer, "emmet:busy") and "DELIVERY VAN RESETTING" or "PRESS 'H' TO START", h * 0.82)
     end
 end)
 addEventHandler("onClientResourceStop", resourceRoot, clearMission)

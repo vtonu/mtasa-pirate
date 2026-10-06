@@ -6,7 +6,7 @@ local promptVisible = false
 local promptColor = tocolor(127, 255, 212)
 local promptFont = "default-bold"
 local promptScale = 2
-local promptText = "PRESS SPACE TO RESPAWN"
+local promptText = "PRESS 'SPACE' TO RESPAWN"
 local promptBottomOffset = 100
 
 -- REFRESH CACHED STYLE WHEN THE CONFIG STARTS

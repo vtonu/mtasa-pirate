@@ -221,7 +221,7 @@ function onLocalSettingChange(setting, value)
     if remaining > 0 then
         triggerClientEvent(client, "onClientFreeroamLocalSettingChange", client, "passive", state)
         if now >= (playerData.passiveNextNotice or 0) then
-            outputChatBox("Wait " .. math.ceil(remaining / 1000) .. " seconds before changing passive mode again.", client, 255, 255, 0)
+            outputChatBox("Wait " .. math.ceil(remaining / 1000) .. " seconds before changing passive mode again.", client, 127, 255, 212)
             playerData.passiveNextNotice = now + 1000
         end
         return
@@ -229,7 +229,7 @@ function onLocalSettingChange(setting, value)
 
     if setPlayerPassiveMode(client, value) then
         playerData.passiveNextToggle = now + PASSIVE_TOGGLE_COOLDOWN
-        outputChatBox("Passive mode " .. (value and "enabled" or "disabled") .. ".", client, 255, 255, 0)
+        outputChatBox("Passive mode " .. (value and "enabled" or "disabled") .. ".", client, 127, 255, 212)
     end
 end
 
@@ -259,8 +259,8 @@ function joinHandler(player)
     setPlayerPassiveMode(player, false)
 
     if getOption('welcometextonstart') then
-        outputChatBox('Welcome to Lifestyle Gaming!', player, 255, 105, 180)
-        outputChatBox('Press F1 to show/hide controls.', player, 0, 0, 0)
+        outputChatBox('Welcome to Lifestyle Gaming!', player, 127, 255, 212)
+        outputChatBox('Press F1 to show/hide controls.', player, 127, 255, 212)
     end
 end
 
@@ -511,7 +511,7 @@ function warpMeIntoVehicle(vehicle)
         return
     end
     if isElement(client) then
-        outputChatBox('Vehicle warping is disabled.', client, 255, 0, 0)
+        outputChatBox('Vehicle warping is disabled.', client, 238, 20, 38)
     end
     return false
 end
@@ -564,6 +564,10 @@ function giveMeVehicles(vehID)
         local vehPos = posVector + vehMatrix.right * 3
         local vehicle = Vehicle(vehID, vehPos, rotVector) or false
         if vehicle then
+            if vehID == 411 then
+                setVehicleColor(vehicle, 127, 255, 212, 127, 255, 212, 127, 255, 212, 127, 255, 212)
+                setVehicleHeadLightColor(vehicle, 127, 255, 212)
+            end
             vehicle.interior = player.interior
             vehicle.dimension = player.dimension
             if vehicle.vehicleType == "Bike" then
