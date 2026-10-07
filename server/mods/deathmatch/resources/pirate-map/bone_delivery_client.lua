@@ -8,8 +8,10 @@ local cargoIds={"securiVehicleBCMissionCrate1","securiVehicleBCMissionCrate2","s
 
 -- LOCAL CARGO KEEPS EACH PLAYER'S LOAD SEPARATE
 local function updateCargo(data)
-    local visible=type(data)=="table" and (data.state=="cargo" or data.state=="loading")
-    for _,id in ipairs(cargoIds) do
+    local count=type(data)=="table" and (data.collected or 0) or 0
+    local show=type(data)=="table" and (data.state=="collect" or data.state=="cargo" or data.state=="loading")
+    for index,id in ipairs(cargoIds) do
+        local visible=show and index<=count
         local object=cargoObjects[id]
         if visible and not isElement(object) then
             local template=getElementByID(id)
@@ -93,7 +95,7 @@ addEventHandler("onClientRender",root,function()
     if type(data)=="table" then
         if data.state=="loading" then text="LOADING THE SECURICAR"
         elseif data.state=="collect" then
-            text="PRESS 'H' AT THE SHED TO TAKE OUT THE CARGO"
+            text="PRESS 'H' AT THE SHED TO TAKE OUT THE CARGO | "..(data.collected or 0).." / 3"
             if isElement(data.marker) then
                 if pickupMarker~=data.marker then
                     pickupMarker=data.marker

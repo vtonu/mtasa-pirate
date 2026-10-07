@@ -3,6 +3,7 @@ local tellers, pedTellers, sessions, aimReports, decay = {}, {}, {}, {}, {}
 local nextRobbery={}
 local successUntil={}
 local pending={}
+local bank={cooldown=0}
 
 local function clearLoot(player,pay)
     local loot=pending[player]
@@ -55,7 +56,7 @@ local function publish(s)
 end
 
 local function animate(teller,state)
-    if state=="hands" and teller.requiresKill then
+    if state=="hands" then
         local now=getTickCount()
         if not teller.reactionStarted then teller.reactionStarted=now end
         local elapsed=now-teller.reactionStarted
@@ -87,10 +88,11 @@ local function finish(teller,now,completed)
             if isElement(bag) then
                 setElementParent(bag,resourceRoot)
                 setObjectScale(bag,0.45)
+                setElementFrozen(bag,true)
                 setElementCollisionsEnabled(bag,false)
                 setElementInterior(bag,getElementInterior(s.player))
                 setElementDimension(bag,getElementDimension(s.player))
-                attachElements(bag,s.player,0,-0.25,0.45)
+                setElementData(bag,"bank:bagOwner",s.player)
             end
             local claimed=getBankBountyClaimed and getBankBountyClaimed(s.player) or 0
             pending[s.player]={total=s.total,claimed=claimed,bag=bag,completed=completed==true and s.maxed==true}
@@ -108,7 +110,8 @@ local function finish(teller,now,completed)
         successUntil[getPlayerSerial(s.player)]=now+resetDelay
         setElementData(s.player,"bank:robberyCooldown",math.ceil(resetDelay/1000))
     end
-    if s.started then teller.cooldown=now+(completed and resetDelay or cooldownDelay) end
+    if s.started then bank.cooldown=now+(completed and resetDelay or cooldownDelay) end
+    if bank.session==s then bank.session=nil end
     teller.session=nil
     cash(teller,0)
     teller.reactionStarted=nil
@@ -170,7 +173,7 @@ addEventHandler("onResourceStart",resourceRoot,function()
         if isElement(ped) and isElement(marker) then
             local x,y,z=getElementPosition(ped)
             local _,_,rotation=getElementRotation(ped)
-            local teller={marker=marker,cooldown=0,requiresKill=index==2,spawn={id=layout[1],model=getElementModel(ped),
+            local teller={marker=marker,requiresKill=index==2,spawn={id=layout[1],model=getElementModel(ped),
                 x=x,y=y,z=z,rotation=rotation,interior=getElementInterior(ped),
                 dimension=getElementDimension(ped),health=getElementHealth(ped),armor=getPedArmor(ped)}}
             tellers[#tellers+1]=teller
@@ -211,7 +214,7 @@ addEventHandler("onPedWasted",root,function(_,killer)
     else
         finish(teller,now,true)
         teller.deadUntil=now+resetDelay
-        teller.cooldown=teller.deadUntil
+        bank.cooldown=teller.deadUntil
     end
     setElementData(teller.marker,"bank:dead",true)
 end)
@@ -233,21 +236,18 @@ setTimer(function()
     local now,players=getTickCount(),getElementsByType("player")
     for _,teller in ipairs(tellers) do
         if teller.deadUntil and now>=teller.deadUntil then restorePed(teller) end
-        local remaining=math.max(0,math.ceil((teller.cooldown-now)/1000))
-        if getElementData(teller.marker,"bank:cooldown")~=remaining then
-            setElementData(teller.marker,"bank:cooldown",remaining)
-        end
         if isElement(teller.ped) and not isPedDead(teller.ped) and not teller.deadUntil then
             local threatened,visitor=false,false
             for _,player in ipairs(players) do
                 if near(player,teller.marker,1.6) then visitor=player end
                 if aiming(player,teller,now) then
                     threatened=true
-                    if not teller.session and now>=teller.cooldown and now>=(nextRobbery[player] or 0) and not sessions[player] and not pending[player]
+                    if not bank.session and now>=bank.cooldown and now>=(nextRobbery[player] or 0) and not sessions[player] and not pending[player]
                         and near(player,teller.marker,1.6) then
                         local s={player=player,teller=teller,held=0,activeTime=0,paidTime=0,
                             total=0,stage=1,lastTick=now,lastAim=now}
                         teller.session,sessions[player]=s,teller
+                        bank.session=s
                         decay[player]=nil
                         setElementData(player,"bank:wantedDecay",false)
                         setElementData(teller.ped,"bank:robber",player)
@@ -305,6 +305,16 @@ setTimer(function()
             end
         end
     end
+    local remaining=math.max(0,math.ceil((bank.cooldown-now)/1000))
+    local robber=bank.session and bank.session.player or false
+    for _,teller in ipairs(tellers) do
+        if getElementData(teller.marker,"bank:cooldown")~=remaining then
+            setElementData(teller.marker,"bank:cooldown",remaining)
+        end
+        if getElementData(teller.marker,"bank:robber")~=robber then
+            setElementData(teller.marker,"bank:robber",robber)
+        end
+    end
     for player,d in pairs(decay) do
         if not isElement(player) or isPedDead(player) then
             decay[player]=nil
@@ -336,6 +346,8 @@ setTimer(function()
             loot.claimed=getBankBountyClaimed and getBankBountyClaimed(player) or loot.claimed
             clearLoot(player,true)
         elseif isElement(loot.bag) then
+            local x,y,z=getElementPosition(player)
+            setElementPosition(loot.bag,x,y,z)
             setElementInterior(loot.bag,getElementInterior(player))
             setElementDimension(loot.bag,getElementDimension(player))
         end
@@ -395,6 +407,7 @@ addEventHandler("onResourceStop",resourceRoot,function()
             removeElementData(teller.marker,"bank:teller")
             removeElementData(teller.marker,"bank:cooldown")
             removeElementData(teller.marker,"bank:dead")
+            removeElementData(teller.marker,"bank:robber")
         end
         if isElement(teller.ped) then setPedAnimation(teller.ped,false) end
         for _,item in ipairs(teller.cash or {}) do

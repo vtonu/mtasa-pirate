@@ -21,7 +21,7 @@ end
 local function publish(s)
     if isElement(s.player) then
         setElementData(s.player,"bone:delivery",{state=s.state,marker=s.marker,vehicle=s.vehicle,
-            name=s.destination and s.destination.name,blip=s.blip,
+            name=s.destination and s.destination.name,blip=s.blip,collected=s.collected or 0,
             remaining=s.endsAt-getTickCount()})
     end
 end
@@ -85,7 +85,7 @@ local function setupVan(van)
     setVehicleRespawnPosition(van,home.x,home.y,home.z)
     toggleVehicleRespawn(van,false)
     pickupVan=van
-    startMarker=createMarker(774.53442,1884.24646,6.1,"arrow",0.8,127,255,212,255)
+    startMarker=createMarker(774.53442,1884.24646,5.7,"arrow",0.8,127,255,212,255)
     if not isElement(startMarker) then
         pickupVan=nil
         remove(van)
@@ -119,6 +119,7 @@ finish=function(s,success)
     if isTimer(s.timer) then killTimer(s.timer) end
     remove(s.marker)
     remove(s.blip)
+    remove(s.publicBlip)
     if isElement(s.player) then
         setElementData(s.player,"bone:delivery",false)
         triggerClientEvent(s.player,"bone:result",resourceRoot,success==true)
@@ -139,9 +140,9 @@ addEventHandler("bone:load",resourceRoot,function()
     requests[client]=now
     ensureVan()
     if not isElement(pickupVan) then return end
-    local s={player=client,state="collect",endsAt=now+90000}
+    local s={player=client,state="collect",collected=0,endsAt=now+90000}
     sessions[client]=s
-    s.marker=createMarker(767.82452,1889.92102,6.18,"arrow",0.8,127,255,212,255,client)
+    s.marker=createMarker(767.82452,1889.92102,5.78,"arrow",0.8,127,255,212,255,client)
     if not isElement(s.marker) then finish(s,false) return end
     setElementParent(s.marker,resourceRoot)
     setElementData(s.marker,"bone:markerOwner",client)
@@ -155,6 +156,8 @@ addEventHandler("bone:collect",resourceRoot,function()
     local s=client and sessions[client]
     if source~=resourceRoot or not s or s.state~="collect" or getPedOccupiedVehicle(client)
         or not near(client,s.marker,1.3) then return end
+    s.collected=s.collected+1
+    if s.collected<#cargoIds then publish(s) return end
     remove(s.marker)
     s.marker=nil
     remove(s.blip)
@@ -188,7 +191,7 @@ addEventHandler("bone:store",resourceRoot,function()
         publish(s)
         ensureVan()
         refreshVan()
-    end,4000,1)
+    end,8000,1)
 end)
 
 addEventHandler("onVehicleStartEnter",root,function(player,seat)
@@ -231,6 +234,8 @@ addEventHandler("onVehicleEnter",root,function(player,seat)
     s.blip=createBlip(d.x,d.y,d.z,51,3,255,40,40,255,0,65535,player)
     if not isElement(s.marker) or not isElement(s.blip) then finish(s,false) return end
     setElementParent(s.marker,resourceRoot)
+    s.publicBlip=createBlipAttachedTo(van,41,2,255,255,255,255,0,16383,root)
+    if not isElement(s.publicBlip) then finish(s,false) return end
     publish(s)
     addEventHandler("onMarkerHit",s.marker,function(element,matchingDimension)
         if sessions[player]~=s or s.state~="delivery" or not matchingDimension

@@ -13,6 +13,8 @@
     <script src="bank_bounty_client.lua" type="client"></script>
     <script src="bank_tellers_server.lua" type="server"></script>
     <script src="bank_tellers_client.lua" type="client"></script>
+    <script src="bank_bag_client.lua" type="client"></script>
+    <script src="high_roller_peds_server.lua" type="server"></script>
     <script src="vehicles_server.lua" type="server"></script>
     <script src="emmet_delivery_server.lua" type="server"></script>
     <script src="emmet_delivery_client.lua" type="client"></script>

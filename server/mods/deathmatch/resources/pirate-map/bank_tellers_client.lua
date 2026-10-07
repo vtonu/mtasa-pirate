@@ -2,6 +2,8 @@
 local markerIds = {"bankMissionPalominoCreek","bankOfficeMissionPalominoCreek"}
 local lastReport, reportedPed = 0, false
 local hiddenWanted, previousWanted = false, true
+local lastWanted=getPlayerWantedLevel()
+local gainedStars={}
 local star = svgCreate(64,64,[[<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><path d="M32 3 L39 23 L61 23 L43 36 L50 58 L32 45 L14 58 L21 36 L3 23 L25 23 Z" fill="white" stroke="black" stroke-width="3"/></svg>]])
 
 local function aimedTeller()
@@ -82,7 +84,7 @@ addEventHandler("onClientRender",root,function()
         local session=getElementData(localPlayer,"bank:robbery")
         local cooldown=tonumber(getElementData(marker,"bank:cooldown")) or 0
         local playerCooldown=tonumber(getElementData(localPlayer,"bank:robberyCooldown")) or 0
-        local robber=ped and getElementData(ped,"bank:robber")
+        local robber=getElementData(marker,"bank:robber")
         local text="KEEP AIMING TO START ROBBERY"
         if dead then
             text="SORRY, THE ZOMBIES GOT HIM. COME TRY LATER."
@@ -98,6 +100,7 @@ addEventHandler("onClientRender",root,function()
                 text="KEEP AIMING | PENDING CASH: $"..tostring(session.total)
                     .."  |  +$"..tostring(session.payout).." / 5 SEC"
             end
+        elseif robber==localPlayer then text="ROBBERY IN PROGRESS AT THE OTHER COUNTER"
         end
         local width=math.min(620,w-32)
         local left,top=(w-width)/2,h*0.78
@@ -106,6 +109,13 @@ addEventHandler("onClientRender",root,function()
             tocolor(127,255,212,255),scale,"unifont","center","center")
     end
     local escape=getElementData(localPlayer,"bank:wantedDecay")
+    local count,now=getPlayerWantedLevel(),getTickCount()
+    if count>lastWanted then
+        for level=lastWanted+1,count do gainedStars[level]=now+2400 end
+    elseif count<lastWanted then
+        for level=count+1,6 do gainedStars[level]=nil end
+    end
+    lastWanted=count
     if star and getPlayerWantedLevel()>0 then
         if not hiddenWanted then
             previousWanted=isPlayerHudComponentVisible("wanted")
@@ -113,13 +123,14 @@ addEventHandler("onClientRender",root,function()
             hiddenWanted=true
         end
         if previousWanted then
-            local count=getPlayerWantedLevel()
             local blink=type(escape)=="table" and escape.remaining<=3000 and math.floor(getTickCount()/400)%2==0
             local size=math.max(18,math.min(36,h*0.042))
             local rowWidth=w*0.17
             local gap=(rowWidth-size*6)/5
             for i=1,6 do
-                local lit=i>6-count and not blink
+                local level=7-i
+                local gained=gainedStars[level] and now<gainedStars[level] and math.floor(now/400)%2==0
+                local lit=i>6-count and not blink and not gained
                 dxDrawImage(w*0.78+(i-1)*(size+gap),h*0.23,size,size,star,0,0,0,
                     lit and tocolor(224,171,53,255) or tocolor(55,55,55,220))
             end
