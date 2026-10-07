@@ -56,8 +56,12 @@ local function resetZombieChase(zombie,data)
 	data.recoveryUntil = nil
 	data.recoverySide = nil
 	data.knifeReachTick = nil
+	if data.bankWalkingStyle then
+		setPedWalkingStyle(zombie,data.bankWalkingStyle)
+		data.bankWalkingStyle=nil
+	end
 	setPedAnimation(zombie)
-	for _,control in ipairs({"forwards","backwards","left","right","fire","aim_weapon","sprint","jump"}) do
+	for _,control in ipairs({"forwards","backwards","left","right","fire","aim_weapon","sprint","jump","walk"}) do
 		setPedControlState(zombie,control,false)
 	end
 end
@@ -234,6 +238,11 @@ local function trackMe()
 			local attackRange = attackRanges[getPedWeapon(zombie)] or 1.0
 			local inReach = getDistanceBetweenPoints3D(zVector,lVector) < attackRange and doesZombieSeePlayer
 			local now = getTickCount()
+			local bankSlow=isBankZombieSlowElement(zombie)
+			if bankSlow then
+				data.progressTick=now
+				data.recoveryUntil=nil
+			end
 			local moveState = getPedMoveState(zombie)
 			local climbing = moveState == "climb" or moveState == "hanging"
 			for _,control in ipairs({"backwards","left","right"}) do
@@ -361,6 +370,25 @@ local function trackMe()
 					data.progressTick = now
 				end
 			end
+            -- SHORT WALK STEPS MAKE BANK CHASERS VERY SLOW
+            if bankSlow then
+                if not data.bankWalkingStyle then
+                    data.bankWalkingStyle=getPedWalkingStyle(zombie)
+                    setPedWalkingStyle(zombie,119)
+                end
+                setPedControlState(zombie,"walk",true)
+                setPedControlState(zombie,"sprint",false)
+                setPedControlState(zombie,"jump",false)
+                if now%2000>=250 then
+                    for _,control in ipairs({"forwards","backwards","left","right"}) do
+                        setPedControlState(zombie,control,false)
+                    end
+                end
+            elseif data.bankWalkingStyle then
+                setPedWalkingStyle(zombie,data.bankWalkingStyle)
+                data.bankWalkingStyle=nil
+                setPedControlState(zombie,"walk",false)
+            end
 			-- GIVE KNIFE ZOMBIES A CLOSE RANGE NECK STAB CHANCE
 			if inReach and getPedWeapon(zombie) == 4 and zombieTarget == localPlayer and not getPedOccupiedVehicle(localPlayer) then
 				data.knifeReachTick = data.knifeReachTick or now

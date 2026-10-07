@@ -63,21 +63,28 @@ addEventHandler("onClientPreRender",root,function()
 end)
 
 -- TELLERS CAN ONLY BE KILLED BY THEIR ROBBER AT THE FINAL STAGE
-addEventHandler("onClientPedDamage",root,function(attacker)
+addEventHandler("onClientPedDamage",root,function(attacker,weapon,bodypart)
     if getElementData(source,"bank:teller")~=true then return end
     if getElementData(source,"bank:killable")~=true
-        or attacker~=getElementData(source,"bank:robber") then cancelEvent() end
+        or attacker~=getElementData(source,"bank:robber") then cancelEvent()
+    elseif bodypart==9 and attacker==localPlayer and getElementData(source,"bank:requiresKill")==true then
+        cancelEvent()
+        triggerServerEvent("bank:headshot",resourceRoot,source,weapon)
+    end
 end)
 
 addEventHandler("onClientRender",root,function()
     local w,h=guiGetScreenSize()
     local ped,marker=aimedTeller(),nearbyMarker()
-    if ped and marker and getElementData(marker,"bank:teller")==ped then
+    local dead=marker and getElementData(marker,"bank:dead")==true
+    if marker and (dead or (ped and getElementData(marker,"bank:teller")==ped)) then
         local session=getElementData(localPlayer,"bank:robbery")
         local cooldown=tonumber(getElementData(marker,"bank:cooldown")) or 0
-        local robber=getElementData(ped,"bank:robber")
+        local robber=ped and getElementData(ped,"bank:robber")
         local text="KEEP AIMING TO START ROBBERY"
-        if cooldown>0 then
+        if dead then
+            text="SORRY, THE ZOMBIES GOT HIM. COME TRY LATER."
+        elseif cooldown>0 then
             text="BANK RESETS IN "..math.ceil(cooldown/60).." MIN"
         elseif robber and robber~=localPlayer then
             text="TELLER IS BEING ROBBED"
@@ -95,8 +102,7 @@ addEventHandler("onClientRender",root,function()
             tocolor(127,255,212,255),scale,"unifont","center","center")
     end
     local escape=getElementData(localPlayer,"bank:wantedDecay")
-    local robbery=getElementData(localPlayer,"bank:robbery")
-    if (type(escape)=="table" or type(robbery)=="table") and star and not isPedDead(localPlayer) then
+    if star and getPlayerWantedLevel()>0 then
         if not hiddenWanted then
             previousWanted=isPlayerHudComponentVisible("wanted")
             setPlayerHudComponentVisible("wanted",false)

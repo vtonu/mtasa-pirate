@@ -4,7 +4,7 @@ local guns = {[22]=true,[23]=true,[24]=true,[25]=true,[26]=true,[27]=true,[28]=t
     [29]=true,[30]=true,[31]=true,[32]=true,[33]=true,[34]=true}
 local payouts = {2500,5000,10000,20000,40000,80000}
 local holdDelay, releaseDelay, payoutDelay, starDelay = 3000,5000,5000,45000
-local cooldownDelay, resetDelay, decayDelay = 300000,1800000,30000
+local cooldownDelay, resetDelay, decayDelay = 300000,1800000,60000
 
 local function near(player, element, radius)
     if not isElement(player) or not isElement(element) or isPedDead(player)
@@ -28,10 +28,18 @@ local function publish(s)
 end
 
 local function animate(teller,state)
+    if state=="hands" and teller.requiresKill then
+        local phase=math.floor(getTickCount()/6000)%3
+        state=phase==1 and "cower" or (phase==2 and "duck" or "hands")
+    end
     if teller.animation==state then return end
     teller.animation=state
     if state=="hands" then
         setPedAnimation(teller.ped,"ped","handsup",-1,false,false,false,true)
+    elseif state=="cower" then
+        setPedAnimation(teller.ped,"ped","handscower",-1,true,false,false,false)
+    elseif state=="duck" then
+        setPedAnimation(teller.ped,"ped","DUCK_cower",-1,true,false,false,false)
     elseif state=="work" then
         setPedAnimation(teller.ped,"ped","IDLE_chat",-1,true,false,false,false)
     else setPedAnimation(teller.ped,false) end
@@ -65,6 +73,7 @@ local function setupPed(teller,ped)
     teller.spawn.rotation=(-math.deg(math.atan2(mx-teller.spawn.x,my-teller.spawn.y)))%360
     setElementRotation(ped,0,0,teller.spawn.rotation)
     setElementData(ped,"bank:teller",true)
+    setElementData(ped,"bank:requiresKill",teller.requiresKill)
     setElementData(ped,"bank:killable",false)
     setElementData(ped,"bank:robber",teller.session and teller.session.player or false)
     setElementData(teller.marker,"bank:teller",ped)
@@ -84,6 +93,7 @@ local function restorePed(teller)
     setElementID(ped,s.id)
     setupPed(teller,ped)
     teller.deadUntil=nil
+    setElementData(teller.marker,"bank:dead",false)
     if teller.session then
         setElementData(ped,"bank:killable",teller.session.maxed==true)
         publish(teller.session)
@@ -109,13 +119,14 @@ addEventHandler("onResourceStart",resourceRoot,function()
         if isElement(ped) and isElement(marker) then
             local x,y,z=getElementPosition(ped)
             local _,_,rotation=getElementRotation(ped)
-            local teller={marker=marker,cooldown=0,spawn={id=layout[1],model=getElementModel(ped),
+            local teller={marker=marker,cooldown=0,requiresKill=index==2,spawn={id=layout[1],model=getElementModel(ped),
                 x=x,y=y,z=z,rotation=rotation,interior=getElementInterior(ped),
                 dimension=getElementDimension(ped),health=getElementHealth(ped),armor=getPedArmor(ped)}}
             tellers[#tellers+1]=teller
             setupPed(teller,ped)
             setElementData(marker,"bank:robberyMarker",true)
             setElementData(marker,"bank:cooldown",0)
+            setElementData(marker,"bank:dead",false)
             if index==1 then
                 local blip=createBlipAttachedTo(marker,52,2,255,255,255,255,0,65535)
                 if isElement(blip) then
@@ -136,9 +147,23 @@ addEventHandler("onPedWasted",root,function(_,killer)
         finish(teller,now,true)
         teller.deadUntil=now+resetDelay
     else
-        -- REPLACE EARLY OR UNAUTHORIZED DEATHS WITHOUT A REWARD
-        teller.deadUntil=now
+        finish(teller,now,true)
+        teller.deadUntil=now+resetDelay
+        teller.cooldown=teller.deadUntil
     end
+    setElementData(teller.marker,"bank:dead",true)
+end)
+
+-- ONLY THE ROBBER'S FINAL HEADSHOT CAN FINISH THE OPEN COUNTER
+addEvent("bank:headshot",true)
+addEventHandler("bank:headshot",resourceRoot,function(ped,weapon)
+    if not client or source~=resourceRoot then return end
+    local teller=pedTellers[ped]
+    local s=teller and teller.session
+    if not s or not s.maxed or not teller.requiresKill or s.player~=client
+        or isPedDead(ped) or not near(client,teller.marker,1.6)
+        or not guns[weapon] or getPedWeapon(client)~=weapon then return end
+    killPed(ped,client,weapon,9)
 end)
 
 -- SERVER MONEY, STAGES AND COOLDOWNS
@@ -198,8 +223,10 @@ setTimer(function()
                         end
                         if s.stage==6 then
                             s.maxed=true
-                            setElementData(teller.ped,"bank:killable",true)
-                            publish(s)
+                            if teller.requiresKill then
+                                setElementData(teller.ped,"bank:killable",true)
+                                publish(s)
+                            else finish(teller,now,true) end
                         end
                     end
                 else
@@ -238,7 +265,11 @@ local function clearPlayer()
     local teller=sessions[source]
     if teller then finish(teller,getTickCount()) end
     aimReports[source],decay[source]=nil,nil
-    if isElement(source) then setElementData(source,"bank:wantedDecay",false) end
+    if isElement(source) then
+        setElementData(source,"bank:wantedDecay",false)
+        setElementData(source,"bank:robbery",false)
+        setPlayerWantedLevel(source,0)
+    end
 end
 addEventHandler("onPlayerQuit",root,clearPlayer)
 addEventHandler("onPlayerWasted",root,clearPlayer)
@@ -251,6 +282,7 @@ addEventHandler("onResourceStop",resourceRoot,function()
             removeElementData(teller.marker,"bank:robberyMarker")
             removeElementData(teller.marker,"bank:teller")
             removeElementData(teller.marker,"bank:cooldown")
+            removeElementData(teller.marker,"bank:dead")
         end
         if isElement(teller.ped) then setPedAnimation(teller.ped,false) end
     end

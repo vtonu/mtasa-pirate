@@ -1,4 +1,11 @@
 -- BANK PRESSURE FOLLOWS WANTED STARS
+function isBankZombieSlowElement(element)
+    if not isElement(element) or getElementInterior(element)~=0
+        or getElementDimension(element)~=0 then return false end
+    local x,y,z=getElementPosition(element)
+    return x>=2300 and x<=2325 and y>=-23 and y<=5 and z>=24 and z<=30
+end
+
 function getBankZombiePressure(player)
     if not isElement(player) or isPedDead(player) or getElementInterior(player)~=0
         or getElementDimension(player)~=0 then return false end
