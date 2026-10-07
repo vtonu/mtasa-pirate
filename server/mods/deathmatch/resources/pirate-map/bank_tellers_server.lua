@@ -2,6 +2,20 @@
 local tellers, pedTellers, sessions, aimReports, decay = {}, {}, {}, {}, {}
 local nextRobbery={}
 local successUntil={}
+local pending={}
+
+local function clearLoot(player,pay)
+    local loot=pending[player]
+    pending[player]=nil
+    if not loot then return end
+    if isElement(loot.bag) then destroyElement(loot.bag) end
+    if isElement(player) then
+        setElementData(player,"bank:pending",false)
+        if pay and not isPedDead(player) then
+            givePlayerMoney(player,math.max(0,loot.total-loot.claimed))
+        end
+    end
+end
 local guns = {[22]=true,[23]=true,[24]=true,[25]=true,[26]=true,[27]=true,[28]=true,
     [29]=true,[30]=true,[31]=true,[32]=true,[33]=true,[34]=true}
 local payouts = {2500,5000,10000,20000,40000,80000}
@@ -65,6 +79,21 @@ local function finish(teller,now,completed)
     local s=teller.session
     if not s then return end
     if isElement(s.player) then
+        if s.total>0 and not isPedDead(s.player) then
+            local x,y,z=getElementPosition(s.player)
+            local bag=createObject(1550,x,y,z)
+            if isElement(bag) then
+                setElementParent(bag,resourceRoot)
+                setObjectScale(bag,0.45)
+                setElementCollisionsEnabled(bag,false)
+                setElementInterior(bag,getElementInterior(s.player))
+                setElementDimension(bag,getElementDimension(s.player))
+                attachElements(bag,s.player,0,-0.25,-0.3)
+            end
+            local claimed=getBankBountyClaimed and getBankBountyClaimed(s.player) or 0
+            pending[s.player]={total=s.total,claimed=claimed,bag=bag}
+            setElementData(s.player,"bank:pending",{total=s.total,claimed=claimed})
+        end
         setElementData(s.player,"bank:robbery",false)
         if s.started and not isPedDead(s.player) then
             decay[s.player]={nextDrop=now+decayDelay,expected=getPlayerWantedLevel(s.player)}
@@ -214,7 +243,7 @@ setTimer(function()
                 if near(player,teller.marker,1.6) then visitor=player end
                 if aiming(player,teller,now) then
                     threatened=true
-                    if not teller.session and now>=teller.cooldown and now>=(nextRobbery[player] or 0) and not sessions[player]
+                    if not teller.session and now>=teller.cooldown and now>=(nextRobbery[player] or 0) and not sessions[player] and not pending[player]
                         and near(player,teller.marker,1.6) then
                         local s={player=player,teller=teller,held=0,activeTime=0,paidTime=0,
                             total=0,stage=1,lastTick=now,lastAim=now}
@@ -251,7 +280,6 @@ setTimer(function()
                         if s.paidTime>=payoutDelay then
                             s.paidTime=s.paidTime-payoutDelay
                             s.total=s.total+payouts[s.stage]
-                            givePlayerMoney(player,payouts[s.stage])
                             publish(s)
                         end
                         if s.stage==6 then
@@ -298,6 +326,16 @@ setTimer(function()
             end
         end
     end
+    for player,loot in pairs(pending) do
+        if not isElement(player) or isPedDead(player) then clearLoot(player,false)
+        elseif getPlayerWantedLevel(player)==0 then
+            loot.claimed=getBankBountyClaimed and getBankBountyClaimed(player) or loot.claimed
+            clearLoot(player,true)
+        elseif isElement(loot.bag) then
+            setElementInterior(loot.bag,getElementInterior(player))
+            setElementDimension(loot.bag,getElementDimension(player))
+        end
+    end
     for player,endsAt in pairs(nextRobbery) do
         if isElement(player) then
             local seconds=math.max(0,math.ceil((endsAt-now)/1000))
@@ -328,6 +366,7 @@ end)
 local function clearPlayer()
     local teller=sessions[source]
     if teller then finish(teller,getTickCount()) end
+    clearLoot(source,false)
     aimReports[source],decay[source]=nil,nil
     if isElement(source) then
         setElementData(source,"bank:wantedDecay",false)
@@ -359,4 +398,5 @@ addEventHandler("onResourceStop",resourceRoot,function()
     for player in pairs(nextRobbery) do
         if isElement(player) then setElementData(player,"bank:robberyCooldown",false) end
     end
+    for player in pairs(pending) do clearLoot(player,false) end
 end)

@@ -20,6 +20,8 @@ local function onPlayerEnterGarden(hitElement, matchingDimension)
     if getElementType(hitElement) ~= "player" then
         return
     end
+    if isPedDead(hitElement) or getElementInterior(hitElement)~=getElementInterior(source)
+        or getElementDimension(hitElement)~=getElementDimension(source) then return end
 
     setElementData(hitElement, "atWeedGarden", true)
 
@@ -42,13 +44,17 @@ local function onPlayerLeaveGarden(leftElement, matchingDimension)
     setElementData(leftElement, "atWeedGarden", false)
 end
 
-local function createWeedShop(x, y, z, markerRadius, alpha, markerId)
-    local gardenMarker = createMarker(x, y, z, "cylinder", markerRadius, 127, 255, 212, alpha)
+local function createWeedShop(x, y, z, markerRadius, alpha, markerId, interior, dimension)
+    local gardenMarker = createMarker(x, y, z, "cylinder", markerRadius, interior and 180 or 127, 255, interior and 60 or 212, alpha)
     if markerId then
         setElementID(gardenMarker, markerId)
     end
-    createBlipAttachedTo(gardenMarker, 63, 2, 255, 255, 255, 255, 0, 65535)
+    if not interior then createBlipAttachedTo(gardenMarker, 63, 2, 255, 255, 255, 255, 0, 65535) end
     local shopCol = createColSphere(x, y, z, SHOP_COL_RADIUS)
+    setElementInterior(gardenMarker,interior or 0)
+    setElementDimension(gardenMarker,dimension or 0)
+    setElementInterior(shopCol,interior or 0)
+    setElementDimension(shopCol,dimension or 0)
     addEventHandler("onColShapeHit", shopCol, onPlayerEnterGarden)
     addEventHandler("onColShapeLeave", shopCol, onPlayerLeaveGarden)
     return shopCol
@@ -56,6 +62,7 @@ end
 
 addEventHandler("onResourceStart", resourceRoot, function()
     gardenCol = createWeedShop(MARKER_X, MARKER_Y, MARKER_Z, MARKER_RADIUS, 150)
+    createWeedShop(2157.20654,1607.71350,998.97131,0.8,150,"weedShopPalominoBasement",1,12104)
     createWeedShop(1857.86353, 2236.32324, 10.125, 1, 255, "weedShopNorthLV")
     createWeedShop(1587.70569, 1910.43542, 9.82031, 1, 255, "weedShopLVHospital")
     createWeedShop(-368.70197, 1168.55225, 19.27188, 1, 255, "weedShopFortCarson")

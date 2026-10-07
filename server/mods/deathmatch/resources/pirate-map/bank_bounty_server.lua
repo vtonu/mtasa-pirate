@@ -1,6 +1,10 @@
 -- ONE BOUNTY POOL PER ROBBERY, SHARED BY EVERY MARKED PLAYER
 local groups,members={},{}
 
+function getBankBountyClaimed(player)
+    return groups[player] and groups[player].claimed or 0
+end
+
 local function inBank(player)
     if not isElement(player) or isPedDead(player) or getElementInterior(player)~=0
         or getElementDimension(player)~=0 then return false end
@@ -55,10 +59,14 @@ end
 
 local function updateRobber(player)
     local data=getElementData(player,"bank:robbery")
+    local loot=getElementData(player,"bank:pending")
     local group=groups[player]
     if type(data)~="table" or data.state=="hold" then
-        if group then endGroup(group) end
-        return
+        if type(loot)=="table" then data=loot
+        else
+            if group then endGroup(group) end
+            return
+        end
     end
     if not group then
         unmark(player)
@@ -67,11 +75,12 @@ local function updateRobber(player)
         mark(group,player)
     end
     group.earned=tonumber(data.total) or 0
+    group.escaping=type(loot)=="table"
     publish()
 end
 
 addEventHandler("onElementDataChange",root,function(key)
-    if client or key~="bank:robbery" or getElementType(source)~="player" then return end
+    if client or (key~="bank:robbery" and key~="bank:pending") or getElementType(source)~="player" then return end
     updateRobber(source)
 end)
 
@@ -84,8 +93,8 @@ addEventHandler("onPlayerWasted",root,function(_,killer)
     if isElement(hunter) and getElementType(hunter)=="vehicle" then hunter=getVehicleController(hunter) end
     if isElement(hunter) and getElementType(hunter)=="player" and hunter~=source
         and hunter~=group.robber and isElement(group.robber) then
-        local reward=math.min(amount(group),math.max(0,getPlayerMoney(group.robber)))
-        if reward>0 and takePlayerMoney(group.robber,reward) then
+        local reward=amount(group)
+        if reward>0 then
             group.claimed=group.claimed+reward
             givePlayerMoney(hunter,reward)
             triggerClientEvent(hunter,"bank:bountyClaim",resourceRoot,reward)
@@ -103,7 +112,7 @@ setTimer(function()
     for _,player in ipairs(getElementsByType("player")) do
         if inBank(player) and not members[player] then
             for _,group in pairs(groups) do
-                if not groups[player] then mark(group,player) end
+                if not groups[player] and not group.escaping then mark(group,player) end
                 if members[player] then break end
             end
         end

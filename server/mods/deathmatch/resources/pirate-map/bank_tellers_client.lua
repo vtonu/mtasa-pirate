@@ -94,7 +94,7 @@ addEventHandler("onClientRender",root,function()
         elseif type(session)=="table" and session.teller==ped then
             if session.state=="max" then text="MAX STARS - KILL THE TELLER TO FINISH"
             elseif session.state=="robbery" then
-                text="KEEP AIMING FOR CASH: $"..tostring(session.total)
+                text="KEEP AIMING | PENDING CASH: $"..tostring(session.total)
                     .."  |  +$"..tostring(session.payout).." / 5 SEC"
             end
         end

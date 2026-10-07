@@ -246,9 +246,9 @@ rooms.clinicPalominoSide.interior = 1
 rooms.clinicPalominoSide.x = 2157.44507
 rooms.clinicPalominoSide.y = 1597.09717
 rooms.clinicPalominoSide.z = 999.97137
-rooms.clinicPalominoSide.spawnX = 2169.46118
-rooms.clinicPalominoSide.spawnY = 1621.79834
-rooms.clinicPalominoSide.spawnZ = 999.97656
+rooms.clinicPalominoSide.spawnX = 2157.73633
+rooms.clinicPalominoSide.spawnY = 1598.78247
+rooms.clinicPalominoSide.spawnZ = 999.97241
 rooms.clinicPalominoSide.rotation = 0
 local sidedMarkers = {}
 for _, id in ipairs({"ammuSouthLSRange", "ammuSouthLSFloor", "ammuTRRange", "ammuTRFloor"}) do
