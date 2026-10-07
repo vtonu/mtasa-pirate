@@ -159,7 +159,7 @@ addEventHandler("bone:collect",resourceRoot,function()
         or not near(client,s.marker,1.3) then return end
     s.taking,s.wasFrozen=true,isElementFrozen(client)
     setElementFrozen(client,true)
-    setElementRotation(client,0,0,0)
+    setElementRotation(client,0,0,180)
     setPedAnimation(client,"INT_HOUSE","wash_up",-1,true,false,false,false)
     publish(s)
     s.timer=setTimer(function()

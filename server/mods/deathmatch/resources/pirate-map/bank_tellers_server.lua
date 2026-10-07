@@ -4,6 +4,19 @@ local nextRobbery={}
 local successUntil={}
 local pending={}
 local bank={cooldown=0}
+local safeClosed,safeOpen
+
+local function updateSafe(open)
+    bank.safeOpened=open==true
+    if isElement(safeClosed) then
+        setElementAlpha(safeClosed,open and 0 or 255)
+        setElementCollisionsEnabled(safeClosed,not open)
+    end
+    if isElement(safeOpen) then
+        setElementAlpha(safeOpen,open and 255 or 0)
+        setElementCollisionsEnabled(safeOpen,open==true)
+    end
+end
 
 local function clearLoot(player,pay)
     local loot=pending[player]
@@ -45,6 +58,7 @@ local function cash(teller,count)
     for index,item in ipairs(teller.cash or {}) do
         if isElement(item.element) then
             setElementAlpha(item.element,index<=count and item.alpha or 0)
+            if index<=count and getElementModel(item.element)==1550 and not bank.safeOpened then updateSafe(true) end
         end
     end
 end
@@ -167,6 +181,10 @@ addEventHandler("bank:aim",resourceRoot,function(ped)
 end)
 
 addEventHandler("onResourceStart",resourceRoot,function()
+    safeClosed,safeOpen=getElementByID("bankSafeClosed"),getElementByID("bankSafeOpen")
+    updateSafe(false)
+    if isElement(safeClosed) then setElementFrozen(safeClosed,true) end
+    if isElement(safeOpen) then setElementFrozen(safeOpen,true) end
     for index,layout in ipairs({{"bankTeller1","bankMissionPalominoCreek"},
         {"bankTeller2","bankOfficeMissionPalominoCreek"}}) do
         local ped,marker=getElementByID(layout[1]),getElementByID(layout[2])
@@ -238,6 +256,7 @@ end)
 -- SERVER MONEY, STAGES AND COOLDOWNS
 setTimer(function()
     local now,players=getTickCount(),getElementsByType("player")
+    if bank.safeOpened and not bank.session and now>=bank.cooldown then updateSafe(false) end
     for _,teller in ipairs(tellers) do
         if teller.deadUntil and now>=teller.deadUntil then restorePed(teller) end
         if isElement(teller.ped) and not isPedDead(teller.ped) and not teller.deadUntil then

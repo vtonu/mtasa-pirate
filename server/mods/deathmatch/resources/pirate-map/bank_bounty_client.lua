@@ -38,15 +38,16 @@ addEventHandler("onClientRender",root,function()
     end
     if not title then return end
     local w,h=guiGetScreenSize()
-    local width=math.min(500,w*0.42)
-    local height=width*52/500
-    local left,top=(w-width)/2,h*0.035
+    local width=w*0.17
+    local height=math.max(34,h*0.04)
+    local starSize=math.max(18,math.min(36,h*0.042))
+    local left,top=w*0.78,h*0.23+starSize+math.max(8,h*0.008)
     if panel then dxDrawImage(left,top,width,height,panel) end
     local inset=width*0.04
-    local scale=math.min(width/500,(width-inset-24)/dxGetTextWidth(title,1,"unifont"))
-    dxDrawText(title,left+inset,top+height*0.18,left+width-20,top+height*0.55,
+    local scale=math.min(0.8,(width-inset-12)/dxGetTextWidth(title,1,"unifont"))
+    dxDrawText(title,left+inset,top+height*0.18,left+width-8,top+height*0.55,
         tocolor(127,255,212,235),scale,"unifont","left","center")
-    local small=math.min(width/650,(width-inset-24)/dxGetTextWidth(detail,1,"unifont"))
-    dxDrawText(detail,left+inset,top+height*0.55,left+width-20,top+height*0.84,
+    local small=math.min(0.65,(width-inset-12)/dxGetTextWidth(detail,1,"unifont"))
+    dxDrawText(detail,left+inset,top+height*0.55,left+width-8,top+height*0.84,
         tocolor(127,255,212,180),small,"unifont","left","center")
 end)
