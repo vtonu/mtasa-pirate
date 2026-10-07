@@ -12,7 +12,9 @@ local function clearLoot(player,pay)
     if isElement(player) then
         setElementData(player,"bank:pending",false)
         if pay and not isPedDead(player) then
-            givePlayerMoney(player,math.max(0,loot.total-loot.claimed))
+            local reward=math.max(0,loot.total-loot.claimed)
+            givePlayerMoney(player,reward)
+            triggerClientEvent(player,"bank:cashout",resourceRoot,reward,loot.completed)
         end
     end
 end
@@ -20,7 +22,7 @@ local guns = {[22]=true,[23]=true,[24]=true,[25]=true,[26]=true,[27]=true,[28]=t
     [29]=true,[30]=true,[31]=true,[32]=true,[33]=true,[34]=true}
 local payouts = {2500,5000,10000,20000,40000,80000}
 local holdDelay, releaseDelay, payoutDelay, starDelay = 3000,5000,5000,45000
-local cooldownDelay, resetDelay, decayDelay = 300000,1800000,60000
+local cooldownDelay, resetDelay, decayDelay = 300000,1800000,10000
 
 local function near(player, element, radius)
     if not isElement(player) or not isElement(element) or isPedDead(player)
@@ -38,16 +40,16 @@ local function aiming(player,teller,now)
         and report and report.ped==teller.ped and now-report.tick<=750
 end
 
-local function cash(teller,stage)
+local function cash(teller,count)
     for index,item in ipairs(teller.cash or {}) do
         if isElement(item.element) then
-            setElementAlpha(item.element,stage>0 and index<=math.ceil(#teller.cash*stage/6) and item.alpha or 0)
+            setElementAlpha(item.element,index<=count and item.alpha or 0)
         end
     end
 end
 
 local function publish(s)
-    cash(s.teller,s.started and s.stage or 0)
+    cash(s.teller,s.revealed or 0)
     setElementData(s.player,"bank:robbery",{state=s.maxed and "max" or (s.started and "robbery" or "hold"),
         total=s.total,stage=s.stage,payout=payouts[s.stage],teller=s.teller.ped})
 end
@@ -88,15 +90,15 @@ local function finish(teller,now,completed)
                 setElementCollisionsEnabled(bag,false)
                 setElementInterior(bag,getElementInterior(s.player))
                 setElementDimension(bag,getElementDimension(s.player))
-                attachElements(bag,s.player,0,-0.25,-0.3)
+                attachElements(bag,s.player,0,-0.25,0.45)
             end
             local claimed=getBankBountyClaimed and getBankBountyClaimed(s.player) or 0
-            pending[s.player]={total=s.total,claimed=claimed,bag=bag}
+            pending[s.player]={total=s.total,claimed=claimed,bag=bag,completed=completed==true and s.maxed==true}
             setElementData(s.player,"bank:pending",{total=s.total,claimed=claimed})
         end
         setElementData(s.player,"bank:robbery",false)
         if s.started and not isPedDead(s.player) then
-            decay[s.player]={nextDrop=now+decayDelay,expected=getPlayerWantedLevel(s.player)}
+            decay[s.player]={nextDrop=now+decayDelay,expected=getPlayerWantedLevel(s.player),health=getElementHealth(s.player)}
             setElementData(s.player,"bank:wantedDecay",{remaining=decayDelay})
         end
     end
@@ -120,8 +122,6 @@ local function setupPed(teller,ped)
     teller.ped,teller.animation=ped,nil
     pedTellers[ped]=teller
     setElementFrozen(ped,true)
-    local mx,my=getElementPosition(teller.marker)
-    teller.spawn.rotation=(-math.deg(math.atan2(mx-teller.spawn.x,my-teller.spawn.y)))%360
     setElementRotation(ped,0,0,teller.spawn.rotation)
     setElementData(ped,"bank:teller",true)
     setElementData(ped,"bank:requiresKill",teller.requiresKill)
@@ -280,6 +280,7 @@ setTimer(function()
                         if s.paidTime>=payoutDelay then
                             s.paidTime=s.paidTime-payoutDelay
                             s.total=s.total+payouts[s.stage]
+                            s.revealed=(s.revealed or 0)+1
                             publish(s)
                         end
                         if s.stage==6 then
@@ -310,6 +311,9 @@ setTimer(function()
             if isElement(player) then setElementData(player,"bank:wantedDecay",false) end
         else
             local stars=getPlayerWantedLevel(player)
+            local health=getElementHealth(player)
+            if health<d.health then d.nextDrop=now+decayDelay end
+            d.health=health
             -- LEAVE NEW WANTED STARS FROM OTHER SYSTEMS ALONE
             if stars>d.expected or stars==0 then
                 decay[player]=nil
@@ -359,6 +363,11 @@ addEventHandler("onPlayerJoin",root,function()
 end)
 
 addEventHandler("onPlayerWeaponFire",root,function()
+    local escape=decay[source]
+    if escape then escape.nextDrop=getTickCount()+decayDelay end
+end)
+
+addEventHandler("onPlayerDamage",root,function()
     local escape=decay[source]
     if escape then escape.nextDrop=getTickCount()+decayDelay end
 end)

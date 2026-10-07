@@ -30,10 +30,11 @@ local function aimedTeller()
             if getDistanceBetweenPoints2D(px,py,mx,my)<=1.6 and math.abs(pz-mz)<=2
                 and isElement(ped) and not isPedDead(ped) then
                 local x,y,z=getElementPosition(ped)
-                z=z+0.65
+                -- KEEP AIM DETECTION THROUGH THE TELLER'S HANDS-UP AND CROUCH POSES
+                z=z+0.35
                 local t=((x-sx)*dx+(y-sy)*dy+(z-sz)*dz)/length
                 if t>0 and getDistanceBetweenPoints2D(px,py,x,y)<=6
-                    and (x-sx-t*dx)^2+(y-sy-t*dy)^2+(z-sz-t*dz)^2<=0.65^2 then
+                    and (x-sx-t*dx)^2+(y-sy-t*dy)^2+(z-sz-t*dz)^2<=1.1^2 then
                     return ped
                 end
             end
@@ -113,11 +114,13 @@ addEventHandler("onClientRender",root,function()
         end
         if previousWanted then
             local count=getPlayerWantedLevel()
-            local blink=type(escape)=="table" and escape.remaining<=10000 and math.floor(getTickCount()/400)%2==0
+            local blink=type(escape)=="table" and escape.remaining<=3000 and math.floor(getTickCount()/400)%2==0
             local size=math.max(18,math.min(36,h*0.042))
+            local rowWidth=w*0.17
+            local gap=(rowWidth-size*6)/5
             for i=1,6 do
                 local lit=i>6-count and not blink
-                dxDrawImage(w*0.78+(i-1)*size,h*0.23,size,size,star,0,0,0,
+                dxDrawImage(w*0.78+(i-1)*(size+gap),h*0.23,size,size,star,0,0,0,
                     lit and tocolor(224,171,53,255) or tocolor(55,55,55,220))
             end
         end

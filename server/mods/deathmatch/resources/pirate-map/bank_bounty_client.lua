@@ -1,6 +1,15 @@
 -- BOUNTY BANNER; OTHER MISSION PROMPTS STAY TEXT ONLY
 local panel=svgCreate(500,52,[[<svg xmlns="http://www.w3.org/2000/svg" width="500" height="52"><rect x="1" y="1" width="498" height="50" rx="5" fill="#131313" fill-opacity=".66" stroke="#7fffd4" stroke-opacity=".22"/><path d="M12 14V38" stroke="#7fffd4" stroke-opacity=".55"/></svg>]])
 local claimed,claimUntil
+local completed,completeUntil
+local fullRobbery
+
+addEvent("bank:cashout",true)
+addEventHandler("bank:cashout",resourceRoot,function(reward,full)
+    completed,completeUntil=tonumber(reward),getTickCount()+6000
+    fullRobbery=full==true
+    playSoundFrontEnd(46)
+end)
 
 addEvent("bank:bountyClaim",true)
 addEventHandler("bank:bountyClaim",resourceRoot,function(reward)
@@ -11,7 +20,10 @@ addEventHandler("onClientRender",root,function()
     local notice=getElementData(resourceRoot,"bank:bounties")
     local own=getElementData(localPlayer,"bank:bounty")
     local title,detail
-    if claimed and getTickCount()<claimUntil then
+    if completed and getTickCount()<completeUntil then
+        title=(fullRobbery and "MISSION COMPLETE | +$" or "CASH SECURED | +$")..completed
+        detail="RED COUNTY BANK"
+    elseif claimed and getTickCount()<claimUntil then
         title="BOUNTY CLAIMED  +$"..claimed
         detail="RED COUNTY BANK"
     elseif type(own)=="table" then
