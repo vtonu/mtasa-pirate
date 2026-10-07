@@ -76,6 +76,8 @@ local function applySettings(vehicle, data)
     local vehicleType = getVehicleType(vehicle)
     if vehicleType == "Plane" or vehicleType == "Helicopter" then
         setVehicleColor(vehicle, 3, 0, 0, 217, 5, 60, 0, 0, 0, 0, 0, 0)
+    elseif model == 416 then
+        setVehicleColor(vehicle, 9, 194, 61, 0, 0, 0, 9, 194, 61, 9, 194, 61)
     elseif model == 411 then
         setVehicleColor(vehicle, 127, 255, 212, 127, 255, 212, 127, 255, 212, 127, 255, 212)
     elseif paintjobCount then

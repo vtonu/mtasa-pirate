@@ -221,6 +221,26 @@ local rooms = {
         blip = "markerCovealot"
     }
 }
+-- CLINIC RECEPTION AND OFFICES: ONE ROOM PER ENTRANCE
+local clinicDoors = {
+    {"clinicNorthLV", 1894.19421, 2234.13354, 11.125},
+    {"clinicLVHospital", 1607.52393, 1816.47595, 10.82031},
+    {"clinicPalomino", 2242.87012, 52.73330, 26.66713},
+    {"clinicPalominoSide", 2265.08228, -76.49768, 24.58594},
+    {"clinicPalominoFront", 2269.84375, -74.72171, 26.77238},
+    {"clinicPalominoRoof", 2258.27588, -71.03239, 31.60156},
+    {"officePalomino", 2238.23071, 67.56730, 26.48438}
+}
+for index, door in ipairs(clinicDoors) do
+    rooms[door[1]] = {
+        entrances = {door[1] .. "Entrance"}, exitID = door[1] .. "Exit",
+        createEntrance = true, entranceInterior = 0, entranceDimension = 0,
+        entranceX = door[2], entranceY = door[3], entranceZ = door[4],
+        interior = 3, dimension = 12100 + index,
+        x = 384.80862, y = 173.80499, z = 1008.38281,
+        spawnX = 387.0, spawnY = 173.80499, rotation = 270
+    }
+end
 local sidedMarkers = {}
 for _, id in ipairs({"ammuSouthLSRange", "ammuSouthLSFloor", "ammuTRRange", "ammuTRFloor"}) do
     rooms[id].doorY = (rooms[id].entranceY + rooms[id].y) / 2

@@ -32,6 +32,10 @@ local rooms = {
     {id = "covealot", entrances = {"markerCovealot"}, exitID = "covealotExitMarker"},
     {id = "cjHouse", entrances = {"markerCJHouse"}, exitID = "cjHouseExitMarker"}
 }
+for _, id in ipairs({"clinicNorthLV", "clinicLVHospital", "clinicPalomino",
+    "clinicPalominoSide", "clinicPalominoFront", "clinicPalominoRoof", "officePalomino"}) do
+    rooms[#rooms + 1] = {id = id, entrances = {id .. "Entrance"}, exitID = id .. "Exit"}
+end
 local casinoMarkers = {}
 local nextDoorTick = 0
 
