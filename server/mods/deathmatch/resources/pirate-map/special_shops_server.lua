@@ -1,5 +1,13 @@
 -- RESERVED FOR SPECIAL SHOPS AND PERKS
 addEventHandler("onResourceStart", resourceRoot, function()
+    local sprunk=getElementByID("object (CJ_SPRUNK1) (1)")
+    if isElement(sprunk) then
+        local green=createMarker(2274.53369,-78.22155,25.62993,"cylinder",0.8,127,255,0,180)
+        setElementID(green,"specialShopWeedGarden")
+        setElementInterior(green,getElementInterior(sprunk))
+        setElementDimension(green,getElementDimension(sprunk))
+        setElementData(green,"specialShop:reserved",true)
+    end
     local machine = getElementByID("RedCountyBlackVendingMachine")
     if not isElement(machine) then
         outputDebugString("SPECIAL SHOP MACHINE MISSING", 1)

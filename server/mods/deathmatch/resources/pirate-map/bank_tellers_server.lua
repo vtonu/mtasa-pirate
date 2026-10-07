@@ -89,7 +89,7 @@ local function animate(teller,state)
     elseif state=="work" then
         setPedAnimation(teller.ped,"ped","IDLE_chat",-1,true,false,false,false)
     else setPedAnimation(teller.ped,false) end
-    setElementRotation(teller.ped,0,0,teller.spawn.rotation)
+    setElementRotation(teller.ped,0,0,teller.spawn.rotation,"ZYX",true)
 end
 
 local function finish(teller,now,completed)
@@ -139,7 +139,7 @@ local function setupPed(teller,ped)
     teller.ped,teller.animation=ped,nil
     pedTellers[ped]=teller
     setElementFrozen(ped,true)
-    setElementRotation(ped,0,0,teller.spawn.rotation)
+    setElementRotation(ped,0,0,teller.spawn.rotation,"ZYX",true)
     setElementData(ped,"bank:teller",true)
     setElementData(ped,"bank:requiresKill",teller.requiresKill)
     setElementData(ped,"bank:killable",false)
@@ -190,7 +190,7 @@ addEventHandler("onResourceStart",resourceRoot,function()
         local ped,marker=getElementByID(layout[1]),getElementByID(layout[2])
         if isElement(ped) and isElement(marker) then
             local x,y,z=getElementPosition(ped)
-            local _,_,rotation=getElementRotation(ped)
+            local _,_,rotation=getElementRotation(ped,"ZYX")
             local teller={marker=marker,requiresKill=index==2,spawn={id=layout[1],model=getElementModel(ped),
                 x=x,y=y,z=z,rotation=rotation,interior=getElementInterior(ped),
                 dimension=getElementDimension(ped),health=getElementHealth(ped),armor=getPedArmor(ped)}}
@@ -324,7 +324,9 @@ setTimer(function()
             if teller.requiresKill and facing and near(facing,teller.marker,1.6,true) then
                 local x,y=getElementPosition(teller.ped)
                 local px,py=getElementPosition(facing)
-                setElementRotation(teller.ped,0,0,(-math.deg(math.atan2(px-x,py-y)))%360)
+                setElementRotation(teller.ped,0,0,(-math.deg(math.atan2(px-x,py-y)))%360,"ZYX",true)
+            else
+                setElementRotation(teller.ped,0,0,teller.spawn.rotation,"ZYX",true)
             end
         end
     end

@@ -1,5 +1,5 @@
 -- BOUNTY BANNER; OTHER MISSION PROMPTS STAY TEXT ONLY
-local panel=svgCreate(500,52,[[<svg xmlns="http://www.w3.org/2000/svg" width="500" height="52"><rect x="1" y="1" width="498" height="50" rx="5" fill="#131313" fill-opacity=".66" stroke="#7fffd4" stroke-opacity=".22"/><path d="M12 14V38" stroke="#7fffd4" stroke-opacity=".55"/></svg>]])
+local panel=svgCreate(500,52,[[<svg xmlns="http://www.w3.org/2000/svg" width="500" height="52"><rect x="1" y="1" width="498" height="50" rx="1" fill="#131313" fill-opacity=".66" stroke="#7fffd4" stroke-opacity=".22"/><path d="M12 14V38" stroke="#7fffd4" stroke-opacity=".55"/></svg>]])
 local claimed,claimUntil
 local completed,completeUntil
 local fullRobbery
@@ -27,14 +27,14 @@ addEventHandler("onClientRender",root,function()
         title="BOUNTY CLAIMED  +$"..claimed
         detail="RED COUNTY BANK"
     elseif type(own)=="table" then
-        title="YOU ARE MARKED  |  BOUNTY $"..tostring(own.amount)
-        detail="HUNTERS CAN SEE YOUR SKULL. SURVIVE THE ROBBERY."
+        title="BOUNTY $"..tostring(own.amount)
+        detail="SURVIVE THE ROBBERY"
         if type(getElementData(localPlayer,"bank:pending"))=="table" then
-            detail="LOSE YOUR STARS TO KEEP THE CASH."
+            detail="LOSE THE STARS"
         end
     elseif type(notice)=="table" and notice.targets>0 then
-        title=notice.targets>1 and "MULTIPLE PLAYERS HAVE BOUNTIES" or "A BANK ROBBER HAS A BOUNTY"
-        detail="HUNT THE BLINKING SKULLS AT RED COUNTY BANK  |  $"..tostring(notice.total).." AVAILABLE"
+        title="BANK BOUNTIES $"..tostring(notice.total)
+        detail="HUNT THE BLINKING SKULLS"
     end
     if not title then return end
     local w,h=guiGetScreenSize()
@@ -44,10 +44,10 @@ addEventHandler("onClientRender",root,function()
     local left,top=w*0.78,h*0.23+starSize+math.max(8,h*0.008)
     if panel then dxDrawImage(left,top,width,height,panel) end
     local inset=width*0.04
-    local scale=math.min(0.8,(width-inset-12)/dxGetTextWidth(title,1,"unifont"))
+    local scale=math.min(1,(width-inset-12)/dxGetTextWidth(title,1,"default-bold"))
     dxDrawText(title,left+inset,top+height*0.18,left+width-8,top+height*0.55,
-        tocolor(127,255,212,235),scale,"unifont","left","center")
-    local small=math.min(0.65,(width-inset-12)/dxGetTextWidth(detail,1,"unifont"))
+        tocolor(127,255,212,235),scale,"default-bold","left","center")
+    local small=math.min(0.85,(width-inset-12)/dxGetTextWidth(detail,1,"default"))
     dxDrawText(detail,left+inset,top+height*0.55,left+width-8,top+height*0.84,
-        tocolor(127,255,212,180),small,"unifont","left","center")
+        tocolor(127,255,212,220),small,"default","left","center")
 end)
