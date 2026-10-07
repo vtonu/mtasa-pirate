@@ -80,11 +80,15 @@ local function drawMissionText(text, top)
         tocolor(127, 255, 212, 245), scale, "unifont", "center", "center")
 end
 
+function emmetBlinkMissionBlip(blip, now)
+    if isElement(blip) then setBlipVisibleDistance(blip, math.floor(now / 600) % 2 == 0 and 16383 or 0) end
+end
+
 addEventHandler("onClientRender", root, function()
     local now = getTickCount()
     local w, h = guiGetScreenSize()
-    if isElement(vanBlip) then setBlipVisibleDistance(vanBlip, math.floor(now / 600) % 2 == 0 and 16383 or 0) end
-    if isElement(targetBlip) then setBlipVisibleDistance(targetBlip, math.floor(now / 600) % 2 == 0 and 16383 or 0) end
+    emmetBlinkMissionBlip(vanBlip, now)
+    emmetBlinkMissionBlip(targetBlip, now)
     if phase == "delivery" and deadline then
         local seconds = math.max(0, math.ceil((deadline - now) / 1000))
         dxDrawText(string.format("DELIVERY TIME: %02d:%02d", math.floor(seconds / 60), seconds % 60),

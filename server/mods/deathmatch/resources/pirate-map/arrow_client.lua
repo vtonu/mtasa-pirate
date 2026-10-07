@@ -39,7 +39,9 @@ addEventHandler("onClientPreRender", root, function()
                 arrows[marker] = color
                 setMarkerColor(marker, r, g, b, 0)
             end
-            if getElementInterior(marker) == getElementInterior(localPlayer)
+            local owner = getElementData(marker, "bone:markerOwner")
+            if (not owner or owner == localPlayer)
+                and getElementInterior(marker) == getElementInterior(localPlayer)
                 and getElementDimension(marker) == getElementDimension(localPlayer) then
                 local x, y, z = getElementPosition(marker)
                 if getDistanceBetweenPoints3D(px, py, pz, x, y, z) <= 100 then

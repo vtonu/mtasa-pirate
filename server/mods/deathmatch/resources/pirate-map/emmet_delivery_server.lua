@@ -72,7 +72,7 @@ local function chooseLoot()
     return bundle
 end
 
-local function dropLoot(vehicle)
+function emmetDropMissionLoot(vehicle)
     local x, y, z = getElementPosition(vehicle)
     local bundle = chooseLoot()
     for index, item in ipairs(bundle) do
@@ -124,14 +124,12 @@ local function findPickupPosition()
     return home.x, home.y, home.z
 end
 
-local function createMissionVan()
-    local x, y, z = findPickupPosition()
-    if not x then return false end
-    local vehicle = createVehicle(tonumber(settings.model), x, y, z, home.rx, home.ry, home.rz, settings.plate or "SECURITY")
-    if not isElement(vehicle) then return false end
-    setElementParent(vehicle, resourceRoot)
-    setElementData(vehicle, "emmet:missionVan", true)
+-- SHARED SECURICAR SETUP FOR DELIVERY MISSIONS
+function emmetConfigureMissionVan(vehicle)
+    if not isElement(vehicle) or not settings then return false end
+    if getElementData(vehicle, "emmet:armored") == true then return true end
     setElementData(vehicle, "emmet:armored", true)
+    setVehiclePlateText(vehicle, settings.plate or "SECURITY")
     setVehiclePaintjob(vehicle, tonumber(settings.paintjob) or 3)
     local colors = {}
     for number in tostring(settings.color or ""):gmatch("[^,]+") do colors[#colors + 1] = tonumber(number) end
@@ -147,6 +145,17 @@ local function createMissionVan()
     setVehicleHandling(vehicle, "tractionMultiplier", handling.tractionMultiplier * 1.1)
     setVehicleHandling(vehicle, "engineAcceleration", handling.engineAcceleration * 1.08)
     setVehicleHandling(vehicle, "collisionDamageMultiplier", handling.collisionDamageMultiplier * 0.75)
+    return true
+end
+
+local function createMissionVan()
+    local x, y, z = findPickupPosition()
+    if not x then return false end
+    local vehicle = createVehicle(tonumber(settings.model), x, y, z, home.rx, home.ry, home.rz, settings.plate or "SECURITY")
+    if not isElement(vehicle) then return false end
+    setElementParent(vehicle, resourceRoot)
+    setElementData(vehicle, "emmet:missionVan", true)
+    emmetConfigureMissionVan(vehicle)
     return vehicle
 end
 
@@ -331,7 +340,7 @@ addEventHandler("onVehicleExplode", resourceRoot, function()
         return
     end
     local current = vehicleSessions[source]
-    if current and current.phase == "delivery" then dropLoot(source) end
+    if current and current.phase == "delivery" then emmetDropMissionLoot(source) end
     finish(current, "DELIVERY FAILED: VAN DESTROYED.", false, true)
 end)
 addEventHandler("onElementDestroy", resourceRoot, function()
@@ -367,8 +376,8 @@ end)
 -- KEEP TIRES AND WINDSCREEN INTACT WITHOUT REPAIRING THE BODY
 setTimer(function()
     ensurePickupVan()
-    for vehicle in pairs(vehicleSessions) do
-        if isElement(vehicle) and not isVehicleBlown(vehicle) then
+    for _, vehicle in ipairs(getElementsByType("vehicle", resourceRoot)) do
+        if getElementData(vehicle, "emmet:armored") == true and not isVehicleBlown(vehicle) then
             local a, b, c, d = getVehicleWheelStates(vehicle)
             if a ~= 0 or b ~= 0 or c ~= 0 or d ~= 0 then setVehicleWheelStates(vehicle, 0, 0, 0, 0) end
             if getVehiclePanelState(vehicle, 4) ~= 0 then setVehiclePanelState(vehicle, 4, 0) end

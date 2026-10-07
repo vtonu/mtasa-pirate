@@ -104,7 +104,8 @@ addEventHandler("onClientRender",root,function()
                 setElementPosition(pickupMarker,x,y,pickupZ+math.sin(now/700)*0.08)
             end
         elseif data.state=="cargo" then
-            text="PRESS 'H' BEHIND THE SECURICAR TO LOAD THE CARGO"
+            text=isElement(getElementData(resourceRoot,"bone:pickupArrow"))
+                and "PRESS 'H' BEHIND THE SECURICAR TO LOAD THE CARGO" or "WAIT FOR THE NEXT SECURICAR"
         elseif data.state=="vehicle" then
             text=isElement(data.vehicle) and "ENTER THE SECURICAR" or "WAIT FOR THE NEXT SECURICAR"
         elseif data.state=="delivery" then
@@ -112,13 +113,7 @@ addEventHandler("onClientRender",root,function()
             local remaining=math.max(0,math.ceil((deliveryDeadline-now)/1000))
             text="DELIVER TO "..data.name.."  |  "..math.floor(remaining/60)..":"..string.format("%02d",remaining%60)
         end
-        if isElement(data.blip) then
-            if data.state=="delivery" then
-                setBlipVisibleDistance(data.blip,math.floor(now/600)%2==0 and 16383 or 0)
-            else
-                setBlipColor(data.blip,255,40,40,math.floor(now/400)%2==0 and 255 or 60)
-            end
-        end
+        emmetBlinkMissionBlip(data.blip,now)
     elseif resultUntil>now then text=resultText
     elseif nearbyStart() then text="PRESS 'H' TO START THE DELIVERY" end
     if text then
