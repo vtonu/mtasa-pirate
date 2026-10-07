@@ -1,5 +1,7 @@
 -- BANK TELLERS
 local tellers, pedTellers, sessions, aimReports, decay = {}, {}, {}, {}, {}
+local nextRobbery={}
+local successUntil={}
 local guns = {[22]=true,[23]=true,[24]=true,[25]=true,[26]=true,[27]=true,[28]=true,
     [29]=true,[30]=true,[31]=true,[32]=true,[33]=true,[34]=true}
 local payouts = {2500,5000,10000,20000,40000,80000}
@@ -22,22 +24,35 @@ local function aiming(player,teller,now)
         and report and report.ped==teller.ped and now-report.tick<=750
 end
 
+local function cash(teller,stage)
+    for index,item in ipairs(teller.cash or {}) do
+        if isElement(item.element) then
+            setElementAlpha(item.element,stage>0 and index<=math.ceil(#teller.cash*stage/6) and item.alpha or 0)
+        end
+    end
+end
+
 local function publish(s)
+    cash(s.teller,s.started and s.stage or 0)
     setElementData(s.player,"bank:robbery",{state=s.maxed and "max" or (s.started and "robbery" or "hold"),
         total=s.total,stage=s.stage,payout=payouts[s.stage],teller=s.teller.ped})
 end
 
 local function animate(teller,state)
     if state=="hands" and teller.requiresKill then
-        local phase=math.floor(getTickCount()/6000)%3
-        state=phase==1 and "cower" or (phase==2 and "duck" or "hands")
+        local now=getTickCount()
+        if not teller.reactionStarted then teller.reactionStarted=now end
+        local elapsed=now-teller.reactionStarted
+        state=elapsed<1800 and "cower" or (math.floor((elapsed-1800)/6000)%2==1 and "duck" or "hands")
+    elseif state~="hands" then
+        teller.reactionStarted=nil
     end
     if teller.animation==state then return end
     teller.animation=state
     if state=="hands" then
         setPedAnimation(teller.ped,"ped","handsup",-1,false,false,false,true)
     elseif state=="cower" then
-        setPedAnimation(teller.ped,"ped","handscower",-1,true,false,false,false)
+        setPedAnimation(teller.ped,"ped","handscower",1800,false,false,false,false)
     elseif state=="duck" then
         setPedAnimation(teller.ped,"ped","DUCK_cower",-1,true,false,false,false)
     elseif state=="work" then
@@ -57,8 +72,15 @@ local function finish(teller,now,completed)
         end
     end
     sessions[s.player]=nil
+    if completed and s.maxed and isElement(s.player) and not isPedDead(s.player) then
+        nextRobbery[s.player]=now+resetDelay
+        successUntil[getPlayerSerial(s.player)]=now+resetDelay
+        setElementData(s.player,"bank:robberyCooldown",math.ceil(resetDelay/1000))
+    end
     if s.started then teller.cooldown=now+(completed and resetDelay or cooldownDelay) end
     teller.session=nil
+    cash(teller,0)
+    teller.reactionStarted=nil
     if isElement(teller.ped) then
         setElementData(teller.ped,"bank:killable",false)
         setElementData(teller.ped,"bank:robber",false)
@@ -123,6 +145,17 @@ addEventHandler("onResourceStart",resourceRoot,function()
                 x=x,y=y,z=z,rotation=rotation,interior=getElementInterior(ped),
                 dimension=getElementDimension(ped),health=getElementHealth(ped),armor=getPedArmor(ped)}}
             tellers[#tellers+1]=teller
+            teller.cash={}
+            local prefix="bankCash"..index
+            for _,object in ipairs(getElementsByType("object",resourceRoot)) do
+                local id=getElementID(object) or ""
+                if id==prefix or id:sub(1,#prefix+1)==prefix.."_" then
+                    teller.cash[#teller.cash+1]={element=object,alpha=getElementAlpha(object),id=id}
+                    setElementCollisionsEnabled(object,false)
+                end
+            end
+            table.sort(teller.cash,function(a,b) return a.id<b.id end)
+            cash(teller,0)
             setupPed(teller,ped)
             setElementData(marker,"bank:robberyMarker",true)
             setElementData(marker,"bank:cooldown",0)
@@ -178,10 +211,10 @@ setTimer(function()
         if isElement(teller.ped) and not isPedDead(teller.ped) and not teller.deadUntil then
             local threatened,visitor=false,false
             for _,player in ipairs(players) do
-                if near(player,teller.marker,1.6) then visitor=true end
+                if near(player,teller.marker,1.6) then visitor=player end
                 if aiming(player,teller,now) then
                     threatened=true
-                    if not teller.session and now>=teller.cooldown and not sessions[player]
+                    if not teller.session and now>=teller.cooldown and now>=(nextRobbery[player] or 0) and not sessions[player]
                         and near(player,teller.marker,1.6) then
                         local s={player=player,teller=teller,held=0,activeTime=0,paidTime=0,
                             total=0,stage=1,lastTick=now,lastAim=now}
@@ -235,6 +268,12 @@ setTimer(function()
                 end
             end
             animate(teller,threatened and "hands" or (teller.session and "hands" or (visitor and "work" or "idle")))
+            local facing=teller.session and teller.session.player or visitor
+            if teller.requiresKill and facing and near(facing,teller.marker,1.6) then
+                local x,y=getElementPosition(teller.ped)
+                local px,py=getElementPosition(facing)
+                setElementRotation(teller.ped,0,0,(-math.deg(math.atan2(px-x,py-y)))%360)
+            end
         end
     end
     for player,d in pairs(decay) do
@@ -259,7 +298,32 @@ setTimer(function()
             end
         end
     end
+    for player,endsAt in pairs(nextRobbery) do
+        if isElement(player) then
+            local seconds=math.max(0,math.ceil((endsAt-now)/1000))
+            if getElementData(player,"bank:robberyCooldown")~=seconds then
+                setElementData(player,"bank:robberyCooldown",seconds)
+            end
+            if seconds==0 then nextRobbery[player]=nil end
+        else nextRobbery[player]=nil end
+    end
+    for serial,endsAt in pairs(successUntil) do
+        if endsAt<=now then successUntil[serial]=nil end
+    end
 end,250,0)
+
+addEventHandler("onPlayerJoin",root,function()
+    local endsAt=successUntil[getPlayerSerial(source)]
+    if endsAt and endsAt>getTickCount() then
+        nextRobbery[source]=endsAt
+        setElementData(source,"bank:robberyCooldown",math.ceil((endsAt-getTickCount())/1000))
+    end
+end)
+
+addEventHandler("onPlayerWeaponFire",root,function()
+    local escape=decay[source]
+    if escape then escape.nextDrop=getTickCount()+decayDelay end
+end)
 
 local function clearPlayer()
     local teller=sessions[source]
@@ -285,8 +349,14 @@ addEventHandler("onResourceStop",resourceRoot,function()
             removeElementData(teller.marker,"bank:dead")
         end
         if isElement(teller.ped) then setPedAnimation(teller.ped,false) end
+        for _,item in ipairs(teller.cash or {}) do
+            if isElement(item.element) then setElementAlpha(item.element,item.alpha) end
+        end
     end
     for player in pairs(decay) do
         if isElement(player) then setElementData(player,"bank:wantedDecay",false) end
+    end
+    for player in pairs(nextRobbery) do
+        if isElement(player) then setElementData(player,"bank:robberyCooldown",false) end
     end
 end)

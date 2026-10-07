@@ -207,6 +207,10 @@ function onLocalSettingChange(setting, value)
     local playerData = g_PlayerData[client]
     if playerData.safeZone then
         triggerClientEvent(client, "onClientFreeroamLocalSettingChange", client, "passive", true)
+        if value==false and getTickCount()>=(playerData.passiveNextNotice or 0) then
+            outputChatBox("You are near a marker. Please move away to disable passive.",client,127,255,212)
+            playerData.passiveNextNotice=getTickCount()+1000
+        end
         return
     end
     local state = playerData.settings.passive == true

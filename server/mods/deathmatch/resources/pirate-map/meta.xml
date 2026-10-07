@@ -9,6 +9,8 @@
     <script src="hospitals_server.lua" type="server"></script>
     <script src="ammu_counters_server.lua" type="server"></script>
     <script src="special_shops_server.lua" type="server"></script>
+    <script src="bank_bounty_server.lua" type="server"></script>
+    <script src="bank_bounty_client.lua" type="client"></script>
     <script src="bank_tellers_server.lua" type="server"></script>
     <script src="bank_tellers_client.lua" type="client"></script>
     <script src="vehicles_server.lua" type="server"></script>

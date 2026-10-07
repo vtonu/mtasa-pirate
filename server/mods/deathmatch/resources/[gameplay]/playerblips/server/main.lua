@@ -52,7 +52,8 @@ end
 
 function createPlayerBlip(player)
 	if (not player or not isElement(player) or player.type ~= "player") then return false end
-	local icon = perkBlipIcons[getElementData(player, "weed.perk")] or 58
+	local bounty=type(getElementData(player,"bank:bounty"))=="table"
+	local icon = bounty and 23 or (perkBlipIcons[getElementData(player, "weed.perk")] or 58)
 	local r, g, b
 	if (useTeams and player.team) then
 		r, g, b = player.team:getColor()
@@ -80,6 +81,9 @@ function createPlayerBlip(player)
 				setElementVisibleTo(blips[player], v, true)
 			end
 		end
+	end
+	for _,viewer in ipairs(getElementsByType("player")) do
+		setElementVisibleTo(blips[player],viewer,viewer~=player)
 	end
 end
 
@@ -127,10 +131,22 @@ addEventHandler("onPlayerTeamChange", root, function()
 end)
 
 addEventHandler("onElementDataChange", root, function(dataName)
-	if dataName == "weed.perk" and getElementType(source) == "player" and isElement(blips[source]) then
+	if (dataName == "weed.perk" or dataName=="bank:bounty") and getElementType(source) == "player" and isElement(blips[source]) then
 		createPlayerBlip(source)
 	end
 end)
+
+-- NONZERO BLIP ICONS IGNORE COLOR ALPHA; BLINK THEIR VISIBILITY
+setTimer(function()
+	local visible=math.floor(getTickCount()/500)%2==0
+	for player,blip in pairs(blips) do
+		if isElement(blip) and type(getElementData(player,"bank:bounty"))=="table" then
+			for _,viewer in ipairs(getElementsByType("player")) do
+				setElementVisibleTo(blip,viewer,visible and viewer~=player)
+			end
+		end
+	end
+end,500,0)
 
 addEventHandler("onSettingChange", root,
 	function(settingName, settingValueEx, settingValue)

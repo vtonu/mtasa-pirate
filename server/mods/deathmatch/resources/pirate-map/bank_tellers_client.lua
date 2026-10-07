@@ -80,10 +80,13 @@ addEventHandler("onClientRender",root,function()
     if marker and (dead or (ped and getElementData(marker,"bank:teller")==ped)) then
         local session=getElementData(localPlayer,"bank:robbery")
         local cooldown=tonumber(getElementData(marker,"bank:cooldown")) or 0
+        local playerCooldown=tonumber(getElementData(localPlayer,"bank:robberyCooldown")) or 0
         local robber=ped and getElementData(ped,"bank:robber")
         local text="KEEP AIMING TO START ROBBERY"
         if dead then
             text="SORRY, THE ZOMBIES GOT HIM. COME TRY LATER."
+        elseif playerCooldown>0 then
+            text="YOUR NEXT ROBBERY IS IN "..math.ceil(playerCooldown/60).." MIN"
         elseif cooldown>0 then
             text="BANK RESETS IN "..math.ceil(cooldown/60).." MIN"
         elseif robber and robber~=localPlayer then

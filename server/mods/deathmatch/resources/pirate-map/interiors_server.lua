@@ -243,9 +243,9 @@ for index, door in ipairs(clinicDoors) do
 end
 -- CALIGULA BASEMENT; KEEP THIS DOOR IN ITS OWN DIMENSION
 rooms.clinicPalominoSide.interior = 1
-rooms.clinicPalominoSide.x = 2169.46118
-rooms.clinicPalominoSide.y = 1618.79834
-rooms.clinicPalominoSide.z = 999.97656
+rooms.clinicPalominoSide.x = 2157.44507
+rooms.clinicPalominoSide.y = 1597.09717
+rooms.clinicPalominoSide.z = 999.97137
 rooms.clinicPalominoSide.spawnX = 2169.46118
 rooms.clinicPalominoSide.spawnY = 1621.79834
 rooms.clinicPalominoSide.spawnZ = 999.97656

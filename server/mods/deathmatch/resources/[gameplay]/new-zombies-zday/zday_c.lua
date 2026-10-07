@@ -379,7 +379,7 @@ local function trackMe()
                 setPedControlState(zombie,"walk",true)
                 setPedControlState(zombie,"sprint",false)
                 setPedControlState(zombie,"jump",false)
-                if now%2000>=250 then
+                if now%2500>=200 then
                     for _,control in ipairs({"forwards","backwards","left","right"}) do
                         setPedControlState(zombie,control,false)
                     end

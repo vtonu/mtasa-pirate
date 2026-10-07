@@ -163,6 +163,36 @@ local function damageZombie(attacker,weapon,bodypart,loss)
 
 end
 
+local function bankLimit()
+	local cap
+	for _,player in ipairs(getElementsByType("player")) do
+		local pressure=getBankZombiePressure(player)
+		if pressure then cap=math.max(cap or 0,pressure.cap) end
+	end
+	return cap
+end
+
+local function bankChasers()
+	local result={}
+	for _,zombie in ipairs(getElementsByType("ped",resourceRoot)) do
+		if not isPedDead(zombie) and getElementInterior(zombie)==0 and getElementDimension(zombie)==0 then
+			local x,y,z=getElementPosition(zombie)
+			if getDistanceBetweenPoints2D(x,y,2312.68408,-8.94955)<=45 and z>=20 and z<=36 then
+				result[#result+1]=zombie
+			end
+		end
+	end
+	return result
+end
+
+-- INCLUDE EXISTING CHASERS SO EXTRA BANK VISITORS DO NOT MULTIPLY THE CAP
+setTimer(function()
+	local cap=bankLimit()
+	if not cap or not isZombieWeather() then return end
+	local chasers=bankChasers()
+	for index=cap+1,#chasers do destroyZombie(chasers[index]) end
+end,1000,0)
+
 local function spawnZombie(s,zx,zy,zz,r)
 
 	if #getElementsByType("ped",resourceRoot) >= maxZombies then return end
@@ -171,11 +201,7 @@ local function spawnZombie(s,zx,zy,zz,r)
 	if getElementInterior(client) ~= 0 then return end
 	local pressure=getBankZombiePressure(client)
 	if pressure then
-		local count=0
-		for zombie,target in pairs(zombieTargets) do
-			if target==client and isElement(zombie) and not isPedDead(zombie) then count=count+1 end
-		end
-		if count>=pressure.cap then return end
+		if #bankChasers()>=(bankLimit() or pressure.cap) then return end
 	end
 	
 	local zombie = Ped(s,zx,zy,zz,r,true)
