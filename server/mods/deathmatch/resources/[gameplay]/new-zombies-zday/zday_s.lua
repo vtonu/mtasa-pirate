@@ -231,7 +231,14 @@ local function murderPlayer(zombie)
 	local now = getTickCount()
 	if now < (knifeAttempts[client] or 0) then return end
 	knifeAttempts[client] = now + 3500
-	if math.random(1,100) <= 35 then killPed(client,zombie,55,9,true) end
+	if math.random(1,100) <= 35 then
+		local shop=getResourceFromName("weed-ui")
+		if shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(client) then
+			setElementHealth(client,math.max(1,getElementHealth(client)))
+			return
+		end
+		killPed(client,zombie,55,9,true)
+	end
 end
 
 local function initScript()

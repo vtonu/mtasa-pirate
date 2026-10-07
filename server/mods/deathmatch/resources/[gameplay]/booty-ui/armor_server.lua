@@ -52,6 +52,11 @@ addEventHandler("bootyArmorOverflow", resourceRoot, function(loss, attacker, wea
         attacker = nil
     end
     local health = getElementHealth(client) - loss
+    local shop=getResourceFromName("weed-ui")
+    if health<=0 and shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(client) then
+        setElementHealth(client,1)
+        return
+    end
     if health <= 0 then killPed(client, attacker, weapon, bodypart)
     else setElementHealth(client, health) end
 end)

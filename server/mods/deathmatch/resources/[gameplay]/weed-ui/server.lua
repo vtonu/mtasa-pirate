@@ -736,7 +736,8 @@ addEventHandler("onPlayerDamage", root, function(attacker, weapon, bodypart, los
             return
         end
 
-        setElementHealth(player, math.max(0, getElementHealth(player) - adjustedLoss))
+        local minimum=isKratomProtected and isKratomProtected(player) and 1 or 0
+        setElementHealth(player, math.max(minimum, getElementHealth(player) - adjustedLoss))
     end, 50, 1, source, loss * damageMultiplier)
 end, false, "low")
 

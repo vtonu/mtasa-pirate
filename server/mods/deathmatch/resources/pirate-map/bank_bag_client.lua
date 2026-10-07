@@ -16,7 +16,7 @@ local function trackBag(object)
     end
 end
 
-local bagOffset={{0,0,-1},{0,1,0},{1,0,0},{-0.2,-0.22,0}}
+local bagOffset={{0,0,-1},{0,1,0},{1,0,0},{-0.1,-0.22,0}}
 
 addEventHandler("onClientResourceStart",resourceRoot,function()
     for _,object in ipairs(getElementsByType("object",resourceRoot)) do trackBag(object) end

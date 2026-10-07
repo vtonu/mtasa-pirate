@@ -11,6 +11,9 @@ addEventHandler("onPlayerDamage", root,
             return
         end
 
+        local shop=getResourceFromName("weed-ui")
+        if shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(source) then return end
+
         triggerEvent("onPlayerPreHeadshot", source, headshotAttacker, headshotCause, headshotDamage)
 
         if wasEventCancelled() then

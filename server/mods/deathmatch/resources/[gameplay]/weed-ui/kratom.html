@@ -11,7 +11,7 @@
         --green-soft: #7fffd4;
         --mint: #7fffd4;
         --amber: #ffe66d;
-        --red: #ee1426;
+        --purple: #ee1426;
         --panel: rgba(19, 19, 19, 0.66);
         --panel-deep: rgba(9, 9, 9, 0.76);
         --line: rgba(127, 255, 212, 0.34);
@@ -1102,6 +1102,9 @@
           flex-wrap: wrap;
         }
       }
+          #actions { grid-template-columns: 1fr; }
+      .legend-item { color: var(--strain-color); }
+      #actions .action-btn { min-height: 48px; width: 100%; }
     </style>
   </head>
   <body>
@@ -1109,7 +1112,7 @@
       <header class="topbar" onmousedown="startDrag(event)">
         <div class="title-block">
           <div class="eyebrow" id="zone">SPECIAL PERKS</div>
-          <h1 id="title">KRATOM</h1>
+          <h1 id="title">KRATOM SHOP</h1>
         </div>
         <button
           class="close-btn"
@@ -1143,14 +1146,14 @@
             <div class="strain-header">
               <div class="data-header">KRATOM VARIETIES</div>
               <div class="strain-legend">
-                <span class="legend-item" style="--strain-color: #b88cff"
+                <span class="legend-item" style="--strain-color: #e8eef0"
                   >White</span
                 >
-                <span class="legend-item" style="--strain-color: #ffe66d"
+                <span class="legend-item" style="--strain-color: #7fff00"
                   >Green</span
                 >
-                <span class="legend-item" style="--strain-color: #7fffd4"
-                  >Red</span
+                <span class="legend-item" style="--strain-color: #b88cff"
+                  >Purple</span
                 >
               </div>
             </div>
@@ -1163,13 +1166,13 @@
             <div class="data-header">PERK TYPE</div>
             <div class="bar-row">
               <div class="bar-meta">
-                <span>White</span><strong id="white-text">0%</strong>
+                <span style="color:#e8eef0">WHITE</span><strong id="white-text">0%</strong>
               </div>
               <div class="bar"><div class="fill" id="white-fill"></div></div>
             </div>
             <div class="bar-row">
               <div class="bar-meta">
-                <span>Green</span><strong id="green-text">0%</strong>
+                <span style="color:#7fff00">GREEN</span><strong id="green-text">0%</strong>
               </div>
               <div class="bar">
                 <div class="fill" id="green-fill"></div>
@@ -1177,9 +1180,9 @@
             </div>
             <div class="bar-row">
               <div class="bar-meta">
-                <span>Red</span><strong id="red-text">0%</strong>
+                <span style="color:#b88cff">PURPLE</span><strong id="purple-text">0%</strong>
               </div>
-              <div class="bar"><div class="fill" id="red-fill"></div></div>
+              <div class="bar"><div class="fill" id="purple-fill"></div></div>
             </div>
           </div>
 
@@ -1187,23 +1190,23 @@
             <div class="data-header">STATS</div>
             <div class="readout-grid">
               <div class="readout">
-                <span>Sprint</span><strong id="gravity">--</strong>
+                <span>Movement</span><strong id="gravity">--</strong>
               </div>
               <div class="readout">
-                <span>Scan Range</span><strong id="speed">--</strong>
+                <span>Vision</span><strong id="speed">--</strong>
               </div>
               <div class="readout">
-                <span>Scan Pulse</span><strong id="health-regen">--</strong>
+                <span>Signature</span><strong id="health-regen">--</strong>
               </div>
               <div class="readout">
-                <span>Fatal Save</span><strong id="armor-regen">--</strong>
+                <span>Duration</span><strong id="armor-regen">--</strong>
               </div>
             </div>
           </div>
 
           <div class="health-scope preview-card" id="perk-preview">
             <div class="preview-main">
-              <img class="preview-art" src="images/leaf.svg" alt="" />
+              <img class="preview-art" src="images/kratom-leaf.svg" alt="" />
               <div class="preview-copy">
                 <div class="preview-label">SELECTED PERK</div>
                 <div class="preview-name" id="preview-perk-name">
@@ -1211,7 +1214,7 @@
                 </div>
                 <div class="preview-detail" id="preview-perk-effect">--</div>
                 <div class="preview-value" id="preview-perk-duration">
-                  SELECT A SIZE
+                  5 MIN PERK DURATION
                 </div>
               </div>
             </div>
@@ -1231,10 +1234,7 @@
               </div>
             </div>
             <div class="button-grid" id="actions"></div>
-            <div class="buy-section">
-              <div class="buy-title">BUY SIZES</div>
-              <div class="button-grid" id="buy-sizes"></div>
-            </div>
+
           </div>
         </aside>
       </section>
@@ -1242,7 +1242,7 @@
 
     <script>
       const defaults = {
-        title: "KRATOM",
+        title: "KRATOM SHOP",
         zone: "SPECIAL PERKS",
         stock: "AVAILABLE",
         ready: 0,
@@ -1250,7 +1250,7 @@
         water: 0,
         white: null,
         green: null,
-        red: null,
+        purple: null,
         gravity: "Normal",
         speed: "Normal",
         healthRegen: 0,
@@ -1259,25 +1259,21 @@
         cycle: "Live",
         note: "SELECT A VARIETY.",
         actions: [],
-        buySizes: [
-          { label: "1/8", value: "eighth" },
-          { label: "OUNCE", value: "ounce" },
-          { label: "QP", value: "qp" },
-        ],
-        strains: [{"symbol":"W","name":"WHITE","type":"white","description":"SPRINT WITHOUT STAMINA DRAIN.","white":100,"green":0,"red":0,"prices":{"cart":2000,"eighth":4500,"ounce":8000,"qp":12000}},{"symbol":"G","name":"GREEN","type":"green","description":"REVEAL NEARBY ZOMBIES FOR 3 SECONDS EVERY 15 SECONDS.","white":0,"green":100,"red":0,"prices":{"cart":2000,"eighth":4500,"ounce":8000,"qp":12000}},{"symbol":"R","name":"RED","type":"red","description":"SURVIVE ONE FATAL BODY HIT AT 1 HP. HEADSHOTS ARE NOT COVERED.","white":0,"green":0,"red":100,"prices":{"cart":2000,"eighth":4500,"ounce":8000,"qp":12000}}],
+        buySizes: [],
+        strains: [{"name":"WHITE","symbol":"W","type":"white","description":"SLOW MOVEMENT / DOUBLE HYBRID JUMP / WHITE NIGHT VISION.","white":100,"green":0,"purple":0,"prices":{"cart":2000}},{"name":"GREEN","symbol":"G","type":"green","description":"GREEN NIGHT VISION / REVEAL ZOMBIE SILHOUETTES FOR 3 SECONDS EVERY 15 SECONDS.","white":0,"green":100,"purple":0,"prices":{"cart":2000}},{"name":"PURPLE","symbol":"P","type":"purple","description":"FATAL DAMAGE GUARD / HEADSHOT AND NECK-STAB GUARD FOR 5 MINUTES.","white":0,"green":0,"purple":100,"prices":{"cart":2000}}],
       };
 
-      const strainColors = {white:'#e8eef0',green:'#7fff00',red:'#ff798a'};
+      const strainColors = {white:'#e8eef0',green:'#7fff00',purple:'#b88cff'};
 
       const strainStats = {
-white:{gravity:'UNLIMITED',speed:'--',healthRegen:'--',armorRegen:'--'},
-green:{gravity:'NORMAL',speed:'35 M',healthRegen:'15 SEC',armorRegen:'--'},
-red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
+ white:{gravity:'SLOW',speed:'WHITE / GRAY',healthRegen:'2X HYBRID JUMP',armorRegen:'5 MIN'},
+ green:{gravity:'NORMAL',speed:'NIGHT VISION',healthRegen:'ZOMBIE SCAN',armorRegen:'5 MIN'},
+ purple:{gravity:'NORMAL',speed:'STANDARD',healthRegen:'FATAL GUARD',armorRegen:'5 MIN'}
 };
 
       let selectedStrainValue = null;
       let selectedStrain = null;
-      let selectedBuySizeValue = null;
+      let selectedBuySizeValue = "cart";
       let displayedStrains = [];
       let strainCatalog = {};
 
@@ -1293,14 +1289,14 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
         updatePrice();
       };
 
-      let packageDurations = {};
+      let packageDurations = {cart:300000};
       let activePreview = { type: false, duration: 0, endsAt: 0 };
-      const perkEffects = {white:'SPRINT WITHOUT STAMINA DRAIN',green:'REVEAL NEARBY ZOMBIES',red:'ONE FATAL BODY HIT SAVE'};
+      const perkEffects = {white:'DOUBLE JUMP / WHITE NIGHT VISION',green:'GREEN NIGHT VISION / ZOMBIE SCAN',purple:'FATAL DAMAGE / EXECUTION GUARD'};
 
       function renderPerkPreview() {
         const type =
           selectedStrain &&
-          String(selectedStrain.type || "red").toLowerCase();
+          String(selectedStrain.type || "purple").toLowerCase();
         document
           .getElementById("perk-preview")
           .style.setProperty(
@@ -1318,7 +1314,7 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
           "preview-perk-duration",
           duration
             ? `${Math.round(duration / 60000)} MIN PERK DURATION`
-            : "SELECT A SIZE",
+            : "5 MIN PERK DURATION",
         );
       }
 
@@ -1415,7 +1411,7 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
         const color =
           fixedColor ||
           (percent < 30
-            ? "var(--red)"
+            ? "var(--purple)"
             : percent < 55
               ? "var(--amber)"
               : "var(--green)");
@@ -1435,34 +1431,16 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
         return shuffled;
       }
 
-      function setActions(actions) {
+      function setActions() {
         const container = document.getElementById("actions");
         container.innerHTML = "";
-
-        actions.slice(0, 3).forEach((name) => {
-          const button = document.createElement("button");
-          button.className = "action-btn";
-          button.type = "button";
-          button.tabIndex = -1;
-          button.textContent = name;
-          const isCart = String(name).toUpperCase() === "CART";
-          if (isCart && selectedBuySizeValue === "cart") {
-            button.classList.add("cart-selected");
-          }
-          button.onclick = () => {
-            if (isCart) {
-              clearPurchaseSelection();
-              button.classList.add("cart-selected");
-              selectedBuySizeValue = "cart";
-              updatePrice();
-            }
-            if (String(name).toUpperCase() === "BUY") {
-              animatePurchase(button);
-            }
-            triggerAction(name);
-          };
-          container.appendChild(button);
-        });
+        const button = document.createElement("button");
+        button.className = "action-btn";
+        button.type = "button";
+        button.tabIndex = -1;
+        button.textContent = "BUY";
+        button.onclick = () => { animatePurchase(button); triggerAction("BUY"); };
+        container.appendChild(button);
       }
 
       function clearPurchaseSelection() {
@@ -1474,34 +1452,8 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
           .forEach((button) => {
             button.classList.remove("cart-selected");
           });
-        selectedBuySizeValue = null;
+        selectedBuySizeValue = "cart";
         updatePrice();
-      }
-
-      function setBuySizes(sizes) {
-        const container = document.getElementById("buy-sizes");
-        container.innerHTML = "";
-
-        sizes.slice(0, 3).forEach((size) => {
-          const label = typeof size === "string" ? size : size.label;
-          const value = typeof size === "string" ? size : size.value;
-          const button = document.createElement("button");
-          button.className = "buy-btn";
-          button.type = "button";
-          button.tabIndex = -1;
-          button.textContent = label;
-          if (value === selectedBuySizeValue) {
-            button.classList.add("selected");
-          }
-          button.onclick = () => {
-            clearPurchaseSelection();
-            button.classList.add("selected");
-            selectedBuySizeValue = value;
-            updatePrice();
-            triggerAction(`buy:${value}`);
-          };
-          container.appendChild(button);
-        });
       }
 
       function setStrains(strains) {
@@ -1511,7 +1463,7 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
         strains.slice(0, 15).forEach((strain, index) => {
           const type = String(strain.type || "green").toLowerCase();
           const color =
-            strain.color || strainColors[type] || strainColors.red;
+            strain.color || strainColors[type] || strainColors.purple;
           const value =
             strain.value || strain.id || strain.name || strain.symbol;
           const button = document.createElement("button");
@@ -1545,7 +1497,7 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
             selectedStrainValue = value;
             selectedStrain = strain;
             setText("plants", String(index + 1).padStart(2, "0"));
-            const selectedStats = strainStats[type] || strainStats.red;
+            const selectedStats = strainStats[type] || strainStats.purple;
             setText("gravity", selectedStats.gravity);
             setText("speed", selectedStats.speed);
             setText("health-regen", selectedStats.healthRegen);
@@ -1554,7 +1506,7 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
 
             setBar("white", strain.white, strainColors.white);
             setBar("green", strain.green, strainColors.green);
-            setBar("red", strain.red, strainColors.red);
+            setBar("purple", strain.purple, strainColors.purple);
             setText(
               "note",
               `${strain.name}: ${strain.description || "Variety selected."}`,
@@ -1603,17 +1555,17 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
             : "--",
         );
         const selectedStats = selectedStrain
-          ? strainStats[String(selectedStrain.type || "red").toLowerCase()]
+          ? strainStats[String(selectedStrain.type || "purple").toLowerCase()]
           : null;
-        setText("gravity", selectedStats ? selectedStats.gravity : "--");
-        setText("speed", selectedStats ? selectedStats.speed : "--");
+        setText("gravity", selectedStats ? selectedStats.gravity : "READY");
+        setText("speed", selectedStats ? selectedStats.speed : "OPTICS ONLINE");
         setText(
           "health-regen",
-          selectedStats ? selectedStats.healthRegen : "--",
+          selectedStats ? selectedStats.healthRegen : "SELECT VARIETY",
         );
         setText(
           "armor-regen",
-          selectedStats ? selectedStats.armorRegen : "--",
+          selectedStats ? selectedStats.armorRegen : "5 MIN",
         );
         setText("note", data.note);
 
@@ -1636,18 +1588,16 @@ red:{gravity:'NORMAL',speed:'--',healthRegen:'--',armorRegen:'ONE BODY HIT'}
           strainColors.green,
         );
         setBar(
-          "red",
+          "purple",
           selectedStrain && !data.resetSelection
-            ? selectedStrain.red
-            : data.red == null
+            ? selectedStrain.purple
+            : data.purple == null
               ? 0
-              : data.red,
-          strainColors.red,
+              : data.purple,
+          strainColors.purple,
         );
         setActions(Array.isArray(data.actions) ? data.actions : []);
-        setBuySizes(
-          Array.isArray(data.buySizes) ? data.buySizes : defaults.buySizes,
-        );
+
         setStrains(displayedStrains);
         updatePrice();
       };

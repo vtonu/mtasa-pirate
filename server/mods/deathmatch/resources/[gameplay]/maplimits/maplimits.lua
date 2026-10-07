@@ -117,7 +117,10 @@ function stuff( player, flag )
 				if ( playerHP > 10 ) then
 					setElementHealth( player, playerHP - 1 )
 				else
-					killPed( player )
+					local shop=getResourceFromName("weed-ui")
+					if shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(player) then
+						setElementHealth(player,1)
+					else killPed( player ) end
 				end
 			end
 		end

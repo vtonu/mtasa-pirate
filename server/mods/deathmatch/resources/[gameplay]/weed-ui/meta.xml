@@ -7,6 +7,10 @@
     <file src="ui.html" />
     <file src="kratom.html" />
     <file src="images/leaf.svg" />
+    <file src="images/kratom-leaf.svg" />
+    <file src="kratom_white.fx" />
+    <file src="kratom_zombie.fx" />
+    <export function="isKratomProtected" type="server" />
     <export function="openGardenUI" type="server" />
     <export function="updateGardenUI" type="server" />
     <export function="closeGardenUI" type="server" />
