@@ -6,6 +6,7 @@ local destinations={
 local sessions,vehicleSessions,requests,lastDestination={},{},{},{}
 local startMarker,pickupVan,home,stopping
 local finish
+local cargoIds={"securiVehicleBCMissionCrate1","securiVehicleBCMissionCrate2","securiVehicleBCMissionCrate3"}
 
 local function near(player,element,radius)
     if not isElement(player) or not isElement(element) or isPedDead(player)
@@ -102,14 +103,39 @@ end
 addEvent("bone:load",true)
 addEventHandler("bone:load",resourceRoot,function()
     if not client or source~=resourceRoot or sessions[client] or not near(client,startMarker,1.8)
-        or getPedOccupiedVehicle(client) or getElementData(client,"freeroam.passive")==true then return end
+        or getPedOccupiedVehicle(client) then return end
     local now=getTickCount()
     if requests[client] and now-requests[client]<1000 then return end
     requests[client]=now
     ensureVan()
     if not isElement(pickupVan) then return end
-    local s={player=client,state="loading",loading=true,wasFrozen=isElementFrozen(client),endsAt=now+90000}
+    local s={player=client,state="collect",endsAt=now+90000}
     sessions[client]=s
+    s.marker=createMarker(767.20643,1890.89404,4.08524,"cylinder",0.8,190,110,255,150,client)
+    if not isElement(s.marker) then finish(s,false) return end
+    setElementParent(s.marker,resourceRoot)
+    publish(s)
+end)
+
+addEvent("bone:collect",true)
+addEventHandler("bone:collect",resourceRoot,function()
+    local s=client and sessions[client]
+    if source~=resourceRoot or not s or s.state~="collect" or getPedOccupiedVehicle(client)
+        or not near(client,s.marker,1.3) then return end
+    remove(s.marker)
+    s.marker=nil
+    s.state="cargo"
+    publish(s)
+end)
+
+addEvent("bone:store",true)
+addEventHandler("bone:store",resourceRoot,function()
+    local s=client and sessions[client]
+    if source~=resourceRoot or not s or s.state~="cargo" or getPedOccupiedVehicle(client)
+        or not near(client,startMarker,1.8) then return end
+    ensureVan()
+    if not isElement(pickupVan) then return end
+    s.state,s.loading,s.wasFrozen="loading",true,isElementFrozen(client)
     setElementFrozen(client,true)
     setElementRotation(client,0,0,home.rotation)
     setPedAnimation(client,"CAR","Fixn_Car_Loop",-1,true,false,false,false)
@@ -119,21 +145,10 @@ addEventHandler("bone:load",resourceRoot,function()
         if sessions[s.player]~=s then return end
         if not near(s.player,startMarker,1.8) then finish(s,false) return end
         releasePlayer(s)
-        s.state="collect"
-        s.marker=createMarker(767.20643,1890.89404,4.08524,"cylinder",0.8,190,110,255,150,s.player)
-        if not isElement(s.marker) then finish(s,false) return end
-        setElementParent(s.marker,resourceRoot)
+        s.state="vehicle"
         publish(s)
-        addEventHandler("onMarkerHit",s.marker,function(player,matchingDimension)
-            if player~=s.player or not matchingDimension or sessions[player]~=s or s.state~="collect"
-                or getPedOccupiedVehicle(player) or not near(player,s.marker,1.3) then return end
-            remove(s.marker)
-            s.marker=nil
-            s.state="vehicle"
-            publish(s)
-            ensureVan()
-            refreshVan()
-        end)
+        ensureVan()
+        refreshVan()
     end,4000,1)
 end)
 
@@ -170,7 +185,7 @@ addEventHandler("onVehicleEnter",root,function(player,seat)
     local d=s.destination
     s.state,s.endsAt="delivery",getTickCount()+300000
     s.marker=createMarker(d.x,d.y,d.z-1,"cylinder",4,255,40,40,150,player)
-    s.blip=createBlip(d.x,d.y,d.z,0,3,255,40,40,255,0,65535,player)
+    s.blip=createBlip(d.x,d.y,d.z,51,3,255,40,40,255,0,65535,player)
     if not isElement(s.marker) or not isElement(s.blip) then finish(s,false) return end
     setElementParent(s.marker,resourceRoot)
     publish(s)
@@ -229,6 +244,14 @@ setTimer(function()
 end,1000,0)
 
 addEventHandler("onResourceStart",resourceRoot,function()
+    for _,id in ipairs(cargoIds) do
+        local object=getElementByID(id)
+        if isElement(object) then
+            setElementAlpha(object,0)
+            setElementCollisionsEnabled(object,false)
+            setElementFrozen(object,true)
+        end
+    end
     local van=getElementByID("vehicle (Securicar) (1)")
     if not isElement(van) then outputDebugString("BONE SECURICAR MISSING",1) return end
     local x,y,z=getElementPosition(van)
