@@ -1,5 +1,5 @@
 -- BOUNTY BANNER; OTHER MISSION PROMPTS STAY TEXT ONLY
-local panel=svgCreate(500,52,[[<svg xmlns="http://www.w3.org/2000/svg" width="500" height="52"><rect x="1" y="1" width="498" height="50" rx="1" fill="#131313" fill-opacity=".66" stroke="#7fffd4" stroke-opacity=".22"/><path d="M12 14V38" stroke="#7fffd4" stroke-opacity=".55"/></svg>]])
+local panel=svgCreate(500,52,[[<svg xmlns="http://www.w3.org/2000/svg" width="500" height="52"><rect x="1" y="1" width="498" height="50" rx="5" fill="#131313" fill-opacity=".35" stroke="#7fffd4" stroke-opacity=".22"/></svg>]])
 local claimed,claimUntil
 local completed,completeUntil
 local fullRobbery
@@ -39,15 +39,13 @@ addEventHandler("onClientRender",root,function()
     if not title then return end
     local w,h=guiGetScreenSize()
     local width=w*0.17
-    local height=math.max(34,h*0.04)
+    local height=math.max(24,h*0.027)
     local starSize=math.max(18,math.min(36,h*0.042))
     local left,top=w*0.78,h*0.23+starSize+math.max(8,h*0.008)
     if panel then dxDrawImage(left,top,width,height,panel) end
     local inset=width*0.04
-    local scale=math.min(1,(width-inset-12)/dxGetTextWidth(title,1,"default-bold"))
-    dxDrawText(title,left+inset,top+height*0.18,left+width-8,top+height*0.55,
+    local text=title.." | "..detail.." |"
+    local scale=math.min(1,(width-inset-12)/dxGetTextWidth(text,1,"default-bold"))
+    dxDrawText(text,left+inset,top,left+width-8,top+height,
         tocolor(127,255,212,235),scale,"default-bold","left","center")
-    local small=math.min(0.85,(width-inset-12)/dxGetTextWidth(detail,1,"default"))
-    dxDrawText(detail,left+inset,top+height*0.55,left+width-8,top+height*0.84,
-        tocolor(127,255,212,220),small,"default","left","center")
 end)

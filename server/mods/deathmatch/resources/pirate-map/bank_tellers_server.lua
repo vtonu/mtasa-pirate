@@ -102,6 +102,7 @@ local function finish(teller,now,completed)
             if isElement(bag) then
                 setElementParent(bag,resourceRoot)
                 setObjectScale(bag,0.45)
+                setElementAlpha(bag,0)
                 setElementFrozen(bag,true)
                 setElementCollisionsEnabled(bag,false)
                 setElementInterior(bag,getElementInterior(s.player))

@@ -85,7 +85,7 @@ local function createGardenUI(payload)
     uiBrowser = guiGetBrowser(uiBrowserElement)
 
     addEventHandler("onClientBrowserCreated", uiBrowser, function()
-        loadBrowserURL(source, "http://mta/local/ui.html")
+        loadBrowserURL(source, currentPayload.shopMode=="kratom" and "http://mta/local/kratom.html" or "http://mta/local/ui.html")
         focusBrowser(source)
     end)
 
@@ -209,7 +209,10 @@ local function updateWeedMovement(timeSlice)
 end
 
 addEvent("weedGarden:openUI", true)
-addEventHandler("weedGarden:openUI", resourceRoot, createGardenUI)
+addEventHandler("weedGarden:openUI", resourceRoot, function(payload)
+    if isElement(uiBrowserElement) and currentPayload.shopMode=="kratom" then closeGardenUI() end
+    createGardenUI(payload)
+end)
 
 addEvent("weedGarden:updateUI", true)
 addEventHandler("weedGarden:updateUI", resourceRoot, sendPayloadToBrowser)
@@ -217,6 +220,7 @@ addEventHandler("weedGarden:updateUI", resourceRoot, sendPayloadToBrowser)
 addEvent("weedGarden:perkPreview", true)
 addEvent("weedGarden:perkClock", true)
 addEventHandler("weedGarden:perkPreview", resourceRoot, function(preview)
+    if currentPayload.shopMode=="kratom" then return end
     currentPayload.perkPreview = preview
     if isElement(uiBrowser) then
         executeBrowserJavascript(uiBrowser, "window.updatePerkPreview(" .. encodeValue(preview) .. ");")
@@ -225,6 +229,7 @@ end)
 
 addEvent("weedGarden:stockUpdate", true)
 addEventHandler("weedGarden:stockUpdate", resourceRoot, function(catalog)
+    if currentPayload.shopMode=="kratom" then return end
     currentPayload.strainCatalog = catalog
     if isElement(uiBrowser) then
         executeBrowserJavascript(uiBrowser, "window.updateGardenCatalog(" .. encodeValue(catalog) .. ");")
@@ -236,8 +241,9 @@ addEventHandler("weedGarden:closeUI", resourceRoot, closeGardenUI)
 
 addEvent("weedGarden:closeFromBrowser", true)
 addEventHandler("weedGarden:closeFromBrowser", root, function()
+    local mode=currentPayload.shopMode
     closeGardenUI()
-    triggerServerEvent("weedGarden:uiClosed", resourceRoot)
+    triggerServerEvent(mode=="kratom" and "kratom:uiClosed" or "weedGarden:uiClosed", resourceRoot)
 end)
 
 addEvent("weedGarden:startDrag", true)
@@ -265,7 +271,7 @@ end)
 
 addEvent("weedGarden:actionFromBrowser", true)
 addEventHandler("weedGarden:actionFromBrowser", root, function(actionName)
-    triggerServerEvent("weedGarden:uiAction", resourceRoot, actionName)
+    triggerServerEvent(currentPayload.shopMode=="kratom" and "kratom:uiAction" or "weedGarden:uiAction", resourceRoot, actionName)
 end)
 
 addEventHandler("onClientClick", root, function(button, state)
@@ -287,8 +293,33 @@ local SPAM_LOCKOUT = 10000
 local lastKeyTick = nil
 local lockoutUntilTick = 0
 
+local function nearKratomShop()
+    local marker=getElementByID("specialShopWeedGarden")
+    if not isElement(marker) or getElementData(marker,"specialShop:catalog")~="kratom" or isPedInVehicle(localPlayer) then return false end
+    if getElementInterior(marker)~=getElementInterior(localPlayer) or getElementDimension(marker)~=getElementDimension(localPlayer) then return false end
+    local x,y,z=getElementPosition(localPlayer)
+    local mx,my,mz=getElementPosition(marker)
+    return getDistanceBetweenPoints3D(x,y,z,mx,my,mz+1)<=1.25
+end
+
+addEvent("kratom:openUI",true)
+addEventHandler("kratom:openUI",resourceRoot,function(payload)
+    if isElement(uiBrowserElement) and currentPayload.shopMode~="kratom" then closeGardenUI() end
+    createGardenUI(payload)
+end)
+addEvent("kratom:closeUI",true)
+addEventHandler("kratom:closeUI",resourceRoot,function()
+    if currentPayload.shopMode=="kratom" then closeGardenUI() end
+end)
+addEvent("kratom:perkClock",true)
+addEventHandler("kratom:perkClock",resourceRoot,function(preview)
+    if currentPayload.shopMode~="kratom" then return end
+    currentPayload.perkPreview=preview
+    if isElement(uiBrowser) then executeBrowserJavascript(uiBrowser,"window.updatePerkPreview("..encodeValue(preview)..");") end
+end)
+
 local function handleHarvestToggle()
-    if getElementData(localPlayer, "atWeedGarden") ~= true or isElement(uiBrowserElement)
+    if (not nearKratomShop() and getElementData(localPlayer, "atWeedGarden") ~= true) or isElement(uiBrowserElement)
         or getTickCount() < openRequestUntil or isPedDead(localPlayer)
         or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
     local currentTick = getTickCount()
@@ -309,7 +340,10 @@ local function handleHarvestToggle()
         return
     end
 
-    if getElementData(localPlayer, "atWeedGarden") == true then
+    if nearKratomShop() then
+        openRequestUntil=currentTick+5000
+        triggerServerEvent("kratom:requestOpen",resourceRoot)
+    elseif getElementData(localPlayer, "atWeedGarden") == true then
         openRequestUntil = currentTick + 5000
         triggerServerEvent("weedGarden:requestOpen", resourceRoot)
     end
@@ -317,7 +351,7 @@ end
 
 -- MATCH THE AIRYARD H PROMPT
 addEventHandler("onClientRender", root, function()
-    if getElementData(localPlayer, "atWeedGarden") ~= true or isElement(uiBrowserElement)
+    if (not nearKratomShop() and getElementData(localPlayer, "atWeedGarden") ~= true) or isElement(uiBrowserElement)
         or getTickCount() < openRequestUntil
         or isPedDead(localPlayer) or isCursorShowing() or isChatBoxInputActive()
         or isConsoleActive() or isMainMenuActive() then return end
