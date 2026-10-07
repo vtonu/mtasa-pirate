@@ -31,9 +31,18 @@ local function onPlayerLeaveShop(leftElement)
     end
 end
 
+local function createWeaponShop(x, y, z, markerId, colZ)
+    local marker = createMarker(x, y, z, "cylinder", MARKER_RADIUS, 255, 230, 109, 150)
+    if markerId then
+        setElementID(marker, markerId)
+    end
+    local col = createColSphere(x, y, colZ or z, SHOP_COL_RADIUS)
+    addEventHandler("onColShapeHit", col, onPlayerEnterShop)
+    addEventHandler("onColShapeLeave", col, onPlayerLeaveShop)
+    return col
+end
+
 addEventHandler("onResourceStart", resourceRoot, function()
-    createMarker(MARKER_X, MARKER_Y, MARKER_Z, "cylinder", MARKER_RADIUS, 255, 230, 109, 150)
-    shopCol = createColSphere(MARKER_X, MARKER_Y, MARKER_Z, SHOP_COL_RADIUS)
-    addEventHandler("onColShapeHit", shopCol, onPlayerEnterShop)
-    addEventHandler("onColShapeLeave", shopCol, onPlayerLeaveShop)
+    shopCol = createWeaponShop(MARKER_X, MARKER_Y, MARKER_Z)
+    createWeaponShop(805.40521, 359.16489, 18.76212, "weaponShopTrailerCounty", 19.76212)
 end)

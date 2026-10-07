@@ -769,12 +769,15 @@ local function atShop(player)
         or getElementData(player, "atBootyShop") ~= true then return false end
     local x, y, z = getElementPosition(player)
     return getDistanceBetweenPoints3D(x, y, z, 2000.70, 1539.16, 12.65) <= 1.1
+        or getDistanceBetweenPoints3D(x, y, z, 805.40521, 359.16489, 19.76212) <= 1.1
 end
 
 local function getShopClerk(player)
     local clerk = getCounterClerk(player)
     if clerk then return clerk end
     if not atShop(player) then return false end
+    local x, y, z = getElementPosition(player)
+    if getDistanceBetweenPoints3D(x, y, z, 2000.70, 1539.16, 12.65) > 1.1 then return false end
     clerk = getElementByID("pirateShipClerk")
     if isElement(clerk) and getElementInterior(clerk) == getElementInterior(player)
         and getElementDimension(clerk) == getElementDimension(player) then return clerk end

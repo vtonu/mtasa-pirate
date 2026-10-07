@@ -635,4 +635,6 @@
     <blip id="bankPalominoCreek" icon="52" size="2" interior="0" dimension="0" posX="2306.10425" posY="-14.09645" posZ="26.74219" ordering="0" visibleDistance="65535"></blip>
     <marker id="bankMissionPalominoCreek" type="cylinder" color="#7FFFD4FF" size="1" interior="0" dimension="0" alpha="255" posX="2316.33984" posY="-15.43921" posZ="25.74219"></marker>
     <marker id="bankOfficeMissionPalominoCreek" type="cylinder" color="#7FFFD4FF" size="1" interior="0" dimension="0" alpha="255" posX="2309.02832" posY="-2.45988" posZ="25.74219"></marker>
+    <blip id="drinkShopBlueberry" icon="49" size="2" interior="0" dimension="0" posX="251.45645" posY="-56.78999" posZ="1.57031" ordering="0" visibleDistance="65535"></blip>
+    <marker id="drinkMissionBlueberry" type="cylinder" color="#7FFFD4FF" size="1" interior="0" dimension="0" alpha="255" posX="251.45645" posY="-56.78999" posZ="0.57031"></marker>
 </map>
