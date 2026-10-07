@@ -4,7 +4,10 @@ local bags={}
 local function trackBag(object)
     if getElementType(object)~="object" then return end
     local owner=getElementData(object,"bank:bagOwner")
-    if isElement(owner) then bags[object]={owner=owner} end
+    if isElement(owner) then
+        bags[object]={owner=owner}
+        setElementDoubleSided(object,true)
+    end
 end
 
 local function calibrateBag(player,bone)
@@ -20,7 +23,7 @@ local function calibrateBag(player,bone)
     end
     local delta={}
     for axis=1,3 do
-        delta[axis]=matrix[4][axis]-0.25*matrix[2][axis]+0.45*matrix[3][axis]-bone[4][axis]
+        delta[axis]=matrix[4][axis]-0.25*matrix[2][axis]+0.35*matrix[3][axis]-bone[4][axis]
     end
     relative[4]={}
     for axis=1,3 do

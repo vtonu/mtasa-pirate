@@ -25,9 +25,9 @@ local payouts = {2500,5000,10000,20000,40000,80000}
 local holdDelay, releaseDelay, payoutDelay, starDelay = 3000,5000,5000,45000
 local cooldownDelay, resetDelay, decayDelay = 300000,1800000,10000
 
-local function near(player, element, radius)
+local function near(player, element, radius, visitor)
     if not isElement(player) or not isElement(element) or isPedDead(player)
-        or getPedOccupiedVehicle(player) or getElementData(player,"freeroam.passive") == true then return false end
+        or getPedOccupiedVehicle(player) or (not visitor and getElementData(player,"freeroam.passive") == true) then return false end
     if getElementInterior(player) ~= getElementInterior(element)
         or getElementDimension(player) ~= getElementDimension(element) then return false end
     local x,y,z = getElementPosition(player)
@@ -207,6 +207,8 @@ end)
 addEventHandler("onPedWasted",root,function(_,killer)
     local teller=pedTellers[source]
     if not teller then return end
+    setPedAnimation(source,false)
+    setElementFrozen(source,false)
     local s,now=teller.session,getTickCount()
     if s and s.maxed and killer==s.player and near(killer,teller.marker,1.6) then
         finish(teller,now,true)
@@ -228,6 +230,8 @@ addEventHandler("bank:headshot",resourceRoot,function(ped,weapon)
     if not s or not s.maxed or not teller.requiresKill or s.player~=client
         or isPedDead(ped) or not near(client,teller.marker,1.6)
         or not guns[weapon] or getPedWeapon(client)~=weapon then return end
+    setPedAnimation(ped,false)
+    setElementFrozen(ped,false)
     killPed(ped,client,weapon,9)
 end)
 
@@ -239,7 +243,7 @@ setTimer(function()
         if isElement(teller.ped) and not isPedDead(teller.ped) and not teller.deadUntil then
             local threatened,visitor=false,false
             for _,player in ipairs(players) do
-                if near(player,teller.marker,1.6) then visitor=player end
+                if near(player,teller.marker,1.6,true) then visitor=player end
                 if aiming(player,teller,now) then
                     threatened=true
                     if not bank.session and now>=bank.cooldown and now>=(nextRobbery[player] or 0) and not sessions[player] and not pending[player]
@@ -298,7 +302,7 @@ setTimer(function()
             end
             animate(teller,threatened and "hands" or (teller.session and "hands" or (visitor and "work" or "idle")))
             local facing=teller.session and teller.session.player or visitor
-            if teller.requiresKill and facing and near(facing,teller.marker,1.6) then
+            if teller.requiresKill and facing and near(facing,teller.marker,1.6,true) then
                 local x,y=getElementPosition(teller.ped)
                 local px,py=getElementPosition(facing)
                 setElementRotation(teller.ped,0,0,(-math.deg(math.atan2(px-x,py-y)))%360)
@@ -307,6 +311,8 @@ setTimer(function()
     end
     local remaining=math.max(0,math.ceil((bank.cooldown-now)/1000))
     local robber=bank.session and bank.session.player or false
+    local alarm=bank.session and bank.session.started==true or false
+    if getElementData(resourceRoot,"bank:alarm")~=alarm then setElementData(resourceRoot,"bank:alarm",alarm) end
     for _,teller in ipairs(tellers) do
         if getElementData(teller.marker,"bank:cooldown")~=remaining then
             setElementData(teller.marker,"bank:cooldown",remaining)
@@ -400,6 +406,7 @@ addEventHandler("onPlayerWasted",root,clearPlayer)
 addEventHandler("onPlayerSpawn",root,clearPlayer)
 
 addEventHandler("onResourceStop",resourceRoot,function()
+    setElementData(resourceRoot,"bank:alarm",false)
     for _,teller in ipairs(tellers) do
         finish(teller,getTickCount())
         if isElement(teller.marker) then

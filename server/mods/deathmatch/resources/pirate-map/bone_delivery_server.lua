@@ -22,7 +22,7 @@ local function publish(s)
     if isElement(s.player) then
         setElementData(s.player,"bone:delivery",{state=s.state,marker=s.marker,vehicle=s.vehicle,
             name=s.destination and s.destination.name,blip=s.blip,collected=s.collected or 0,
-            remaining=s.endsAt-getTickCount()})
+            taking=s.taking==true,remaining=s.endsAt-getTickCount()})
     end
 end
 
@@ -45,11 +45,12 @@ local function updateRearDoors(vehicle)
 end
 
 local function releasePlayer(s)
-    if s.loading and isElement(s.player) then
+    if (s.loading or s.taking) and isElement(s.player) then
         setPedAnimation(s.player,false)
         setElementFrozen(s.player,s.wasFrozen)
     end
     s.loading=false
+    s.taking=false
     updateRearDoors(s.loadingVehicle)
     s.loadingVehicle=nil
 end
@@ -154,16 +155,28 @@ end)
 addEvent("bone:collect",true)
 addEventHandler("bone:collect",resourceRoot,function()
     local s=client and sessions[client]
-    if source~=resourceRoot or not s or s.state~="collect" or getPedOccupiedVehicle(client)
+    if source~=resourceRoot or not s or s.state~="collect" or s.taking or getPedOccupiedVehicle(client)
         or not near(client,s.marker,1.3) then return end
-    s.collected=s.collected+1
-    if s.collected<#cargoIds then publish(s) return end
-    remove(s.marker)
-    s.marker=nil
-    remove(s.blip)
-    s.blip=nil
-    s.state="cargo"
+    s.taking,s.wasFrozen=true,isElementFrozen(client)
+    setElementFrozen(client,true)
+    setElementRotation(client,0,0,0)
+    setPedAnimation(client,"INT_HOUSE","wash_up",-1,true,false,false,false)
     publish(s)
+    s.timer=setTimer(function()
+        s.timer=nil
+        if sessions[s.player]~=s then return end
+        if not near(s.player,s.marker,1.3) then finish(s,false) return end
+        releasePlayer(s)
+        s.collected=s.collected+1
+        if s.collected==#cargoIds then
+            remove(s.marker)
+            s.marker=nil
+            remove(s.blip)
+            s.blip=nil
+            s.state="cargo"
+        end
+        publish(s)
+    end,2000,1)
 end)
 
 addEvent("bone:store",true)

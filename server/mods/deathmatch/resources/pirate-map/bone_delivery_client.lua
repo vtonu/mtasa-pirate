@@ -58,7 +58,7 @@ bindKey("h","down",function()
         or isCursorShowing() or isChatBoxInputActive() or isConsoleActive() or isMainMenuActive() then return end
     local data=getElementData(localPlayer,"bone:delivery")
     if type(data)=="table" then
-        if data.state=="collect" and isElement(data.marker) then
+        if data.state=="collect" and not data.taking and isElement(data.marker) then
             local x,y,z=getElementPosition(localPlayer)
             local mx,my,mz=getElementPosition(data.marker)
             if getElementInterior(localPlayer)==getElementInterior(data.marker)
@@ -95,7 +95,8 @@ addEventHandler("onClientRender",root,function()
     if type(data)=="table" then
         if data.state=="loading" then text="LOADING THE SECURICAR"
         elseif data.state=="collect" then
-            text="PRESS 'H' AT THE SHED TO TAKE OUT THE CARGO | "..(data.collected or 0).." / 3"
+            text=(data.taking and "TAKING OUT THE CARGO | " or "PRESS 'H' AT THE SHED TO TAKE OUT THE CARGO | ")
+                ..(data.collected or 0).." / 3"
             if isElement(data.marker) then
                 if pickupMarker~=data.marker then
                     pickupMarker=data.marker

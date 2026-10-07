@@ -4,6 +4,8 @@ local lastReport, reportedPed = 0, false
 local hiddenWanted, previousWanted = false, true
 local lastWanted=getPlayerWantedLevel()
 local gainedStars={}
+local alarmSound
+local nextAlarmAttempt=0
 local star = svgCreate(64,64,[[<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><path d="M32 3 L39 23 L61 23 L43 36 L50 58 L32 45 L14 58 L21 36 L3 23 L25 23 Z" fill="white" stroke="black" stroke-width="3"/></svg>]])
 
 local function aimedTeller()
@@ -56,6 +58,46 @@ local function nearbyMarker()
         end
     end
 end
+
+-- KEEP THE ROBBERY ALARM AT THE BANK
+local function updateAlarm()
+    local marker=getElementByID(markerIds[1])
+    local nearby=false
+    if getElementData(resourceRoot,"bank:alarm")==true and isElement(marker)
+        and getElementInterior(marker)==getElementInterior(localPlayer)
+        and getElementDimension(marker)==getElementDimension(localPlayer) then
+        local x,y,z=getElementPosition(localPlayer)
+        local mx,my,mz=getElementPosition(marker)
+        nearby=getDistanceBetweenPoints3D(x,y,z,mx,my,mz)<=45
+    end
+    if not nearby then
+        if isElement(alarmSound) then destroyElement(alarmSound) end
+        alarmSound=nil
+    elseif not isElement(alarmSound) and getTickCount()>=nextAlarmAttempt then
+        nextAlarmAttempt=getTickCount()+10000
+        local x,y,z=getElementPosition(marker)
+        alarmSound=playSFX3D("script",36,0,x,y,z,true)
+        if isElement(alarmSound) then
+            setElementParent(alarmSound,resourceRoot)
+            setElementInterior(alarmSound,getElementInterior(marker))
+            setElementDimension(alarmSound,getElementDimension(marker))
+            setSoundVolume(alarmSound,0.4)
+            setSoundMinDistance(alarmSound,5)
+            setSoundMaxDistance(alarmSound,35)
+        end
+    end
+end
+setTimer(updateAlarm,250,0)
+
+addEventHandler("onClientPedWasted",root,function()
+    if getElementData(source,"bank:teller")~=true or not isElementStreamedIn(source)
+        or getElementInterior(source)~=getElementInterior(localPlayer)
+        or getElementDimension(source)~=getElementDimension(localPlayer) then return end
+    setPedAnimation(source,false)
+    local x,y,z=getPedBonePosition(source,6)
+    if not x then x,y,z=getElementPosition(source) end
+    fxAddBlood(x,y,z,0,0,-1,12,1)
+end)
 
 addEventHandler("onClientPreRender",root,function()
     local ped,now=aimedTeller(),getTickCount()
@@ -110,6 +152,8 @@ addEventHandler("onClientRender",root,function()
     end
     local escape=getElementData(localPlayer,"bank:wantedDecay")
     local count,now=getPlayerWantedLevel(),getTickCount()
+    local robbery=getElementData(localPlayer,"bank:robbery")
+    local building=type(robbery)=="table" and robbery.state=="robbery" and count<6
     if count>lastWanted then
         for level=lastWanted+1,count do gainedStars[level]=now+2400 end
     elseif count<lastWanted then
@@ -129,7 +173,8 @@ addEventHandler("onClientRender",root,function()
             local gap=(rowWidth-size*6)/5
             for i=1,6 do
                 local level=7-i
-                local gained=gainedStars[level] and now<gainedStars[level] and math.floor(now/400)%2==0
+                local rising=building or (type(robbery)~="table" and gainedStars[level] and now<gainedStars[level])
+                local gained=rising and math.floor(now/400)%2==0
                 local lit=i>6-count and not blink and not gained
                 dxDrawImage(w*0.78+(i-1)*(size+gap),h*0.23,size,size,star,0,0,0,
                     lit and tocolor(224,171,53,255) or tocolor(55,55,55,220))
@@ -142,5 +187,6 @@ addEventHandler("onClientRender",root,function()
 end)
 
 addEventHandler("onClientResourceStop",resourceRoot,function()
+    if isElement(alarmSound) then destroyElement(alarmSound) end
     if hiddenWanted then setPlayerHudComponentVisible("wanted",previousWanted) end
 end)
