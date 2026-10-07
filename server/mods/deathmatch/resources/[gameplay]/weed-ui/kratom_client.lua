@@ -30,7 +30,7 @@ local function updateVision()
     end
     if not previousVision then previousVision=getCameraGoggleEffect() end
     if getCameraGoggleEffect()~="nightvision" then setCameraGoggleEffect("nightvision") end
-    if perk=="white" and not isElement(whiteShader) and getTickCount()>=nextWhiteAttempt then
+    if not isElement(whiteShader) and getTickCount()>=nextWhiteAttempt then
         nextWhiteAttempt=getTickCount()+10000
         local w,h=guiGetScreenSize()
         whiteShader=dxCreateShader("kratom_white.fx")
@@ -40,11 +40,17 @@ local function updateVision()
             if isElement(whiteShader) then destroyElement(whiteShader) end
             if isElement(screenSource) then destroyElement(screenSource) end
             whiteShader,screenSource=nil,nil
-            outputDebugString("KRATOM WHITE OPTICS COULD NOT START",1)
+            outputDebugString("KRATOM OPTICS COULD NOT START",1)
         end
-    elseif perk=="green" then
-        if isElement(whiteShader) then destroyElement(whiteShader) whiteShader=nil end
-        if isElement(screenSource) then destroyElement(screenSource) screenSource=nil end
+    end
+    if isElement(whiteShader) then
+        if perk=="green" then
+            dxSetShaderValue(whiteShader,"visionTint",0.68,0.9,0.8)
+            dxSetShaderValue(whiteShader,"visionBrightness",1.05)
+        else
+            dxSetShaderValue(whiteShader,"visionTint",1,1,1)
+            dxSetShaderValue(whiteShader,"visionBrightness",1.45)
+        end
     end
 end
 
@@ -64,7 +70,7 @@ end)
 
 addEventHandler("onClientRender",root,function()
     updateVision()
-    if getElementData(localPlayer,"kratom:perk")=="white" and isElement(whiteShader) and isElement(screenSource) then
+    if isElement(whiteShader) and isElement(screenSource) then
         dxUpdateScreenSource(screenSource,true)
         local w,h=guiGetScreenSize()
         dxDrawImage(0,0,w,h,whiteShader)
@@ -76,7 +82,7 @@ addEventHandler("onClientRender",root,function()
         elseif not data.shaded and isElementStreamedIn(ped) then
             local x,y,z=getElementPosition(ped)
             local sx,sy=getScreenFromWorldPosition(x,y,z+1.1)
-            if sx then dxDrawText("Z",sx-5,sy-16,sx+5,sy-5,tocolor(127,255,0,235),1,"default-bold","center","center") end
+            if sx then dxDrawText("Z",sx-5,sy-16,sx+5,sy-5,tocolor(184,140,255,235),1,"default-bold","center","center") end
         end
     end
 end,false,"high")

@@ -7,14 +7,14 @@
       @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap");
 
       :root {
-        --green: #7fffd4;
-        --green-soft: #7fffd4;
-        --mint: #7fffd4;
+        --green: #7fff00;
+        --green-soft: #7fff00;
+        --mint: #7fff00;
         --amber: #ffe66d;
         --purple: #ee1426;
         --panel: rgba(19, 19, 19, 0.66);
         --panel-deep: rgba(9, 9, 9, 0.76);
-        --line: rgba(127, 255, 212, 0.34);
+        --line: rgba(127, 255, 0, 0.34);
       }
 
       * {
@@ -45,13 +45,13 @@
         background:
           radial-gradient(
             circle at 20% 10%,
-            rgba(127, 255, 212, 0.05),
+            rgba(127, 255, 0, 0.05),
             transparent 32%
           ),
           linear-gradient(135deg, rgba(19, 19, 19, 0.82), rgba(8, 8, 8, 0.62));
         box-shadow:
-          inset 0 0 32px rgba(127, 255, 212, 0.045),
-          0 0 14px rgba(127, 255, 212, 0.07);
+          inset 0 0 32px rgba(127, 255, 0, 0.045),
+          0 0 14px rgba(127, 255, 0, 0.07);
       }
 
       .garden-ui::before {
@@ -98,7 +98,7 @@
         font-family: "Orbitron", sans-serif;
         font-size: 18px;
         color: #fff;
-        text-shadow: 0 0 7px rgba(127, 255, 212, 0.3);
+        text-shadow: 0 0 7px rgba(127, 255, 0, 0.3);
         letter-spacing: 0;
         white-space: nowrap;
         overflow: hidden;
@@ -112,7 +112,7 @@
       .close-btn {
         width: 34px;
         height: 34px;
-        border: 1px solid rgba(127, 255, 212, 0.55);
+        border: 1px solid rgba(127, 255, 0, 0.55);
         border-radius: 6px;
         color: var(--mint);
         background: rgba(0, 0, 0, 0.22);
@@ -123,7 +123,7 @@
       .close-btn:hover {
         border-color: var(--green);
         color: #fff;
-        box-shadow: 0 0 14px rgba(127, 255, 212, 0.22);
+        box-shadow: 0 0 14px rgba(127, 255, 0, 0.22);
       }
 
       .content {
@@ -141,7 +141,7 @@
         background: var(--panel);
         border: 1px solid var(--line);
         border-radius: 8px;
-        box-shadow: inset 0 0 16px rgba(127, 255, 212, 0.035);
+        box-shadow: inset 0 0 16px rgba(127, 255, 0, 0.035);
         backdrop-filter: blur(4px);
       }
 
@@ -161,7 +161,7 @@
       .metric {
         min-height: 74px;
         padding: 10px;
-        border: 1px solid rgba(127, 255, 212, 0.2);
+        border: 1px solid rgba(127, 255, 0, 0.2);
         border-radius: 7px;
         background: rgba(0, 0, 0, 0.18);
       }
@@ -191,13 +191,13 @@
         gap: 10px;
         padding: 12px;
         overflow: hidden;
-        border: 1px solid rgba(127, 255, 212, 0.24);
+        border: 1px solid rgba(127, 255, 0, 0.24);
         border-radius: 8px;
         background:
-          linear-gradient(rgba(127, 255, 212, 0.07) 1px, transparent 1px),
+          linear-gradient(rgba(127, 255, 0, 0.07) 1px, transparent 1px),
           linear-gradient(
             90deg,
-            rgba(127, 255, 212, 0.07) 1px,
+            rgba(127, 255, 0, 0.07) 1px,
             transparent 1px
           ),
           rgba(11, 11, 11, 0.48);
@@ -258,7 +258,7 @@
         font-family: "Share Tech Mono", monospace;
         text-align: center;
         cursor: pointer;
-        box-shadow: inset 0 0 9px rgba(127, 255, 212, 0.025);
+        box-shadow: inset 0 0 9px rgba(127, 255, 0, 0.025);
         transition:
           transform 0.15s ease,
           box-shadow 0.15s ease,
@@ -275,7 +275,7 @@
         background: rgba(6, 6, 6, 0.88);
         box-shadow:
           inset 0 3px 9px rgba(0, 0, 0, 0.72),
-          inset 0 0 10px rgba(127, 255, 212, 0.05);
+          inset 0 0 10px rgba(127, 255, 0, 0.05);
       }
 
       .strain-check {
@@ -341,7 +341,7 @@
         width: min(58vh, 58vw);
         max-width: 340px;
         aspect-ratio: 1;
-        border: 2px dashed rgba(127, 255, 212, 0.34);
+        border: 2px dashed rgba(127, 255, 0, 0.34);
         border-radius: 50%;
         animation: spin 30s linear infinite;
       }
@@ -362,11 +362,11 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        border: 1px solid rgba(127, 255, 212, 0.55);
+        border: 1px solid rgba(127, 255, 0, 0.55);
         background: rgba(22, 22, 22, 0.5);
         box-shadow:
-          0 0 34px rgba(127, 255, 212, 0.2),
-          inset 0 0 22px rgba(127, 255, 212, 0.18);
+          0 0 34px rgba(127, 255, 0, 0.2),
+          inset 0 0 22px rgba(127, 255, 0, 0.18);
       }
 
       .leaf {
@@ -375,12 +375,12 @@
         height: 72px;
         background: linear-gradient(
           180deg,
-          rgba(127, 255, 212, 0.96),
-          rgba(127, 255, 212, 0.36)
+          rgba(127, 255, 0, 0.96),
+          rgba(127, 255, 0, 0.36)
         );
         border-radius: 48% 52% 48% 52%;
         transform-origin: 50% 90%;
-        box-shadow: 0 0 16px rgba(127, 255, 212, 0.28);
+        box-shadow: 0 0 16px rgba(127, 255, 0, 0.28);
       }
 
       .leaf:nth-child(1) {
@@ -436,17 +436,17 @@
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        border: 1px solid rgba(127, 255, 212, 0.22);
+        border: 1px solid rgba(127, 255, 0, 0.22);
         border-radius: 7px;
         background:
-          radial-gradient(circle, rgba(127, 255, 212, 0.11), transparent 64%),
+          radial-gradient(circle, rgba(127, 255, 0, 0.11), transparent 64%),
           rgba(6, 6, 6, 0.48);
       }
 
       .health-scope .scope-ring {
         width: 88px;
         max-width: none;
-        border-color: rgba(127, 255, 212, 0.42);
+        border-color: rgba(127, 255, 0, 0.42);
       }
 
       .health-scope .scope-ring.inner {
@@ -502,12 +502,12 @@
       }
 
       .health-scope .core-text strong {
-        color: #7fffd4;
+        color: #7fff00;
         font-size: 13px;
       }
 
       .health-scope .core-text {
-        text-shadow: 0 0 10px #7fffd4;
+        text-shadow: 0 0 10px #7fff00;
       }
 
       .health-scope .core-text span {
@@ -519,7 +519,7 @@
         font-family: "Share Tech Mono", monospace;
         font-size: 13px;
         text-transform: uppercase;
-        border-bottom: 1px solid rgba(127, 255, 212, 0.22);
+        border-bottom: 1px solid rgba(127, 255, 0, 0.22);
         padding-bottom: 6px;
         margin-bottom: 10px;
       }
@@ -539,7 +539,7 @@
       .bar {
         height: 10px;
         overflow: hidden;
-        border: 1px solid rgba(127, 255, 212, 0.36);
+        border: 1px solid rgba(127, 255, 0, 0.36);
         background: rgba(11, 11, 11, 0.66);
       }
 
@@ -561,7 +561,7 @@
 
       .readout {
         padding: 7px 9px;
-        border: 1px solid rgba(127, 255, 212, 0.18);
+        border: 1px solid rgba(127, 255, 0, 0.18);
         border-radius: 6px;
         background: rgba(0, 0, 0, 0.16);
       }
@@ -596,7 +596,7 @@
         align-items: start;
         overflow: hidden;
         padding: 10px;
-        border: 1px solid rgba(127, 255, 212, 0.16);
+        border: 1px solid rgba(127, 255, 0, 0.16);
         border-radius: 0;
         color: var(--mint);
         background: var(--panel-deep);
@@ -612,7 +612,7 @@
         border: 0;
         border-radius: 0;
         color: #272727;
-        background: #7fffd4;
+        background: #7fff00;
         font-family: "Share Tech Mono", "Consolas", monospace;
         font-size: 17px;
         box-shadow: none;
@@ -657,7 +657,7 @@
       .buy-btn {
         min-height: 34px;
         padding: 7px 8px;
-        border: 1px solid rgba(127, 255, 212, 0.38);
+        border: 1px solid rgba(127, 255, 0, 0.38);
         border-radius: 0;
         color: var(--green);
         background: rgba(25, 25, 25, 0.46);
@@ -683,7 +683,7 @@
         border-color: var(--green);
         background: rgba(6, 6, 6, 0.88);
         box-shadow:
-          0 0 7px rgba(127, 255, 212, 0.22),
+          0 0 7px rgba(127, 255, 0, 0.22),
           inset 0 3px 8px rgba(0, 0, 0, 0.72);
         transform: translateY(1px);
       }
@@ -692,7 +692,7 @@
       .buy-btn:hover {
         border-color: var(--green);
         filter: brightness(0.82);
-        box-shadow: 0 0 3px rgba(127, 255, 212, 0.16);
+        box-shadow: 0 0 3px rgba(127, 255, 0, 0.16);
       }
 
       .action-btn.purchase-click {
@@ -712,7 +712,7 @@
         45% {
           transform: translateY(2px) scale(0.94);
           box-shadow:
-            0 0 5px rgba(127, 255, 212, 0.14),
+            0 0 5px rgba(127, 255, 0, 0.14),
             inset 0 3px 8px rgba(0, 0, 0, 0.72);
         }
         100% {
@@ -722,31 +722,31 @@
 
       /* HUD COLORS AND SURFACES */
       :root {
-        --green: #7fffd4;
-        --green-soft: #7fffd4;
-        --mint: #7fffd4;
+        --green: #7fff00;
+        --green-soft: #7fff00;
+        --mint: #7fff00;
         --panel: transparent;
         --panel-deep: rgba(22, 22, 22, 0.48);
-        --line: rgba(127, 255, 212, 0.16);
+        --line: rgba(127, 255, 0, 0.16);
       }
 
       .shop-ui,
       .garden-ui {
-        border-color: rgba(127, 255, 212, 0.18);
+        border-color: rgba(127, 255, 0, 0.18);
         border-radius: 1px;
         background: linear-gradient(
           135deg,
           rgba(45, 45, 45, 0.56),
           rgba(18, 18, 18, 0.46)
         );
-        box-shadow: inset 0 1px rgba(127, 255, 212, 0.12);
+        box-shadow: inset 0 1px rgba(127, 255, 0, 0.12);
       }
       .shop-ui::before,
       .garden-ui::before {
         display: none;
       }
       .topbar {
-        background: rgba(127, 255, 212, 0.035);
+        background: rgba(127, 255, 0, 0.035);
         border-bottom-color: var(--line);
       }
       h1,
@@ -781,16 +781,16 @@
       .eyebrow,
       .bar-meta,
       .readout span {
-        color: #7fffd4;
+        color: #7fff00;
       }
       .readout {
         border-color: transparent;
         border-radius: 0;
-        background: rgba(127, 255, 212, 0.045);
+        background: rgba(127, 255, 0, 0.045);
       }
       .bar {
         border: 0;
-        background: rgba(127, 255, 212, 0.12);
+        background: rgba(127, 255, 0, 0.12);
       }
       .weapon-tile,
       .strain-tile {
@@ -798,12 +798,12 @@
       }
       .weapon-tile:hover,
       .strain-tile:hover {
-        background: rgba(127, 255, 212, 0.14);
+        background: rgba(127, 255, 0, 0.14);
       }
       .weapon-tile.selected,
       .strain-tile.selected {
-        background: rgba(127, 255, 212, 0.24);
-        box-shadow: inset 0 -2px #7fffd4;
+        background: rgba(127, 255, 0, 0.24);
+        box-shadow: inset 0 -2px #7fff00;
       }
       .category-btn,
       .strain-check,
@@ -824,19 +824,19 @@
         box-shadow: none;
       }
       .note {
-        border-color: rgba(127, 255, 212, 0.16);
+        border-color: rgba(127, 255, 0, 0.16);
         background: var(--panel-deep);
       }
       .note-icon {
         color: #272727;
-        background: #7fffd4;
+        background: #7fff00;
         border: 0;
         box-shadow: none;
       }
       .weapon-display,
       .health-scope {
         border-color: transparent;
-        background: rgba(127, 255, 212, 0.035);
+        background: rgba(127, 255, 0, 0.035);
       }
       .scope-ring {
         opacity: 0.25;
@@ -856,21 +856,21 @@
       }
       .buy-btn,
       .action-btn {
-        color: #7fffd4;
-        border-color: rgba(127, 255, 212, 0.48);
-        background: rgba(127, 255, 212, 0.13);
+        color: #7fff00;
+        border-color: rgba(127, 255, 0, 0.48);
+        background: rgba(127, 255, 0, 0.13);
         box-shadow: none;
       }
       .buy-btn:hover,
       .action-btn:hover {
-        background: rgba(127, 255, 212, 0.25);
+        background: rgba(127, 255, 0, 0.25);
         box-shadow: none;
         filter: none;
       }
       .buy-btn.selected,
       .action-btn.cart-selected {
         color: #262626;
-        background: #7fffd4;
+        background: #7fff00;
         box-shadow: none;
       }
       button:focus-visible {
@@ -977,7 +977,7 @@
       @keyframes insufficient-funds-pulse {
         0%,
         100% {
-          border-color: rgba(127, 255, 212, 0.16);
+          border-color: rgba(127, 255, 0, 0.16);
           background: var(--panel-deep);
           box-shadow: none;
         }

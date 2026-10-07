@@ -42,9 +42,10 @@ addEventHandler("onClientRender",root,function()
     local height=math.max(24,h*0.027)
     local starSize=math.max(18,math.min(36,h*0.042))
     local left,top=w*0.78,h*0.23+starSize+math.max(8,h*0.008)
+    if getPlayerWantedLevel(localPlayer)==0 then top=h*0.23+math.max(8,h*0.008) end
     if panel then dxDrawImage(left,top,width,height,panel) end
     local inset=width*0.04
-    local text=title.." | "..detail.." |"
+    local text="★ "..title.." ★ "..detail.." ★"
     local scale=math.min(1,(width-inset-12)/dxGetTextWidth(text,1,"default-bold"))
     dxDrawText(text,left+inset,top,left+width-8,top+height,
         tocolor(127,255,212,235),scale,"default-bold","left","center")
