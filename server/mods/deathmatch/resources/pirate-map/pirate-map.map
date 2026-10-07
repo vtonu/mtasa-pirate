@@ -632,4 +632,7 @@
     <marker id="ammuNationSpecialClerkMarker" type="cylinder" color="#FFE66DFF" size="1" interior="7" dimension="0" alpha="255" posX="314" posY="-133.8" posZ="998.5" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
     <ped id="ammuNationSpecialClerk2" interior="7" rotZ="0" dimension="0" model="133" health="100" armor="0" collisions="true" alpha="255" frozen="true" posX="316.09961" posY="-136.90039" posZ="1004.1" rotX="0" rotY="0" scale="1"></ped>
     <marker id="ammuNationSpecialClerkMarker2" type="cylinder" color="#7FFFD4FF" size="1" interior="7" dimension="0" alpha="255" posX="313.79999" posY="-136.89999" posZ="1002.8" rotX="0" rotY="0" rotZ="0" scale="1"></marker>
+    <blip id="bankPalominoCreek" icon="52" size="2" interior="0" dimension="0" posX="2306.10425" posY="-14.09645" posZ="26.74219" ordering="0" visibleDistance="65535"></blip>
+    <marker id="bankMissionPalominoCreek" type="cylinder" color="#7FFFD4FF" size="1" interior="0" dimension="0" alpha="255" posX="2316.33984" posY="-15.43921" posZ="25.74219"></marker>
+    <marker id="bankOfficeMissionPalominoCreek" type="cylinder" color="#7FFFD4FF" size="1" interior="0" dimension="0" alpha="255" posX="2309.02832" posY="-2.45988" posZ="25.74219"></marker>
 </map>
