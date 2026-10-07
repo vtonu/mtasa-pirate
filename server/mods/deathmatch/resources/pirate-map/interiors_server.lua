@@ -237,10 +237,19 @@ for index, door in ipairs(clinicDoors) do
         createEntrance = true, entranceInterior = 0, entranceDimension = 0,
         entranceX = door[2], entranceY = door[3], entranceZ = door[4],
         interior = 3, dimension = 12100 + index,
-        x = 384.80862, y = 173.80499, z = 1008.38281,
-        spawnX = 387.0, spawnY = 173.80499, rotation = 270
+        x = 389.89935, y = 173.61348, z = 1008.38281,
+        spawnX = 375.38947, spawnY = 173.98508, spawnZ = 1008.38934, rotation = 90
     }
 end
+-- CALIGULA BASEMENT; KEEP THIS DOOR IN ITS OWN DIMENSION
+rooms.clinicPalominoSide.interior = 1
+rooms.clinicPalominoSide.x = 2169.46118
+rooms.clinicPalominoSide.y = 1618.79834
+rooms.clinicPalominoSide.z = 999.97656
+rooms.clinicPalominoSide.spawnX = 2169.46118
+rooms.clinicPalominoSide.spawnY = 1621.79834
+rooms.clinicPalominoSide.spawnZ = 999.97656
+rooms.clinicPalominoSide.rotation = 0
 local sidedMarkers = {}
 for _, id in ipairs({"ammuSouthLSRange", "ammuSouthLSFloor", "ammuTRRange", "ammuTRFloor"}) do
     rooms[id].doorY = (rooms[id].entranceY + rooms[id].y) / 2
@@ -430,7 +439,7 @@ addEventHandler("royalCasino:useDoor", resourceRoot, function(door, roomID)
         end
         if not entrance then return end
         useDoor(client, entrance, room.destination or {
-            x = room.spawnX, y = room.spawnY, z = room.z, rotation = room.rotation,
+            x = room.spawnX, y = room.spawnY, z = room.spawnZ or room.z, rotation = room.rotation,
             interior = room.interior, dimension = room.dimension
         }, true, roomID)
     elseif door == "exit" then

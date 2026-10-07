@@ -13,6 +13,32 @@ local function aimedTeller()
     if isElement(target) and getElementData(target,"bank:teller")==true and not isPedDead(target) then
         return target
     end
+    -- ONLY THIS COUNTER CAN USE THE AIM RAY THROUGH ITS GLASS
+    local px,py,pz=getElementPosition(localPlayer)
+    local sx,sy,sz=getPedTargetStart(localPlayer)
+    local ex,ey,ez=getPedTargetEnd(localPlayer)
+    if not sx or not ex then return false end
+    local dx,dy,dz=ex-sx,ey-sy,ez-sz
+    local length=dx*dx+dy*dy+dz*dz
+    if length<0.001 then return false end
+    for _,id in ipairs(markerIds) do
+        local marker=getElementByID(id)
+        if isElement(marker) and getElementInterior(marker)==getElementInterior(localPlayer)
+            and getElementDimension(marker)==getElementDimension(localPlayer) then
+            local mx,my,mz=getElementPosition(marker)
+            local ped=getElementData(marker,"bank:teller")
+            if getDistanceBetweenPoints2D(px,py,mx,my)<=1.6 and math.abs(pz-mz)<=2
+                and isElement(ped) and not isPedDead(ped) then
+                local x,y,z=getElementPosition(ped)
+                z=z+0.65
+                local t=((x-sx)*dx+(y-sy)*dy+(z-sz)*dz)/length
+                if t>0 and getDistanceBetweenPoints2D(px,py,x,y)<=6
+                    and (x-sx-t*dx)^2+(y-sy-t*dy)^2+(z-sz-t*dz)^2<=0.65^2 then
+                    return ped
+                end
+            end
+        end
+    end
     return false
 end
 
@@ -65,13 +91,12 @@ addEventHandler("onClientRender",root,function()
         local width=math.min(620,w-32)
         local left,top=(w-width)/2,h*0.78
         local scale=math.min(1,(width-24)/dxGetTextWidth(text,1,"unifont"))
-        dxDrawRectangle(left,top,width,46,tocolor(31,31,31,160))
-        dxDrawRectangle(left,top,2,46,tocolor(127,255,212,220))
         dxDrawText(text,left+12,top,left+width-12,top+46,
             tocolor(127,255,212,255),scale,"unifont","center","center")
     end
     local escape=getElementData(localPlayer,"bank:wantedDecay")
-    if type(escape)=="table" and star and not isPedDead(localPlayer) then
+    local robbery=getElementData(localPlayer,"bank:robbery")
+    if (type(escape)=="table" or type(robbery)=="table") and star and not isPedDead(localPlayer) then
         if not hiddenWanted then
             previousWanted=isPlayerHudComponentVisible("wanted")
             setPlayerHudComponentVisible("wanted",false)
@@ -79,7 +104,7 @@ addEventHandler("onClientRender",root,function()
         end
         if previousWanted then
             local count=getPlayerWantedLevel()
-            local blink=escape.remaining<=10000 and math.floor(getTickCount()/400)%2==0
+            local blink=type(escape)=="table" and escape.remaining<=10000 and math.floor(getTickCount()/400)%2==0
             local size=math.max(18,math.min(36,h*0.042))
             for i=1,6 do
                 local lit=i>6-count and not blink

@@ -169,7 +169,7 @@ addEventHandler("onResourceStart", resourceRoot, function()
         if xmlNodeGetName(node) == "vehicle" then
             local settings = xmlNodeGetAttributes(node)
             local vehicle = settings.id and mapVehicles[settings.id]
-            if isElement(vehicle) and settings.id ~= "emmetDeliveryVan" then
+            if isElement(vehicle) and settings.id ~= "emmetDeliveryVan" and settings.id ~= "vehicle (Securicar) (1)" then
                 local data = { settings = settings, vehicle = vehicle, isSpawn = true }
                 vehicles[vehicle] = data
                 toggleVehicleRespawn(vehicle, false)

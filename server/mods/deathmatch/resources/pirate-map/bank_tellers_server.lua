@@ -2,7 +2,7 @@
 local tellers, pedTellers, sessions, aimReports, decay = {}, {}, {}, {}, {}
 local guns = {[22]=true,[23]=true,[24]=true,[25]=true,[26]=true,[27]=true,[28]=true,
     [29]=true,[30]=true,[31]=true,[32]=true,[33]=true,[34]=true}
-local payouts = {1000,2500,5000,10000,20000,40000}
+local payouts = {2500,5000,10000,20000,40000,80000}
 local holdDelay, releaseDelay, payoutDelay, starDelay = 3000,5000,5000,45000
 local cooldownDelay, resetDelay, decayDelay = 300000,1800000,30000
 
@@ -18,9 +18,7 @@ end
 
 local function aiming(player,teller,now)
     local report = aimReports[player]
-    local target = isElement(player) and getPedTarget(player)
     return near(player,teller.ped,6) and guns[getPedWeapon(player)] and getPedTotalAmmo(player)>0
-        and (not target or target==teller.ped)
         and report and report.ped==teller.ped and now-report.tick<=750
 end
 
@@ -35,8 +33,9 @@ local function animate(teller,state)
     if state=="hands" then
         setPedAnimation(teller.ped,"ped","handsup",-1,false,false,false,true)
     elseif state=="work" then
-        setPedAnimation(teller.ped,"INT_SHOP","shop_cashier",-1,true,false,false,false)
+        setPedAnimation(teller.ped,"ped","IDLE_chat",-1,true,false,false,false)
     else setPedAnimation(teller.ped,false) end
+    setElementRotation(teller.ped,0,0,teller.spawn.rotation)
 end
 
 local function finish(teller,now,completed)
@@ -62,6 +61,9 @@ local function setupPed(teller,ped)
     teller.ped,teller.animation=ped,nil
     pedTellers[ped]=teller
     setElementFrozen(ped,true)
+    local mx,my=getElementPosition(teller.marker)
+    teller.spawn.rotation=(-math.deg(math.atan2(mx-teller.spawn.x,my-teller.spawn.y)))%360
+    setElementRotation(ped,0,0,teller.spawn.rotation)
     setElementData(ped,"bank:teller",true)
     setElementData(ped,"bank:killable",false)
     setElementData(ped,"bank:robber",teller.session and teller.session.player or false)

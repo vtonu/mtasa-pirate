@@ -185,7 +185,6 @@ local function checkPlayer(player,col)
 	if not colshapes[col] then return false end
 	if player.type ~= "player" then return false end
 	if isPassive(player) or isPedDead(player) then return false end
-	if isBankZombieSafeElement(player) then return false end
 	if player.dimension ~= col.dimension then return false end
 	if player.interior ~= col.interior then return false end
 
@@ -218,7 +217,6 @@ local function trackMe()
 		local zombieTarget = data and data.target
 		if not data or zombieTarget == nil then requestZombieTargets() end
 		if isZombieWeather() and isElement(zombieTarget) and not isPassive(zombieTarget)
-			and not isBankZombieSafeElement(zombieTarget) and not isBankZombieSafeElement(zombie)
 			and getElementInterior(zombieTarget) == 0 and getElementInterior(zombie) == 0
 			and getElementDimension(zombieTarget) == getElementDimension(zombie)
 			and not isPedDead(zombieTarget) and not isPedDead(zombie) then
@@ -418,6 +416,10 @@ local function getLocalZombieCount()
 end
 
 local function spawnZombie()
+	local pressure=getBankZombiePressure(localPlayer)
+	local spawnCap=pressure and pressure.cap or maxZombies
+	local minDelay=pressure and pressure.minDelay or minInterval
+	local maxDelay=pressure and pressure.maxDelay or maxInterval
 
 	if not isZombieWeather() or isPedDead(localPlayer) or isPassive(localPlayer)
 		or isPedInVehicle(localPlayer) or getElementInterior(localPlayer) ~= 0
@@ -426,9 +428,8 @@ local function spawnZombie()
 	end
 
 	if not isZombieWeather() or isPedDead(localPlayer) or getElementInterior(localPlayer) ~= 0
-		or isBankZombieSafeElement(localPlayer)
-		or getLocalZombieCount() >= maxZombies then
-		setTimer(spawnZombie,math.random(minInterval,maxInterval),1)
+		or getLocalZombieCount() >= spawnCap then
+		setTimer(spawnZombie,math.random(minDelay,maxDelay),1)
 		return
 	end
 
@@ -465,7 +466,7 @@ local function spawnZombie()
             local clear = isLineOfSightClear(x,y,z,px,py,pz,true,false,false,true,false,true,true,localPlayer)
             local open = isLineOfSightClear(px,py,floorZ + 0.2,px,py,floorZ + 2,true,true,false,true,false)
             -- KEEP A CLEAR APPROACH; ALLOW CLOSER POINTS WHEN SPACE IS TIGHT
-            if clear and open and not isBankZombieSafePoint(px,py,pz,0,getElementDimension(localPlayer)) then
+            if clear and open then
                 zx,zy,zz = px,py,pz
                 break
             end
@@ -476,7 +477,7 @@ local function spawnZombie()
 	local zr = rot(x,y,zx,zy)
 	local s = zombieData.skins[math.random(1,#zombieData.skins)]
 	triggerServerEvent("Zday:spawnZombie",localPlayer,s,zx,zy,zz,zr)
-	setTimer(spawnZombie,math.random(minInterval,maxInterval),1)
+	setTimer(spawnZombie,math.random(minDelay,maxDelay),1)
 
 end
 

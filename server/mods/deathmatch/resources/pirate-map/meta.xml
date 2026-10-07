@@ -14,6 +14,8 @@
     <script src="vehicles_server.lua" type="server"></script>
     <script src="emmet_delivery_server.lua" type="server"></script>
     <script src="emmet_delivery_client.lua" type="client"></script>
+    <script src="bone_delivery_server.lua" type="server"></script>
+    <script src="bone_delivery_client.lua" type="client"></script>
     <info gamemodes="play" type="map" name="pirate-map" author="lifestyle" version="1.1.7" description="October 2026, GTA VI Vibes."></info>
     <map src="pirate-map.map" dimension="0"></map>
     <settings>
