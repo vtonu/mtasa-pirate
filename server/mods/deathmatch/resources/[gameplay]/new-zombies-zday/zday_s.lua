@@ -12,6 +12,7 @@ local setZombieTarget
 
 local function targetDistance(zombie,player)
 	if not isElement(player) or isPedDead(player) or getElementData(player,"freeroam.passive") == true then return math.huge end
+	if isBankZombieSafeElement(player) or isBankZombieSafeElement(zombie) then return math.huge end
 	if getElementInterior(player) ~= 0 or getElementInterior(zombie) ~= 0 then return math.huge end
 	if getElementDimension(player) ~= getElementDimension(zombie) or getElementInterior(player) ~= getElementInterior(zombie) then return math.huge end
 	local x,y,z = getElementPosition(zombie)
@@ -96,6 +97,15 @@ function destroyZombie(zombie)
 
 end
 
+-- REMOVE ONLY ZOMBIES THAT CROSS INTO THE BANK BUFFER
+setTimer(function()
+	for _, zombie in ipairs(getElementsByType("ped",resourceRoot)) do
+		if not isPedDead(zombie) and isBankZombieSafeElement(zombie) then
+			destroyZombie(zombie)
+		end
+	end
+end,250,0)
+
 -- CLEAR DISTANT OR STUCK CHASERS WITHOUT REMOVING NEARBY THREATS
 local function cleanZombieChasers()
 	local now = getTickCount()
@@ -168,6 +178,8 @@ local function spawnZombie(s,zx,zy,zz,r)
 	if client ~= source then return end
 	if not isZombieWeather() or isPedDead(client) then return end
 	if getElementInterior(client) ~= 0 then return end
+	if isBankZombieSafeElement(client)
+		or isBankZombieSafePoint(zx,zy,zz,0,getElementDimension(client)) then return end
 	
 	local zombie = Ped(s,zx,zy,zz,r,true)
 	if not isElement(zombie) then return end
@@ -190,6 +202,7 @@ end
 -- CHECK KNIFE NECK STABS ON THE SERVER
 local function murderPlayer(zombie)
 	if not client or client ~= source then return end
+	if isBankZombieSafeElement(client) or isBankZombieSafeElement(zombie) then return end
 	if not isZombieWeather() or isPassive(client) or getElementData(client,"freeroam.passive") == true or isPedDead(client) or getPedOccupiedVehicle(client) then return end
 	if not isElement(zombie) or zombieTargets[zombie] ~= client or isPedDead(zombie) or getPedWeapon(zombie) ~= 4 then return end
 	if targetDistance(zombie,client) > 1.2 then return end

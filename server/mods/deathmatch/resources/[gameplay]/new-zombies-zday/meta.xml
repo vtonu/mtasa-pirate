@@ -1,6 +1,7 @@
 <meta>
 	<info name="Lifestyle Zombies" author="Lifestyle" version="1.1" type="script" />
 	<oop>true</oop>
+	<script src="bank_zone.lua" type="shared" />
 	<script src="zday_s.lua" type="server" />
 	<script src="zday_c.lua" type="client" />
 
