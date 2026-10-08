@@ -303,7 +303,6 @@ local function stopPassiveDriveby()
 	if not isPassive() then return end
 	unbindFire()
 	setPedDoingGangDriveby(localPlayer, false)
-	setPedWeaponSlot(localPlayer, 0)
 	toggleControl("vehicle_fire", false)
 	toggleControl("vehicle_secondary_fire", false)
 	setPedControlState("vehicle_secondary_fire", false)

@@ -320,6 +320,10 @@ setTimer(function()
                     if now-s.lastAim>=releaseDelay then finish(teller,now) end
                 end
             end
+            if teller.session and teller.session.started and not teller.session.maxed then
+                local current=teller.session
+                triggerClientEvent(current.player,"bank:payoutProgress",resourceRoot,current.paidTime,payoutDelay,aiming(current.player,teller,now))
+            end
             animate(teller,threatened and "hands" or (teller.session and "hands" or (visitor and "work" or "idle")))
             local facing=teller.session and teller.session.player or visitor
             if teller.requiresKill and facing and near(facing,teller.marker,1.6,true) then

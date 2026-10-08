@@ -294,12 +294,18 @@ local lastKeyTick = nil
 local lockoutUntilTick = 0
 
 local function nearKratomShop()
-    local marker=getElementByID("specialShopWeedGarden")
-    if not isElement(marker) or getElementData(marker,"specialShop:catalog")~="kratom" or isPedInVehicle(localPlayer) then return false end
-    if getElementInterior(marker)~=getElementInterior(localPlayer) or getElementDimension(marker)~=getElementDimension(localPlayer) then return false end
+    if not isElement(localPlayer) or isPedDead(localPlayer) or isPedInVehicle(localPlayer) then return false end
     local x,y,z=getElementPosition(localPlayer)
-    local mx,my,mz=getElementPosition(marker)
-    return getDistanceBetweenPoints3D(x,y,z,mx,my,mz+1)<=1.25
+    for _,id in ipairs({"specialShopWeedGarden","specialShopRedCounty"}) do
+        local marker=getElementByID(id)
+        if isElement(marker) and getElementData(marker,"specialShop:catalog")=="kratom"
+            and getElementInterior(marker)==getElementInterior(localPlayer)
+            and getElementDimension(marker)==getElementDimension(localPlayer) then
+            local mx,my,mz=getElementPosition(marker)
+            if getDistanceBetweenPoints3D(x,y,z,mx,my,mz+1)<=1.25 then return true end
+        end
+    end
+    return false
 end
 
 addEvent("kratom:openUI",true)

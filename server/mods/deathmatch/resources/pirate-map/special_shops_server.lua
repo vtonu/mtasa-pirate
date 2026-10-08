@@ -15,9 +15,10 @@ addEventHandler("onResourceStart", resourceRoot, function()
         return
     end
     local marker = createMarker(2237.20288, 49.77655, 25.48438,
-        "cylinder", 0.8, 127, 255, 212, 150)
+        "cylinder", 0.8, 127, 255, 0, 180)
     setElementID(marker, "specialShopRedCounty")
     setElementInterior(marker, getElementInterior(machine))
     setElementDimension(marker, getElementDimension(machine))
     setElementData(marker, "specialShop:reserved", true)
+    setElementData(marker,"specialShop:catalog","kratom")
 end)

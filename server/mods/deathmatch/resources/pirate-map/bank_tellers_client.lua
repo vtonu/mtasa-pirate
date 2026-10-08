@@ -4,6 +4,11 @@ local lastReport, reportedPed = 0, false
 local hiddenWanted, previousWanted = false, true
 local lastWanted=getPlayerWantedLevel()
 local gainedStars={}
+local payoutProgress={paid=0,delay=5000,tick=0,aiming=false}
+addEvent("bank:payoutProgress",true)
+addEventHandler("bank:payoutProgress",resourceRoot,function(paid,delay,aiming)
+    payoutProgress={paid=paid,delay=delay,tick=getTickCount(),aiming=aiming}
+end)
 local alarmSound
 local nextAlarmAttempt=0
 local star = svgCreate(64,64,[[<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><path d="M32 3 L39 23 L61 23 L43 36 L50 58 L32 45 L14 58 L21 36 L3 23 L25 23 Z" fill="white" stroke="black" stroke-width="3"/></svg>]])
@@ -146,9 +151,24 @@ addEventHandler("onClientRender",root,function()
         end
         local width=math.min(620,w-32)
         local left,top=(w-width)/2,h*0.78
-        local scale=math.min(1,(width-24)/dxGetTextWidth(text,1,"unifont"))
-        dxDrawText(text,left+12,top,left+width-12,top+46,
+        local loading=type(session)=="table" and session.state=="robbery" and session.teller==ped
+        local extra=loading and 48 or 0
+        local scale=math.min(1,(width-24-extra)/dxGetTextWidth(text,1,"unifont"))
+        local textWidth=dxGetTextWidth(text,scale,"unifont")
+        local textLeft=(w-textWidth-extra)/2
+        dxDrawText(text,textLeft,top,textLeft+textWidth,top+46,
             tocolor(127,255,212,255),scale,"unifont","center","center")
+        if loading then
+            local clock=payoutProgress
+            local elapsed=clock.aiming and math.min(500,getTickCount()-clock.tick) or 0
+            local progress=math.min(1,(clock.paid+elapsed)/clock.delay)
+            for i=1,3 do
+                local x=textLeft+textWidth+12+(i-1)*12
+                dxDrawRectangle(x,top+20,9,6,tocolor(127,255,212,45))
+                local fill=math.max(0,math.min(1,progress*3-(i-1)))
+                if fill>0 then dxDrawRectangle(x,top+20,9*fill,6,tocolor(127,255,212,255)) end
+            end
+        end
     end
     local escape=getElementData(localPlayer,"bank:wantedDecay")
     local count,now=getPlayerWantedLevel(),getTickCount()

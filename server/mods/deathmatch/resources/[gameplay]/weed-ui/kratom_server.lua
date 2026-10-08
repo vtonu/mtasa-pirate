@@ -15,12 +15,17 @@ end
 
 local function nearShop(player)
     if not isElement(player) or isPedDead(player) or isPedInVehicle(player) then return false end
-    local marker=getElementByID("specialShopWeedGarden")
-    if not isElement(marker) or getElementData(marker,"specialShop:catalog")~="kratom" then return false end
-    if getElementInterior(player)~=getElementInterior(marker) or getElementDimension(player)~=getElementDimension(marker) then return false end
     local x,y,z=getElementPosition(player)
-    local mx,my,mz=getElementPosition(marker)
-    return getDistanceBetweenPoints3D(x,y,z,mx,my,mz+1)<=1.25
+    for _,id in ipairs({"specialShopWeedGarden","specialShopRedCounty"}) do
+        local marker=getElementByID(id)
+        if isElement(marker) and getElementData(marker,"specialShop:catalog")=="kratom"
+            and getElementInterior(marker)==getElementInterior(player)
+            and getElementDimension(marker)==getElementDimension(player) then
+            local mx,my,mz=getElementPosition(marker)
+            if getDistanceBetweenPoints3D(x,y,z,mx,my,mz+1)<=1.25 then return true end
+        end
+    end
+    return false
 end
 
 local function preview(player)
@@ -70,6 +75,7 @@ local function clearPerk(player,note)
     if isTimer(perk.timer) then killTimer(perk.timer) end
     if isElement(player) then
         if perk.type=="white" then setPedGravity(player,restoreGravity(player,perk.baseGravity)) end
+        if perk.type=="purple" then setPedFightingStyle(player,perk.baseFightingStyle) end
         setElementData(player,"kratom:perk",false)
         triggerClientEvent(player,"kratom:perkClock",resourceRoot,preview(player))
         if note then triggerClientEvent(player,"weedGarden:notification",resourceRoot,note) end
@@ -79,9 +85,14 @@ end
 local function equip(player,variety,package)
     clearPerk(player)
     local perk={type=variety.type,duration=package.duration,expires=getTickCount()+package.duration,baseGravity=getElementData(player,"weed.perk") and 0.008 or getPedGravity(player)}
+    perk.baseFightingStyle=getPedFightingStyle(player)
     active[player]=perk
     if perk.type=="white" then setPedGravity(player,isPedInVehicle(player) and 0.008 or 0.0015) end
-    if perk.type=="purple" then perk.reserve=10000 setElementHealth(player,100) end
+    if perk.type=="purple" then
+        perk.reserve=10000
+        setElementHealth(player,100)
+        setPedFightingStyle(player,5)
+    end
     setElementData(player,"kratom:perk",perk.type)
     triggerClientEvent(player,"kratom:perkClock",resourceRoot,preview(player))
     perk.timer=setTimer(function()
