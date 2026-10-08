@@ -61,24 +61,39 @@ local function updateVision()
     end
 end
 
-addEvent("kratom:reveal",true)
-addEventHandler("kratom:reveal",resourceRoot,function(targets)
-    clearReveal()
+local nextRevealAttempt=0
+local function refreshReveal()
     local perk=getElementData(localPlayer,"kratom:perk")
-    if (perk~="green" and perk~="white") or type(targets)~="table" then return end
-    if not isElement(greenShader) then greenShader=dxCreateShader("kratom_zombie.fx",0,0,true,"ped") end
+    if isPedDead(localPlayer) or (perk~="green" and perk~="white") then clearReveal() return end
+    local zombies=getResourceFromName("new-zombies-zday")
+    if not zombies or getResourceState(zombies)~="running" then clearReveal() return end
+    if not isElement(greenShader) and getTickCount()>=nextRevealAttempt then
+        nextRevealAttempt=getTickCount()+10000
+        greenShader=dxCreateShader("kratom_zombie.fx",0,0,true,"ped")
+    end
     if isElement(greenShader) then
         if perk=="white" then dxSetShaderValue(greenShader,"zombieColor",1,0.05,0.1)
         else dxSetShaderValue(greenShader,"zombieColor",0.05,1,0.1) end
     end
-    local untilTick=getTickCount()+3000
-    for _,ped in ipairs(targets) do
-        if isElement(ped) then
-            local shaded=isElement(greenShader) and engineApplyShaderToWorldTexture(greenShader,"*",ped)
-            revealed[ped]={expires=untilTick,shaded=shaded}
+    local seen={}
+    for _,ped in ipairs(getElementsByType("ped",getResourceDynamicElementRoot(zombies),true)) do
+        if not isPedDead(ped) and getElementInterior(ped)==getElementInterior(localPlayer)
+            and getElementDimension(ped)==getElementDimension(localPlayer) then
+            seen[ped]=true
+            if not revealed[ped] or (not revealed[ped].shaded and isElement(greenShader)) then
+                local shaded=isElement(greenShader) and engineApplyShaderToWorldTexture(greenShader,"*",ped)
+                revealed[ped]={shaded=shaded}
+            end
         end
     end
+    for ped in pairs(revealed) do if not seen[ped] then removeReveal(ped) end end
+end
+setTimer(refreshReveal,500,0)
+addEventHandler("onClientElementStreamIn",root,function()
+    if getElementType(source)=="ped" then refreshReveal() end
 end)
+addEventHandler("onClientElementStreamOut",root,function() if revealed[source] then removeReveal(source) end end)
+addEventHandler("onClientElementDestroy",root,function() revealed[source]=nil end)
 
 addEventHandler("onClientRender",root,function()
     updateVision()
@@ -87,9 +102,8 @@ addEventHandler("onClientRender",root,function()
         local w,h=guiGetScreenSize()
         dxDrawImage(0,0,w,h,whiteShader)
     end
-    local now=getTickCount()
     for ped,data in pairs(revealed) do
-        if now>=data.expires or not isElement(ped) or isPedDead(ped) or (getElementData(localPlayer,"kratom:perk")~="green" and getElementData(localPlayer,"kratom:perk")~="white")
+        if not isElement(ped) or isPedDead(ped) or (getElementData(localPlayer,"kratom:perk")~="green" and getElementData(localPlayer,"kratom:perk")~="white")
             or getElementInterior(ped)~=getElementInterior(localPlayer) or getElementDimension(ped)~=getElementDimension(localPlayer) then removeReveal(ped)
         elseif not data.shaded and isElementStreamedIn(ped) then
             local x,y,z=getElementPosition(ped)
@@ -127,7 +141,7 @@ addEventHandler("onClientPlayerHeliKilled",localPlayer,function()
 end)
 
 addEventHandler("onClientElementDataChange",localPlayer,function(key)
-    if key=="kratom:perk" then pendingDamage=0 clearReveal() updateVision() end
+    if key=="kratom:perk" then pendingDamage=0 clearReveal() updateVision() refreshReveal() end
 end)
 
 setTimer(function()

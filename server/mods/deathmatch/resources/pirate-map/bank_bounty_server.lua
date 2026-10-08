@@ -18,7 +18,12 @@ end
 
 local function publish()
     local count,total=0,0
-    for _,group in pairs(groups) do total=total+amount(group) end
+    local robbers={}
+    for _,group in pairs(groups) do
+        total=total+amount(group)
+        if isElement(group.robber) then robbers[#robbers+1]={player=group.robber,escaping=group.escaping==true} end
+    end
+    table.sort(robbers,function(a,b) return getPlayerName(a.player)<getPlayerName(b.player) end)
     for player,group in pairs(members) do
         if isElement(player) then
             count=count+1
@@ -31,8 +36,14 @@ local function publish()
         end
     end
     local old=getElementData(resourceRoot,"bank:bounties")
-    if type(old)~="table" or old.targets~=count or old.total~=total then
-        setElementData(resourceRoot,"bank:bounties",{targets=count,total=total})
+    local changed=type(old)~="table" or type(old.robbers)~="table" or #old.robbers~=#robbers
+    if not changed then
+        for i,entry in ipairs(robbers) do
+            if old.robbers[i].player~=entry.player or old.robbers[i].escaping~=entry.escaping then changed=true break end
+        end
+    end
+    if changed or old.targets~=count or old.total~=total then
+        setElementData(resourceRoot,"bank:bounties",{targets=count,total=total,robbers=robbers})
     end
 end
 
