@@ -1,15 +1,9 @@
 -- ONE BOUNTY POOL PER ROBBERY, SHARED BY EVERY MARKED PLAYER
-local groups,members={},{}
+local groups,members,claims={},{},{}
 
 function getBankBountyClaimed(player)
-    return groups[player] and groups[player].claimed or 0
-end
-
-local function inBank(player)
-    if not isElement(player) or isPedDead(player) or getElementInterior(player)~=0
-        or getElementDimension(player)~=0 then return false end
-    local x,y,z=getElementPosition(player)
-    return getDistanceBetweenPoints2D(x,y,2312.68408,-8.94955)<=25 and z>=20 and z<=36
+    local group=groups[player] or members[player]
+    return group and group.claimed or claims[player] or 0
 end
 
 local function amount(group)
@@ -66,12 +60,14 @@ local function mark(group,player)
     if members[player] or group.dead[player] then return end
     members[player]=group
     group.players[player]=true
+    claims[player]=group.claimed
 end
 
 local function updateRobber(player)
     local data=getElementData(player,"bank:robbery")
     local loot=getElementData(player,"bank:pending")
     local group=groups[player]
+    if (type(data)=="table" and data.partner) or (type(loot)=="table" and loot.partner) then return end
     if type(data)~="table" or data.state=="hold" then
         if type(loot)=="table" then data=loot
         else
@@ -87,6 +83,10 @@ local function updateRobber(player)
     end
     group.earned=tonumber(data.total) or 0
     group.escaping=type(loot)=="table"
+    local crew=getBankRobberyCrew and getBankRobberyCrew(player) or {[player]=true}
+    for member in pairs(crew) do
+        if isElement(member) and not isPedDead(member) then mark(group,member) end
+    end
     publish()
 end
 
@@ -103,10 +103,11 @@ addEventHandler("onPlayerWasted",root,function(_,killer)
     local hunter=killer
     if isElement(hunter) and getElementType(hunter)=="vehicle" then hunter=getVehicleController(hunter) end
     if isElement(hunter) and getElementType(hunter)=="player" and hunter~=source
-        and hunter~=group.robber and isElement(group.robber) then
+        and not group.players[hunter] and isElement(group.robber) then
         local reward=amount(group)
         if reward>0 then
             group.claimed=group.claimed+reward
+            for member in pairs(group.players) do claims[member]=group.claimed end
             givePlayerMoney(hunter,reward)
             triggerClientEvent(hunter,"bank:bountyClaim",resourceRoot,reward)
         end
@@ -117,16 +118,21 @@ end,true,"high+10")
 addEventHandler("onPlayerQuit",root,function()
     local group=members[source]
     if group and group.robber==source then endGroup(group) else unmark(source);publish() end
+    claims[source]=nil
 end)
 
+-- ONLY THE REGISTERED CREW SHARES THE BOUNTY; NO LATE BYSTANDERS
 setTimer(function()
-    for _,player in ipairs(getElementsByType("player")) do
-        if inBank(player) and not members[player] then
-            for _,group in pairs(groups) do
-                if not groups[player] and not group.escaping then mark(group,player) end
-                if members[player] then break end
-            end
+    for robber,group in pairs(groups) do
+        local crew=getBankRobberyCrew and getBankRobberyCrew(robber) or {[robber]=true}
+        for player in pairs(crew) do
+            if isElement(player) and not isPedDead(player) then mark(group,player) end
         end
+        local removed={}
+        for player in pairs(group.players) do
+            if player~=robber and not crew[player] then removed[#removed+1]=player end
+        end
+        for _,player in ipairs(removed) do unmark(player) end
     end
     publish()
 end,500,0)

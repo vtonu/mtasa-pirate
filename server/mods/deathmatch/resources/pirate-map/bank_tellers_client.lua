@@ -4,7 +4,7 @@ local lastReport, reportedPed = 0, false
 local hiddenWanted, previousWanted = false, true
 local lastWanted=getPlayerWantedLevel()
 local gainedStars={}
-local payoutProgress={paid=0,delay=5000,tick=0,aiming=false}
+local payoutProgress={paid=0,delay=4500,tick=0,aiming=false}
 addEvent("bank:payoutProgress",true)
 addEventHandler("bank:payoutProgress",resourceRoot,function(paid,delay,aiming)
     payoutProgress={paid=paid,delay=delay,tick=getTickCount(),aiming=aiming}
@@ -127,7 +127,8 @@ addEventHandler("onClientRender",root,function()
     local w,h=guiGetScreenSize()
     local ped,marker=aimedTeller(),nearbyMarker()
     local dead=marker and getElementData(marker,"bank:dead")==true
-    if marker and (dead or (ped and getElementData(marker,"bank:teller")==ped)) then
+    local crew=getElementData(localPlayer,"bank:robbery")
+    if marker and (dead or (ped and getElementData(marker,"bank:teller")==ped) or (type(crew)=="table" and crew.partner)) then
         local session=getElementData(localPlayer,"bank:robbery")
         local cooldown=tonumber(getElementData(marker,"bank:cooldown")) or 0
         local playerCooldown=tonumber(getElementData(localPlayer,"bank:robberyCooldown")) or 0
@@ -138,14 +139,16 @@ addEventHandler("onClientRender",root,function()
         elseif playerCooldown>0 then
             text="YOUR NEXT ROBBERY IS IN "..math.ceil(playerCooldown/60).." MIN"
         elseif cooldown>0 then
-            text="BANK RESETS IN "..math.ceil(cooldown/60).." MIN"
+            text="COME BACK LATER | BANK RESETS IN "..math.ceil(cooldown/60).." MIN"
+        elseif type(session)=="table" and session.partner then
+            text="ROBBERY CREW | PENDING BANK CASH: $"..tostring(session.total)
         elseif robber and robber~=localPlayer then
             text="TELLER IS BEING ROBBED"
         elseif type(session)=="table" and session.teller==ped then
             if session.state=="max" then text="MAX STARS - KILL THE TELLER TO FINISH"
             elseif session.state=="robbery" then
                 text="KEEP AIMING | PENDING CASH: $"..tostring(session.total)
-                    .."  |  +$"..tostring(session.payout).." / 5 SEC"
+                    .."  |  +$"..tostring(session.payout).." / "..tostring((session.payoutDelay or 4500)/1000).." SEC"
             end
         elseif robber==localPlayer then text="ROBBERY IN PROGRESS AT THE OTHER COUNTER"
         end

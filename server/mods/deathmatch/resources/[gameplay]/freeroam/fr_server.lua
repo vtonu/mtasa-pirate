@@ -135,8 +135,8 @@ g_OptionDefaults = {
     },
     welcometextonstart = false,
     vehicles = {
-        maxidletime = 60000,
-        idleexplode = true,
+        maxidletime = 600000,
+        idleexplode = false,
         maxperplayer = 2,
         disallowed = {}
     }

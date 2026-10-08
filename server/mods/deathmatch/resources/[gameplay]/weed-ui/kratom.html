@@ -1260,15 +1260,15 @@
         note: "SELECT A VARIETY.",
         actions: [],
         buySizes: [],
-        strains: [{"name":"WHITE","symbol":"W","type":"white","description":"SLOW MOVEMENT / DOUBLE HYBRID JUMP / WHITE NIGHT VISION / CONTINUOUS RED ZOMBIE SILHOUETTES.","white":100,"green":0,"purple":0,"prices":{"cart":2000}},{"name":"GREEN","symbol":"G","type":"green","description":"MINT NIGHT VISION / CONTINUOUS GREEN ZOMBIE SILHOUETTES.","white":0,"green":100,"purple":0,"prices":{"cart":2000}},{"name":"PURPLE","symbol":"P","type":"purple","description":"10,000 HEALTH RESERVE / PURPLE IMPACT: POWER PUNCHES, MELEE AND KNOCKDOWN / FATAL HIT GUARDS / 5 MINUTES.","white":0,"green":0,"purple":100,"prices":{"cart":2000}}],
+        strains: [{"name":"WHITE","symbol":"W","type":"white","description":"SLOW MOVEMENT / DOUBLE HYBRID JUMP / WHITE NIGHT VISION / CONTINUOUS RED ZOMBIE SILHOUETTES.","white":100,"green":0,"purple":0,"prices":{"cart":1500},"duration":300000},{"name":"GREEN","symbol":"G","type":"green","description":"MINT NIGHT VISION / CONTINUOUS GREEN ZOMBIE SILHOUETTES.","white":0,"green":100,"purple":0,"prices":{"cart":2000},"duration":360000},{"name":"PURPLE","symbol":"P","type":"purple","description":"8,000 HEALTH RESERVE / POWER MELEE.","white":0,"green":0,"purple":100,"prices":{"cart":3000},"duration":240000}],
       };
 
       const strainColors = {white:'#e8eef0',green:'#7fff00',purple:'#b88cff'};
 
       const strainStats = {
  white:{gravity:'SLOW',speed:'WHITE / GRAY',healthRegen:'2X HYBRID JUMP',armorRegen:'5 MIN'},
- green:{gravity:'NORMAL',speed:'NIGHT VISION',healthRegen:'ZOMBIE SCAN',armorRegen:'5 MIN'},
- purple:{gravity:'NORMAL',speed:'STANDARD',healthRegen:'PURPLE IMPACT',armorRegen:'5 MIN'}
+ green:{gravity:'NORMAL',speed:'NIGHT VISION',healthRegen:'ZOMBIE SCAN',armorRegen:'6 MIN'},
+ purple:{gravity:'NORMAL',speed:'STANDARD',healthRegen:'PURPLE IMPACT',armorRegen:'4 MIN'}
 };
 
       let selectedStrainValue = null;
@@ -1291,7 +1291,7 @@
 
       let packageDurations = {cart:300000};
       let activePreview = { type: false, duration: 0, endsAt: 0 };
-      const perkEffects = {white:'DOUBLE JUMP / RED ZOMBIE SCAN',green:'GREEN SILHOUETTES / NIGHT VISION',purple:'POWER MELEE / 10,000 RESERVE'};
+      const perkEffects = {white:'DOUBLE JUMP / RED ZOMBIE SCAN',green:'GREEN SILHOUETTES / NIGHT VISION',purple:'POWER MELEE / 8,000 RESERVE'};
 
       function renderPerkPreview() {
         const type =
@@ -1309,12 +1309,12 @@
         );
         setText("preview-perk-effect", type ? perkEffects[type] || "--" : "--");
         const duration =
-          selectedBuySizeValue && packageDurations[selectedBuySizeValue];
+          selectedStrain && selectedStrain.duration;
         setText(
           "preview-perk-duration",
           duration
             ? `${Math.round(duration / 60000)} MIN PERK DURATION`
-            : "5 MIN PERK DURATION",
+            : "SELECT A VARIETY",
         );
       }
 
@@ -1565,7 +1565,7 @@
         );
         setText(
           "armor-regen",
-          selectedStats ? selectedStats.armorRegen : "5 MIN",
+          selectedStats ? selectedStats.armorRegen : "4 / 5 / 6 MIN",
         );
         setText("note", data.note);
 

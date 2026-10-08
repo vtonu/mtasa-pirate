@@ -1,4 +1,5 @@
 local pickupTimers = {}
+local cashPickups = {}
 local expireTime = get("timeout")
 local onlyCurrentWeapon = get("only_current")
 local dropRadius = get("radius")
@@ -26,6 +27,21 @@ end
 
 function onDeathPickupHit(playerElement)
     cancelEvent()
+    if not isElement(playerElement) or getElementType(playerElement) ~= "player" or isPedDead(playerElement) then return end
+    if getElementInterior(playerElement) ~= getElementInterior(source)
+        or getElementDimension(playerElement) ~= getElementDimension(source) then return end
+    local x,y,z=getElementPosition(playerElement)
+    local px,py,pz=getElementPosition(source)
+    if getDistanceBetweenPoints3D(x,y,z,px,py,pz)>2.5 then return end
+    local cash=cashPickups[source]
+    if cash then
+        -- CLAIM ONCE BEFORE GIVING MONEY
+        cashPickups[source]=nil
+        destroyDeathPickup(source)
+        givePlayerMoney(playerElement,cash)
+        return
+    end
+    if getPickupType(source) ~= 2 then return end
     giveWeapon(playerElement, getPickupWeapon(source), getPickupAmmo(source), false)
     destroyDeathPickup(source)
 end
@@ -33,6 +49,18 @@ addEventHandler("onPickupHit", resourceRoot, onDeathPickupHit)
 
 function onPlayerWasted()
     local posX, posY, posZ = getElementPosition(source)
+    local cash=math.floor(math.max(0,getPlayerMoney(source))*0.5)
+    if cash>0 then
+        local pickup=createPickup(posX,posY,posZ,3,1212,expireTime)
+        if isElement(pickup) then
+            setElementInterior(pickup,getElementInterior(source))
+            setElementDimension(pickup,getElementDimension(source))
+            if takePlayerMoney(source,cash) then
+                cashPickups[pickup]=cash
+                pickupTimers[pickup]=setTimer(destroyDeathPickup,expireTime,1,pickup)
+            else destroyDeathPickup(pickup) end
+        end
+    end
 
     if onlyCurrentWeapon then
         local playerWeapon = getPedWeapon(source)
@@ -64,6 +92,7 @@ end
 addEventHandler("onPlayerWasted", root, onPlayerWasted)
 
 function onElementDestroyPickup()
+    cashPickups[source]=nil
     local validElement = isElement(source)
 
     if validElement then

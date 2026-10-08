@@ -1,7 +1,7 @@
 -- MAP VEHICLES
 local vehicles = {}
 local stopping = false
-local idleDelay = 60000
+local idleDelay = 600000
 local wreckDelay = 5000
 local respawnDelay = 10000
 local spawnDistance = 30

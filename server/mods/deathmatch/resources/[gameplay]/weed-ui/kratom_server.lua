@@ -1,15 +1,14 @@
 -- GREEN MARKER CATALOG; WEED STOCK AND PERKS STAY SEPARATE
 local shops,active,requests={},{},{}
-local packages={cart={price=2000,duration=300000}}
+local reserveLimit=8000
 local varieties={
-    {name="WHITE",symbol="W",type="white",description="SLOW MOVEMENT / DOUBLE HYBRID JUMP / WHITE NIGHT VISION / CONTINUOUS RED ZOMBIE SILHOUETTES.",white=100,green=0,purple=0},
-    {name="GREEN",symbol="G",type="green",description="MINT NIGHT VISION / CONTINUOUS GREEN ZOMBIE SILHOUETTES.",white=0,green=100,purple=0},
-    {name="PURPLE",symbol="P",type="purple",description="10,000 HEALTH RESERVE / PURPLE IMPACT: POWER PUNCHES, MELEE AND KNOCKDOWN / FATAL HIT GUARDS / 5 MINUTES.",white=0,green=0,purple=100}
+    {name="WHITE",symbol="W",type="white",price=1500,duration=300000,description="SLOW MOVEMENT / DOUBLE HYBRID JUMP / WHITE NIGHT VISION / CONTINUOUS RED ZOMBIE SILHOUETTES.",white=100,green=0,purple=0},
+    {name="GREEN",symbol="G",type="green",price=2000,duration=360000,description="MINT NIGHT VISION / CONTINUOUS GREEN ZOMBIE SILHOUETTES.",white=0,green=100,purple=0},
+    {name="PURPLE",symbol="P",type="purple",price=3000,duration=240000,description="8,000 HEALTH RESERVE / POWER MELEE.",white=0,green=0,purple=100}
 }
 local byName={}
 for _,variety in ipairs(varieties) do
-    variety.prices={}
-    for name,package in pairs(packages) do variety.prices[name]=package.price end
+    variety.prices={cart=variety.price}
     byName[variety.name]=variety
 end
 
@@ -35,12 +34,10 @@ local function preview(player)
 end
 
 local function sendShop(player,note,reset)
-    local durations={}
-    for name,package in pairs(packages) do durations[name]=package.duration end
     triggerClientEvent(player,"kratom:openUI",resourceRoot,{shopMode="kratom",title="KRATOM SHOP",zone="SPECIAL PERKS",
         note=note or "SELECT A VARIETY.",resetSelection=reset==true,strains=varieties,actions={"BUY"},
         buySizes={},
-        packageDurations=durations,perkPreview=preview(player)})
+        perkPreview=preview(player)})
 end
 
 
@@ -58,8 +55,8 @@ end
 function drainKratomReserve(player,loss)
     if not isKratomProtected(player) or type(loss)~="number" or loss~=loss or loss<=0 or loss==math.huge then return false end
     local perk=active[player]
-    perk.reserve=math.max(100,(perk.reserve or 10000)-math.min(loss,1000))
-    setElementHealth(player,perk.reserve/100)
+    perk.reserve=math.max(100,(perk.reserve or reserveLimit)-math.min(loss,1000))
+    setElementHealth(player,perk.reserve/reserveLimit*100)
     return true
 end
 
@@ -82,14 +79,19 @@ local function clearPerk(player,note)
     end
 end
 
+function clearKratomPerks(player)
+    clearPerk(player)
+end
+
 local function equip(player,variety,package)
     clearPerk(player)
+    clearWeedPerks(player)
     local perk={type=variety.type,duration=package.duration,expires=getTickCount()+package.duration,baseGravity=getElementData(player,"weed.perk") and 0.008 or getPedGravity(player)}
     perk.baseFightingStyle=getPedFightingStyle(player)
     active[player]=perk
     if perk.type=="white" then setPedGravity(player,isPedInVehicle(player) and 0.008 or 0.0015) end
     if perk.type=="purple" then
-        perk.reserve=10000
+        perk.reserve=reserveLimit
         setElementHealth(player,100)
         setPedFightingStyle(player,5)
     end
@@ -123,8 +125,9 @@ addEventHandler("kratom:uiAction",resourceRoot,function(action)
 
     if name and byName[name] then state.variety=name
     elseif action=="BUY" then
-        local variety,package=byName[state.variety],packages.cart
+        local variety=byName[state.variety]
         if not variety then sendShop(client,"SELECT A VARIETY.") return end
+        local package={price=variety.price,duration=variety.duration}
         if getPlayerMoney(client)<package.price then sendShop(client,"SORRY, INSUFFICIENT FUNDS.") return end
         if not takePlayerMoney(client,package.price) then return end
         equip(client,variety,package)
@@ -188,3 +191,31 @@ addEventHandler("onPlayerQuit",root,function() clearPerk(source) shops[source]=n
 addEventHandler("onResourceStop",resourceRoot,function()
     for player in pairs(active) do clearPerk(player) end
 end)
+
+-- AMBULANCE ENTRY USES SERVER PERK STATE; EXPIRY DOES NOT EJECT OCCUPANTS
+local ambulanceNotices={}
+local function canEnterAmbulance(player)
+    local perk=active[player]
+    return perk and perk.expires>getTickCount() and not isPedDead(player) or false
+end
+local function denyAmbulance(player)
+    local now=getTickCount()
+    if now>=(ambulanceNotices[player] or 0) then
+        ambulanceNotices[player]=now+2000
+        outputChatBox("ONLY KRATOM PLAYERS CAN USE THIS VEHICLE.",player,255,230,109)
+    end
+end
+addEventHandler("onVehicleStartEnter",root,function(player)
+    if getElementModel(source)==416 and getElementType(player)=="player" and not canEnterAmbulance(player) then
+        cancelEvent()
+        denyAmbulance(player)
+    end
+end)
+-- ALSO COVER WARP ENTRY FROM OTHER RESOURCES
+addEventHandler("onVehicleEnter",root,function(player)
+    if getElementModel(source)==416 and getElementType(player)=="player" and not canEnterAmbulance(player) then
+        removePedFromVehicle(player)
+        denyAmbulance(player)
+    end
+end)
+addEventHandler("onPlayerQuit",root,function() ambulanceNotices[source]=nil end)

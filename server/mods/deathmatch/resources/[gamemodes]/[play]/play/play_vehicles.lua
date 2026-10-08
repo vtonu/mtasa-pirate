@@ -205,8 +205,10 @@ function onVehicleExit()
         end
     end
 
-    -- Start A 60 Second Abandonment Timer
-    vehicleTimers[source] = setTimer(destroyVehicle, 60000, 1, source)
+    -- KEEP PARKED VEHICLES FOR TEN MINUTES
+    vehicleTimers[source] = setTimer(function(vehicle)
+        if isElement(vehicle) and not next(getVehicleOccupants(vehicle)) then destroyVehicle(vehicle) end
+    end, 600000, 1, source)
 end
 
 function onVehicleExplode()

@@ -3,6 +3,7 @@ local tellers, pedTellers, sessions, aimReports, decay = {}, {}, {}, {}, {}
 local nextRobbery={}
 local successUntil={}
 local pending={}
+local partnerSessions={}
 local bank={cooldown=0}
 local safeClosed,safeOpen
 
@@ -26,7 +27,10 @@ local function clearLoot(player,pay)
     if isElement(player) then
         setElementData(player,"bank:pending",false)
         if pay and not isPedDead(player) then
-            local reward=math.max(0,loot.total-loot.claimed)
+            local claimed=getBankBountyClaimed and getBankBountyClaimed(player) or loot.claimed
+            local debt=math.max(loot.claimed,claimed)
+            local deduction=math.floor(debt*((loot.offset+loot.total)/loot.pool))-math.floor(debt*(loot.offset/loot.pool))
+            local reward=math.max(0,loot.total-deduction)
             givePlayerMoney(player,reward)
             triggerClientEvent(player,"bank:cashout",resourceRoot,reward,loot.completed)
         end
@@ -35,7 +39,7 @@ end
 local guns = {[22]=true,[23]=true,[24]=true,[25]=true,[26]=true,[27]=true,[28]=true,
     [29]=true,[30]=true,[31]=true,[32]=true,[33]=true,[34]=true}
 local payouts = {2500,5000,10000,20000,40000,80000}
-local holdDelay, releaseDelay, payoutDelay, starDelay = 3000,5000,5000,40500
+local holdDelay, releaseDelay, payoutDelay, starDelay = 3000,5000,4500,36450
 local cooldownDelay, resetDelay, decayDelay = 300000,1800000,10000
 
 local function near(player, element, radius, visitor)
@@ -63,10 +67,40 @@ local function cash(teller,count)
     end
 end
 
+-- CREW IS FIXED WHEN AIM HOLD COMPLETES; LATE ARRIVALS DO NOT JOIN
+function getBankRobberyCrew(player)
+    local s=bank.session
+    if s and s.player==player then return s.crew end
+    return pending[player] and pending[player].crew or {}
+end
+
+local function clearPartner(s,player)
+    s.crew[player]=nil
+    partnerSessions[player]=nil
+    if isElement(player) then setElementData(player,"bank:robbery",false) end
+end
+
+local function joinCrew(s,players,now)
+    s.crew={[s.player]=true}
+    for _,player in ipairs(players) do
+        if player~=s.player and near(player,s.teller.marker,10) and not sessions[player]
+            and not partnerSessions[player] and not pending[player] and now>=(nextRobbery[player] or 0) then
+            s.crew[player]=true
+            partnerSessions[player]=s
+            outputChatBox("YOU JOINED THE BANK ROBBERY. STAY NEAR THE BANK FOR YOUR CASH SHARE.",player,127,255,212)
+        end
+    end
+end
+
 local function publish(s)
     cash(s.teller,s.revealed or 0)
     setElementData(s.player,"bank:robbery",{state=s.maxed and "max" or (s.started and "robbery" or "hold"),
-        total=s.total,stage=s.stage,payout=payouts[s.stage],teller=s.teller.ped})
+        total=s.total,stage=s.stage,payout=payouts[s.stage],payoutDelay=payoutDelay,teller=s.teller.ped})
+    for player in pairs(s.crew or {}) do
+        if player~=s.player and isElement(player) then
+            setElementData(player,"bank:robbery",{partner=true,robber=s.player,state="crew",total=s.total,teller=s.teller.ped})
+        end
+    end
 end
 
 local function animate(teller,state)
@@ -95,9 +129,25 @@ end
 local function finish(teller,now,completed)
     local s=teller.session
     if not s then return end
-    if isElement(s.player) then
-        if s.total>0 and not isPedDead(s.player) then
-            local x,y,z=getElementPosition(s.player)
+    local crew=s.crew or {[s.player]=true}
+    local eligible={}
+    for player in pairs(crew) do
+        if isElement(player) and not isPedDead(player) and (player==s.player or near(player,teller.marker,30)) then
+            eligible[#eligible+1]=player
+        end
+    end
+    table.sort(eligible,function(a,b)
+        if a==b then return false end
+        if a==s.player then return true end
+        if b==s.player then return false end
+        return getPlayerSerial(a)<getPlayerSerial(b)
+    end)
+    local claimed=getBankBountyClaimed and getBankBountyClaimed(s.player) or 0
+    local count=#eligible
+    for index,player in ipairs(eligible) do
+        if s.total>0 then
+            local share=math.floor(s.total/count)+(index<=s.total%count and 1 or 0)
+            local x,y,z=getElementPosition(player)
             local bag=createObject(1550,x,y,z)
             if isElement(bag) then
                 setElementParent(bag,resourceRoot)
@@ -105,26 +155,33 @@ local function finish(teller,now,completed)
                 setElementAlpha(bag,0)
                 setElementFrozen(bag,true)
                 setElementCollisionsEnabled(bag,false)
-                setElementInterior(bag,getElementInterior(s.player))
-                setElementDimension(bag,getElementDimension(s.player))
-                setElementData(bag,"bank:bagOwner",s.player)
+                setElementInterior(bag,getElementInterior(player))
+                setElementDimension(bag,getElementDimension(player))
+                setElementData(bag,"bank:bagOwner",player)
             end
-            local claimed=getBankBountyClaimed and getBankBountyClaimed(s.player) or 0
-            pending[s.player]={total=s.total,claimed=claimed,bag=bag,completed=completed==true and s.maxed==true}
-            setElementData(s.player,"bank:pending",{total=s.total,claimed=claimed})
+            local offset=(index-1)*math.floor(s.total/count)+math.min(index-1,s.total%count)
+            pending[player]={total=share,claimed=claimed,pool=s.total,offset=offset,bag=bag,
+                crew=crew,completed=completed==true and s.maxed==true}
+            setElementData(player,"bank:pending",{total=player==s.player and s.total or share,
+                share=share,partner=player~=s.player,robber=s.player,claimed=claimed})
         end
-        setElementData(s.player,"bank:robbery",false)
-        if s.started and not isPedDead(s.player) then
-            decay[s.player]={nextDrop=now+decayDelay,expected=getPlayerWantedLevel(s.player),health=getElementHealth(s.player)}
-            setElementData(s.player,"bank:wantedDecay",{remaining=decayDelay})
+        if s.started then
+            decay[player]={nextDrop=now+decayDelay,expected=getPlayerWantedLevel(player),health=getElementHealth(player)}
+            setElementData(player,"bank:wantedDecay",{remaining=decayDelay})
+        end
+    end
+    for player in pairs(crew) do
+        partnerSessions[player]=nil
+        if isElement(player) then
+            setElementData(player,"bank:robbery",false)
+            if completed and s.maxed and not isPedDead(player) then
+                nextRobbery[player]=now+resetDelay
+                successUntil[getPlayerSerial(player)]=now+resetDelay
+                setElementData(player,"bank:robberyCooldown",math.ceil(resetDelay/1000))
+            end
         end
     end
     sessions[s.player]=nil
-    if completed and s.maxed and isElement(s.player) and not isPedDead(s.player) then
-        nextRobbery[s.player]=now+resetDelay
-        successUntil[getPlayerSerial(s.player)]=now+resetDelay
-        setElementData(s.player,"bank:robberyCooldown",math.ceil(resetDelay/1000))
-    end
     if s.started then bank.cooldown=now+(completed and resetDelay or cooldownDelay) end
     if bank.session==s then bank.session=nil end
     teller.session=nil
@@ -266,10 +323,10 @@ setTimer(function()
                 if near(player,teller.marker,1.6,true) then visitor=player end
                 if aiming(player,teller,now) then
                     threatened=true
-                    if not bank.session and now>=bank.cooldown and now>=(nextRobbery[player] or 0) and not sessions[player] and not pending[player]
+                    if not bank.session and now>=bank.cooldown and now>=(nextRobbery[player] or 0) and not sessions[player] and not partnerSessions[player] and not pending[player]
                         and near(player,teller.marker,1.6) then
                         local s={player=player,teller=teller,held=0,activeTime=0,paidTime=0,
-                            total=0,stage=1,lastTick=now,lastAim=now}
+                            total=0,stage=1,lastTick=now,lastAim=now,crew={[player]=true}}
                         teller.session,sessions[player]=s,teller
                         bank.session=s
                         decay[player]=nil
@@ -283,6 +340,9 @@ setTimer(function()
             if s then
                 local player,elapsed=s.player,now-s.lastTick
                 s.lastTick=now
+                for member in pairs(s.crew) do
+                    if member~=player and not near(member,teller.marker,30) then clearPartner(s,member) end
+                end
                 if not near(player,teller.marker,1.6) then finish(teller,now)
                 elseif aiming(player,teller,now) then
                     s.lastAim=now
@@ -290,7 +350,10 @@ setTimer(function()
                         s.held=s.held+elapsed
                         if s.held>=holdDelay then
                             s.started=true
-                            setPlayerWantedLevel(player,math.min(6,getPlayerWantedLevel(player)+1))
+                            joinCrew(s,players,now)
+                            for member in pairs(s.crew) do
+                                setPlayerWantedLevel(member,math.min(6,getPlayerWantedLevel(member)+1))
+                            end
                             publish(s)
                         end
                     elseif not s.maxed then
@@ -299,7 +362,9 @@ setTimer(function()
                         local stage=math.min(6,1+math.floor(s.activeTime/starDelay))
                         if stage>s.stage then
                             s.stage=stage
-                            setPlayerWantedLevel(player,math.min(6,getPlayerWantedLevel(player)+1))
+                            for member in pairs(s.crew) do
+                                setPlayerWantedLevel(member,math.min(6,getPlayerWantedLevel(member)+1))
+                            end
                         end
                         if s.paidTime>=payoutDelay then
                             s.paidTime=s.paidTime-payoutDelay
@@ -417,6 +482,8 @@ addEventHandler("onPlayerDamage",root,function()
 end)
 
 local function clearPlayer()
+    local crew=partnerSessions[source]
+    if crew then clearPartner(crew,source) end
     local teller=sessions[source]
     if teller then finish(teller,getTickCount()) end
     clearLoot(source,false)

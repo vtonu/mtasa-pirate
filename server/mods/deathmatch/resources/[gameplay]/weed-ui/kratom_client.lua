@@ -24,13 +24,13 @@ end
 
 local function updateVision()
     local perk=getElementData(localPlayer,"kratom:perk")
-    if isPedDead(localPlayer) or (perk~="white" and perk~="green" and perk~="purple") then
+    if isPedDead(localPlayer) or (perk~="white" and perk~="green") then
         if previousVision then clearVision() end
         return
     end
     if not previousVision then previousVision=getCameraGoggleEffect() end
     -- KEEP COLOR SIGNALS IN THE SCREEN SOURCE; OUR SHADER PROVIDES NIGHT OPTICS
-    local mode=(isElement(whiteShader) or perk=="purple") and "normal" or "nightvision"
+    local mode=isElement(whiteShader) and "normal" or "nightvision"
     if getCameraGoggleEffect()~=mode then setCameraGoggleEffect(mode,false) end
     if not isElement(whiteShader) and getTickCount()>=nextWhiteAttempt then
         nextWhiteAttempt=getTickCount()+10000
@@ -46,12 +46,9 @@ local function updateVision()
         end
     end
     if isElement(whiteShader) then
-        dxSetShaderValue(whiteShader,"visionGamma",perk=="purple" and 1 or 0.6)
-        dxSetShaderValue(whiteShader,"visionStrength",perk=="purple" and 0.18 or 1)
-        if perk=="purple" then
-            dxSetShaderValue(whiteShader,"visionTint",0.85,0.65,1)
-            dxSetShaderValue(whiteShader,"visionBrightness",1)
-        elseif perk=="green" then
+        dxSetShaderValue(whiteShader,"visionGamma",0.6)
+        dxSetShaderValue(whiteShader,"visionStrength",1)
+        if perk=="green" then
             dxSetShaderValue(whiteShader,"visionTint",0.68,0.9,0.8)
             dxSetShaderValue(whiteShader,"visionBrightness",1.05)
         else

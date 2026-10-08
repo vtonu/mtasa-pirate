@@ -395,6 +395,10 @@ local function restorePlayerPerks(player)
     end
 end
 
+function clearWeedPerks(player)
+    restorePlayerPerks(player)
+end
+
 local function equipPlayerPerks(player, strainName, strainType, packageName)
     local perks = PERK_SETTINGS[strainType]
     local package = PACKAGE_SETTINGS[packageName]
@@ -402,6 +406,7 @@ local function equipPlayerPerks(player, strainName, strainType, packageName)
         return false
     end
 
+    clearKratomPerks(player)
     local previous = playerPerks[player]
     local baseGravity = previous and previous.baseGravity or getPedGravity(player)
 
