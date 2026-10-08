@@ -11,7 +11,7 @@ vehicleSpawns = {{411, 2149.95, 1677.33, 10.55, 0}, -- Infernus
 {476, 2024, 1431.0999755859, 12.10000038147, 270}, -- Rustler
 }
 
-pickupSpawns = {{"armor", 2144.3000488281, 1683.3000488281, 13.300000190735}, -- armor icon near fountain
+pickupSpawns = {{"armor", 2144.39990, 1683.30005, 14.40000}, -- ARMOR ABOVE THE SKULL
 {"loco", 2025.3000488281, 1552.8000488281, 11.39999961853}} -- loco skull at pirates in men's pants
 
 -- PLAYER SPAWN
