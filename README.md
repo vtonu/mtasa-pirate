@@ -1,4 +1,4 @@
-# Project Details (mtasa-pirate v1.3.8)
+# Project Details (mtasa-pirate v1.3.9)
 
 <img width="1920" height="1080" alt="mtasa-pirate-openbeta" src="https://github.com/user-attachments/assets/bee0cba0-5b55-4744-9ff9-d74f14e8e4cc" />
 
@@ -6,6 +6,8 @@ MTA:SA freeroam server for custom gameplay, content creation, and playing with f
 
 ## Features
 
+- Bank robberies with cash bags, bounties, blinking stars, and payout progress.
+- WHITE, GREEN, and PURPLE kratom with night vision, zombie highlights, and combat perks.
 - Fog of War Garden with strain prices, rotating stock, and Indica, Sativa, and Hybrid perks lasting 5, 10, 20, or 30 minutes, with matching health-bar colors.
 - Casino, lounge, garage, Ammu-Nation, and CJ's house interiors with shared access and return to your entrance.
 - Passive mode with a shield beside player names, vehicle options, weapon drops, and a Money / Team / K/D / Z/D scoreboard.
@@ -22,7 +24,7 @@ MTA:SA freeroam server for custom gameplay, content creation, and playing with f
 | Key   | Action                                                                                                                            |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------- |
 | F1    | Player, vehicle, and passive options                                                                                              |
-| H     | Open the Garden or Booty Desk shop, enter/exit interiors, start Airyard at the ship capsule, or equip a parachute at the loot box |
+| H     | Open the Garden, Kratom, or Booty Desk shop, enter/exit interiors, start Airyard at the ship capsule, or equip a parachute at the loot box |
 | Space | Respawn when prompted                                                                                                             |
 
 Rustler bombs use the vehicle fire control.
