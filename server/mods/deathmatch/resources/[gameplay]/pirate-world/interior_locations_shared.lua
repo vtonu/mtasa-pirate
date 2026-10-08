@@ -1,4 +1,4 @@
--- NEW LV DOORS; EACH ENTRANCE HAS ITS OWN ROOM
+-- DOORS; EACH ENTRANCE HAS ITS OWN ROOM
 local casino = {interior = 12, x = 1133.25, y = -15.26, z = 1000.68,
     spawnX = 1133.25, spawnY = -12.76, rotation = 0}
 local dragons = {interior = 10, x = 2018.95, y = 1017.09, z = 996.875,
@@ -7,6 +7,8 @@ local dispensary = {interior = 4, x = -27.31, y = -31.38, z = 1003.55,
     spawnX = -27.31, spawnY = -28.38, rotation = 0}
 local stripClub = {interior = 2, x = 1204.81, y = -12.79, z = 1001.09,
     spawnX = 1204.81, spawnY = -9.79, rotation = 0}
+local clinic = {interior = 3, x = 389.89935, y = 173.61348, z = 1008.38281,
+    spawnX = 375.38947, spawnY = 173.98508, spawnZ = 1008.38934, rotation = 90}
 
 local doors = {
     {"dispensaryNorthLV", 1854.38477, 2233.88232, 11.12500, dispensary, false},
@@ -19,7 +21,11 @@ local doors = {
     {"casinoOldStripSouth", 2219.68530, 2123.58936, 10.82031, casino, 44},
     {"casinoOldStripEast", 2329.91235, 2114.49536, 10.82812, casino, 44},
     {"casinoOldStripNorth", 2374.24170, 2168.64258, 10.82431, casino, 44},
-    {"stripClubOldStrip", 2506.74634, 2120.67651, 10.83990, stripClub, 21}
+    {"stripClubOldStrip", 2506.74634, 2120.67651, 10.83990, stripClub, 21},
+    {"clinicSFWest", -2664.98950, 639.52942, 14.45312, clinic, false},
+    {"clinicSFEast", -2558.18774, 663.10907, 14.45312, clinic, false},
+    {"gasStationChiliad", -2231.54492, -2558.19507, 31.92188, dispensary, 11},
+    {"clinicLSWest", 1172.67395, -1325.41089, 15.40222, clinic, false}
 }
 
 additionalInteriorRooms = {}

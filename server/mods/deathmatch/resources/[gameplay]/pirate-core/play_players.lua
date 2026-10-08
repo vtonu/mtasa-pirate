@@ -32,9 +32,11 @@ end
 local function getHospitalRespawn(deathPosition, playerElement)
     local nearestSpawn
     local nearestDistance
+    local stayInSF = getZoneName(deathPosition.x, deathPosition.y, 0, true) == "San Fierro"
     for _, spawnData in ipairs(hospitalSpawns) do
         local distance = (spawnData.x - deathPosition.x)^2 + (spawnData.y - deathPosition.y)^2
-        if (not nearestDistance or distance < nearestDistance) and isHospitalSpawnClear(spawnData, playerElement) then
+        if (not stayInSF or spawnData.city == "San Fierro")
+            and (not nearestDistance or distance < nearestDistance) and isHospitalSpawnClear(spawnData, playerElement) then
             nearestSpawn = spawnData
             nearestDistance = distance
         end
@@ -42,6 +44,7 @@ local function getHospitalRespawn(deathPosition, playerElement)
     if nearestSpawn then
         hospitalReservations[nearestSpawn] = getTickCount() + 3000
     end
+    if stayInSF then return nearestSpawn end
     return nearestSpawn or playerSpawn
 end
 
@@ -122,6 +125,12 @@ local function finishPendingPlayerRespawn(playerElement)
     local spawnData = pendingRespawn.spawnData
     if spawnData.hospitalRespawn then
         spawnData = getHospitalRespawn(spawnData, playerElement)
+        -- KEEP SF RESPAWNS LOCAL WHILE BOTH POINTS ARE OCCUPIED
+        if not spawnData then
+            if isTimer(pendingRespawn.timer) then killTimer(pendingRespawn.timer) end
+            pendingRespawn.timer = setTimer(finishPendingPlayerRespawn, 500, 1, playerElement)
+            return
+        end
     end
 
     clearPendingPlayerRespawn(playerElement, true)
