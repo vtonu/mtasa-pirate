@@ -29,6 +29,7 @@ addEventHandler("onResourceStart", resourceRoot, function()
         missions[player] = nil
         landedPlayers[player] = true
         triggerClientEvent(player, "airyard:finished", resourceRoot)
+        triggerClientEvent(player, "mission:complete", resourceRoot, "AIRYARD", 0, "PARACHUTE UNLOCKED")
     end)
     rooftopZone = createColSphere(2059.08545, 2434.55225, 165.61719, 2.5)
 end)

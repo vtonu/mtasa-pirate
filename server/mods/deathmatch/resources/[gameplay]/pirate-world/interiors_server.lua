@@ -222,6 +222,10 @@ local rooms = {
     }
 }
 -- CLINIC RECEPTION AND OFFICES: ONE ROOM PER ENTRANCE
+for _, room in ipairs(additionalInteriorRooms) do
+    rooms[room.id] = room
+end
+
 local clinicDoors = {
     {"clinicNorthLV", 1894.19421, 2234.13354, 11.125},
     {"clinicLVHospital", 1607.52393, 1816.47595, 10.82031},
@@ -374,6 +378,16 @@ addEventHandler("onResourceStart", resourceRoot, function()
                 setElementDimension(marker, room.entranceDimension or room.dimension)
                 setElementData(marker, "pirate.doorDistance", 0.7)
                 setDoorSide(marker, room, -1)
+            end
+        end
+        -- MATCH THE PALOMINO BACKDOOR ON ALL OUTSIDE ENTRANCES
+        for _, id in ipairs(room.entrances) do
+            local marker = getElementByID(id)
+            if isElement(marker) and getElementInterior(marker) == 0
+                and getElementDimension(marker) == 0 then
+                setMarkerType(marker, "arrow")
+                setMarkerSize(marker, 1)
+                setMarkerColor(marker, 127, 255, 212, 255)
             end
         end
         local entrance = room.blip and getElementByID(room.blip)

@@ -71,7 +71,8 @@ local NOTIFICATION_MESSAGES = {"[NOTIFICATION] Aye Captain, you can always come 
                                "[NOTIFICATION] Got a suggestion? Use /report to let us know.",
                                "[NOTIFICATION] Open beta: expect bugs. Use /report for feedback.",
                                "[NOTIFICATION] Need a car? Head to the Autobahn flag.",
-                               "[NOTIFICATION] Pick up a car at the Autobahn flag."}
+                               "[NOTIFICATION] Pick up a car at the Autobahn flag.",
+                               "[NOTIFICATION] Go to the AutoBahn in LV for a sports car!"}
 
 addEventHandler("onResourceStart", resourceRoot, function()
     local entrance = createColSphere(2025.07141, 1545.09875, 10.82031, 6)

@@ -3,6 +3,7 @@
     <info name="pirate-world" type="script" />
     <include resource="pirate-map" />
     <script src="map_links_shared.lua" type="shared" />
+    <script src="interior_locations_shared.lua" type="shared" />
     <script src="world_server.lua" type="server" />
     <script src="spawn_vehicles_server.lua" type="server" />
     <script src="vehicle_speed_client.lua" type="client" />

@@ -259,6 +259,7 @@ addEventHandler("onVehicleEnter",root,function(player,seat)
             or getPedOccupiedVehicle(player)~=s.vehicle or getVehicleController(s.vehicle)~=player
             or not near(player,s.marker,5) then return end
         givePlayerMoney(player,500000)
+        triggerClientEvent(player,"mission:complete",resourceRoot,"SECURI DELIVERY",500000)
         finish(s,true)
     end)
     -- OTHER READY PLAYERS WAIT FOR A CLEAR HOME BEFORE A NEW VAN APPEARS

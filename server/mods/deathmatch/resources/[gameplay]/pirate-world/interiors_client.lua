@@ -37,6 +37,10 @@ for _, id in ipairs({"clinicNorthLV", "clinicLVHospital", "clinicPalomino",
     rooms[#rooms + 1] = {id = id, entrances = {id .. "Entrance"}, exitID = id .. "Exit"}
 end
 local casinoMarkers = {}
+for _, room in ipairs(additionalInteriorRooms) do
+    rooms[#rooms + 1] = {id = room.id, entrances = room.entrances, exitID = room.exitID}
+end
+
 local nextDoorTick = 0
 
 local function getNearbyDoor()

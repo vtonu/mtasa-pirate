@@ -1,14 +1,27 @@
--- BOUNTY BANNER; OTHER MISSION PROMPTS STAY TEXT ONLY
+-- SHARED MISSION AND BOUNTY BANNER
 local panel=svgCreate(500,52,[[<svg xmlns="http://www.w3.org/2000/svg" width="500" height="52"><rect x="1" y="1" width="498" height="50" rx="5" fill="#131313" fill-opacity=".35" stroke="#7fffd4" stroke-opacity=".22"/></svg>]])
 local alertPanel=svgCreate(500,52,[[<svg xmlns="http://www.w3.org/2000/svg" width="500" height="52"><rect x="1" y="1" width="498" height="50" rx="5" fill="#dc4848" fill-opacity=".5" stroke="#ff7777" stroke-opacity=".6"/></svg>]])
 local claimed,claimUntil
 local completed,completeUntil
 local fullRobbery
+local completionTitle,completionDetail
+
+addEvent("mission:complete",true)
+addEventHandler("mission:complete",resourceRoot,function(mission,reward,extra)
+    completed,completeUntil=tonumber(reward) or 0,getTickCount()+6000
+    completionTitle="MISSION COMPLETE"
+    if completed>0 then completionTitle=completionTitle.." | +$"..completed end
+    if extra and extra~="" then completionTitle=completionTitle.." | "..extra end
+    completionDetail=mission
+    playSoundFrontEnd(46)
+end)
 
 addEvent("bank:cashout",true)
 addEventHandler("bank:cashout",resourceRoot,function(reward,full)
     completed,completeUntil=tonumber(reward),getTickCount()+6000
     fullRobbery=full==true
+    completionTitle=nil
+    completionDetail=nil
     playSoundFrontEnd(46)
 end)
 
@@ -23,8 +36,8 @@ addEventHandler("onClientRender",root,function()
     local title,detail
     local public=false
     if completed and getTickCount()<completeUntil then
-        title=(fullRobbery and "MISSION COMPLETE | +$" or "CASH SECURED | +$")..completed
-        detail="RED COUNTY BANK"
+        title=completionTitle or ((fullRobbery and "MISSION COMPLETE | +$" or "CASH SECURED | +$")..completed)
+        detail=completionDetail or "RED COUNTY BANK"
     elseif claimed and getTickCount()<claimUntil then
         title="BOUNTY CLAIMED  +$"..claimed
         detail="RED COUNTY BANK"

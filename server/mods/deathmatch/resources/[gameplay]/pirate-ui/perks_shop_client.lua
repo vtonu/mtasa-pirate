@@ -139,7 +139,7 @@ local lockoutUntilTick = 0
 local function nearKratomShop()
     if not isElement(localPlayer) or isPedDead(localPlayer) or isPedInVehicle(localPlayer) then return false end
     local x,y,z=getElementPosition(localPlayer)
-    for _,id in ipairs({"specialShopWeedGarden","specialShopRedCounty"}) do
+    for _,id in ipairs({"specialShopWeedGarden","specialShopRedCounty","specialShopNorthLV"}) do
         local marker=getElementByID(id)
         if isElement(marker) and getElementData(marker,"specialShop:catalog")=="kratom"
             and getElementInterior(marker)==getElementInterior(localPlayer)

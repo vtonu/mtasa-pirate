@@ -63,7 +63,7 @@ end
 addEventHandler("onResourceStart", resourceRoot, function()
     gardenCol = createWeedShop(MARKER_X, MARKER_Y, MARKER_Z, MARKER_RADIUS, 150)
     createWeedShop(2157.20654,1607.71350,998.97131,0.8,150,"weedShopPalominoBasement",1,12104)
-    createWeedShop(1857.86353, 2236.32324, 10.125, 1, 255, "weedShopNorthLV")
+    createWeedShop(1859.36475, 2235.77222, 10.12500, 1, 255, "weedShopNorthLV")
     createWeedShop(1587.70569, 1910.43542, 9.82031, 1, 255, "weedShopLVHospital")
     createWeedShop(-368.70197, 1168.55225, 19.27188, 1, 255, "weedShopFortCarson")
     createWeedShop(-1448.90356, 2557.48486, 54.83594, 1, 255, "weedShopElQuebrados")

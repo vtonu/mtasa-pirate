@@ -188,7 +188,10 @@ finish = function(current, message, success, wreck)
         -- HIDE ONLY THIS PLAYER'S MARKER
         setElementVisibleTo(current.destination.marker, current.player, false)
     end
-    if success and isElement(current.player) then givePlayerMoney(current.player, current.destination.reward) end
+    if success and isElement(current.player) then
+        givePlayerMoney(current.player, current.destination.reward)
+        triggerClientEvent(current.player, "mission:complete", resourceRoot, "EMMET DELIVERY", current.destination.reward)
+    end
     send(current.player, "finished", message, success)
     if wreck and not stopping then
         setPlayerBusy(current.player, true)

@@ -231,6 +231,7 @@ local function completeMissionTarget(player)
     end
 
     rewardPlayer(player)
+    triggerClientEvent(player, "mission:complete", resourceRoot, "LOCO", REWARD_MONEY, "+" .. REWARD_POINTS .. " LOCO POINT")
     exports["pirate-core"]:playMessage(player, "locoReward", REWARD_MONEY)
     destroyMissionVehicle(player)
 

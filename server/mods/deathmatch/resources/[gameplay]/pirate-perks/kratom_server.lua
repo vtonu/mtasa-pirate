@@ -15,7 +15,7 @@ end
 local function nearShop(player)
     if not isElement(player) or isPedDead(player) or isPedInVehicle(player) then return false end
     local x,y,z=getElementPosition(player)
-    for _,id in ipairs({"specialShopWeedGarden","specialShopRedCounty"}) do
+    for _,id in ipairs({"specialShopWeedGarden","specialShopRedCounty","specialShopNorthLV"}) do
         local marker=getElementByID(id)
         if isElement(marker) and getElementData(marker,"specialShop:catalog")=="kratom"
             and getElementInterior(marker)==getElementInterior(player)
@@ -202,7 +202,7 @@ local function denyAmbulance(player)
     local now=getTickCount()
     if now>=(ambulanceNotices[player] or 0) then
         ambulanceNotices[player]=now+2000
-        outputChatBox("ONLY KRATOM PLAYERS CAN USE THIS VEHICLE.",player,255,230,109)
+        outputChatBox("Only #7FFF00Kratom#FFE66D players can use this vehicle.",player,255,230,109,true)
     end
 end
 addEventHandler("onVehicleStartEnter",root,function(player)
