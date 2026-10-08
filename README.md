@@ -1,11 +1,13 @@
-# Project Details (mtasa-pirate v1.3.9)
+# Project Details (mtasa-pirate v1.3.10)
 
-<img width="1920" height="1080" alt="mtasa-pirate-openbeta" src="https://github.com/user-attachments/assets/bee0cba0-5b55-4744-9ff9-d74f14e8e4cc" />
+<img width="1920" height="1080" alt="mta-screen_2026-10-07_23-57-28" src="https://github.com/user-attachments/assets/3ccfa318-edf0-4ab2-9a9f-8f15f5533539" />
 
 MTA:SA freeroam server for custom gameplay, content creation, and playing with friends. Now live and in open beta.
 
 ## Features
 
+- Six grouped resources for core, UI, perks, weapons, world, and missions.
+- Cargo loading progress, Autobahn cars with a custom flag, and 50% cash drops on death.
 - Bank robberies with cash bags, bounties, blinking stars, and payout progress.
 - WHITE, GREEN, and PURPLE kratom with night vision, zombie highlights, and combat perks.
 - Fog of War Garden with strain prices, rotating stock, and Indica, Sativa, and Hybrid perks lasting 5, 10, 20, or 30 minutes, with matching health-bar colors.
