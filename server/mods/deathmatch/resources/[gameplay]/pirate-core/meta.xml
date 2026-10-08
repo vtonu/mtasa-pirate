@@ -1,0 +1,32 @@
+<meta>
+	<info author="Lifestyle" description="Launches a basic freeroam mode, together with basic map and extra handling" version="1.0" type="gamemode"/>
+	<min_mta_version server="1.6.0-0.00000"></min_mta_version>
+	
+	<include resource="freeroam"/>
+	<include resource="pirate-world"/>
+	<include resource="pirate-perks"/>
+	<include resource="pirate-weapons"/>
+	<!-- <include resource="superman"/> -->
+	<!-- <include resource="hedit"/> -->
+	<include resource="mapfixes"/>
+	<include resource="chatmanager" />
+
+	<script src="style_config.lua" type="shared"/>
+	<script src="style_shared.lua" type="shared"/>
+	<script src="play_config.lua" type="server"/>
+	<script src="play_messages.lua" type="server"/>
+	<script src="play_stats.lua" type="server"/>
+	<script src="play_scoreboard.lua" type="server"/>
+	<script src="play_players.lua" type="server"/>
+	<script src="spawn_server.lua" type="server"/>
+	<script src="play_pickups.lua" type="server"/>
+	<script src="play.lua" type="server"/>
+	<script src="play_bootyLoot.lua" type="server"/>
+	<export function="addPlayerMoneyEarned" type="server"/>
+	<export function="addPlayerPlayStat" type="server"/>
+	<export function="playMessage" type="server"/>
+	<export function="getPromptStyle" type="client"/>
+	<export function="getPromptStyle" type="server"/>
+	<export function="showSpawnScreen" type="server"/>
+	<export function="isWaitingForSpawn" type="server"/>
+</meta>

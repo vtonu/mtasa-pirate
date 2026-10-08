@@ -1,0 +1,21 @@
+<meta>
+    <include resource="pirate-ui" />
+    <info name="pirate-weapons" author="Lifestyle, erorr404, jbeta, MTA contributors (github.com/multitheftauto/mtasa-resources)" type="script" />
+    <min_mta_version server="1.6.0" />
+    <include resource="pirate-perks" />
+    <script src="armor_server.lua" type="server" />
+    <script src="armor_client.lua" type="client" />
+    <script src="shop_server.lua" type="server" />
+    <script src="headshotSettings.lua" type="server" />
+    <script src="headshotDamage.lua" type="server" />
+    <script src="headshotSpawn.lua" type="server" />
+    <script src="death_pickups_server.lua" type="server" />
+    <export function="openBootyUI" type="server" />
+    <export function="closeBootyUI" type="server" />
+    <settings>
+        <setting name="*decap" desc="determines whether the player becomes headless after a headshot" value="[true]" accept="false, true" />
+        <setting name="*timeout" value="[180000]" />
+        <setting name="*only_current" value="[false]" />
+        <setting name="*radius" value="[1]" />
+    </settings>
+</meta>

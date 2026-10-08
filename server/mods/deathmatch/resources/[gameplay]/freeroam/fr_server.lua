@@ -753,7 +753,7 @@ end
 addEventHandler('onPlayerQuit', root, quitHandler)
 
 local function isWaitingForSpawn(player)
-    local screen = getResourceFromName("spawn-screen")
+    local screen = getResourceFromName("pirate-core")
     return screen and getResourceState(screen) == "running" and call(screen, "isWaitingForSpawn", player) == true
 end
 

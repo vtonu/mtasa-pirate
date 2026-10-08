@@ -1,0 +1,17 @@
+<meta>
+    <include resource="pirate-ui" />
+    <info author="Lifestyle" name="Weed Garden UI" version="1.0" type="script" description="Greenhouse-style CEF interface for the weed growing system." />
+    <script src="shops_server.lua" type="server" />
+    <script src="weed_server.lua" type="server" />
+    <script src="kratom_server.lua" type="server" />
+    <script src="weed_client.lua" type="client" />
+    <script src="kratom_client.lua" type="client" />
+    <script src="kratom_goggles_client.lua" type="client" />
+    <file src="kratom_white.fx" />
+    <file src="kratom_zombie.fx" />
+    <export function="drainKratomReserve" type="server" />
+    <export function="isKratomProtected" type="server" />
+    <export function="openGardenUI" type="server" />
+    <export function="updateGardenUI" type="server" />
+    <export function="closeGardenUI" type="server" />
+</meta>

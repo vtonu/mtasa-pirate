@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="shop.css" />
+    <style>
+
+      :root {
+        --green: #7fffd4;
+        --green-soft: #7fffd4;
+        --mint: #7fffd4;
+        --amber: #ffe66d;
+        --red: #ee1426;
+        --stealth: #b88cff;
+        --ballistics: #ffe66d;
+        --heavy: #7fffd4;
+        --panel: rgba(13, 13, 13, 0.72);
+        --panel-deep: rgba(6, 6, 6, 0.84);
+        --line: rgba(127, 255, 212, 0.38);
+      }
+
+
+
+      .shop-ui {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background:
+          radial-gradient(
+            circle at 20% 10%,
+            rgba(127, 255, 212, 0.06),
+            transparent 32%
+          ),
+          linear-gradient(135deg, rgba(15, 15, 15, 0.9), rgba(6, 6, 6, 0.72));
+        box-shadow:
+          inset 0 0 32px rgba(127, 255, 212, 0.05),
+          0 0 14px rgba(127, 255, 212, 0.08);
+      }
+
+      .shop-ui::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.5;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.025),
+          rgba(255, 255, 255, 0.025) 1px,
+          transparent 1px,
+          transparent 5px
+        );
+      }
+
+      .topbar {
+        position: relative;
+        z-index: 1;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(22, 22, 22, 0.62);
+        cursor: move;
+        user-select: none;
+      }
+
+      .eyebrow,
+      .metric-label,
+      .buy-title {
+        color: var(--green-soft);
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin-top: 2px;
+        overflow: hidden;
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: 18px;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        text-shadow: 0 0 7px rgba(127, 255, 212, 0.36);
+        white-space: nowrap;
+      }
+
+      button {
+        font-family: "Share Tech Mono", monospace;
+      }
+
+      button:focus {
+        outline: none;
+      }
+
+      .close-btn {
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(127, 255, 212, 0.55);
+        border-radius: 6px;
+        color: var(--mint);
+        background: rgba(0, 0, 0, 0.22);
+        font-family: "Orbitron", sans-serif;
+        cursor: pointer;
+      }
+
+      .close-btn:hover {
+        border-color: var(--green);
+        color: #0d0d0d;
+        background: var(--green);
+        box-shadow: 0 0 16px rgba(127, 255, 212, 0.34);
+      }
+
+      .buy-btn:hover {
+        border-color: var(--green);
+        filter: brightness(0.82);
+        box-shadow: 0 0 3px rgba(127, 255, 212, 0.2);
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 12px;
+        height: calc(100vh - 56px);
+        padding: 12px 12px 30px;
+      }
+
+      .panel {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: inset 0 0 16px rgba(127, 255, 212, 0.04);
+        backdrop-filter: blur(4px);
+      }
+
+      .main-panel {
+        display: flex;
+        flex-direction: column;
+        padding: 14px 14px 16px;
+      }
+
+      .status-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .metric {
+        min-height: 74px;
+        padding: 10px;
+        border: 1px solid rgba(127, 255, 212, 0.22);
+        border-radius: 7px;
+        background: rgba(0, 0, 0, 0.18);
+      }
+
+      .metric-value {
+        margin-top: 7px;
+        overflow: hidden;
+        color: #fff;
+        font-family: "Share Tech Mono", monospace;
+        font-size: clamp(12px, 1.65vw, 20px);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .weapon-scope {
+        min-height: 0;
+        flex: 1;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 10px;
+        padding: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(127, 255, 212, 0.28);
+        border-radius: 8px;
+        background:
+          linear-gradient(rgba(127, 255, 212, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(127, 255, 212, 0.08) 1px, transparent 1px),
+          rgba(7, 7, 7, 0.56);
+        background-size: 28px 28px;
+      }
+
+      .data-header {
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(127, 255, 212, 0.25);
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: 13px;
+      }
+
+      .weapon-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(127, 255, 212, 0.25);
+      }
+
+      .weapon-header .data-header {
+        flex: 1;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        white-space: nowrap;
+      }
+
+      .category-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        width: min(62%, 310px);
+      }
+
+      .category-btn {
+        min-height: 27px;
+        border: 1px solid var(--category-color);
+        border-radius: 5px;
+        color: var(--category-color);
+        background: rgba(6, 6, 6, 0.76);
+        font-size: 11px;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      .category-btn.selected,
+      .category-btn:hover {
+        color: #0d0d0d;
+        background: var(--category-color);
+        box-shadow: 0 0 9px var(--category-color);
+      }
+
+      .weapon-grid {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-auto-rows: 50px;
+        gap: 7px;
+        padding: 3px 4px 0 0;
+        overflow-y: auto;
+      }
+
+      .weapon-grid::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .weapon-grid::-webkit-scrollbar-thumb {
+        background: rgba(127, 255, 212, 0.45);
+      }
+
+      .weapon-tile {
+        position: relative;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px;
+        overflow: hidden;
+        border: 1px solid var(--weapon-color);
+        border-radius: 0;
+        color: var(--weapon-color);
+        background: rgba(9, 9, 9, 0.9);
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .weapon-tile:hover {
+        background: rgba(13, 13, 13, 0.94);
+        transform: translateY(-1px);
+      }
+
+      .weapon-tile.selected {
+        background: rgba(4, 4, 4, 0.96);
+        box-shadow: none;
+        transform: translateY(1px) scale(0.985);
+      }
+
+      .weapon-name {
+        display: -webkit-box;
+        overflow: hidden;
+        color: #fff;
+        font-size: 10px;
+        line-height: 1.05;
+        overflow-wrap: anywhere;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .side-panel {
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        gap: 10px;
+        padding: 12px 12px 20px;
+      }
+
+      .armor-tiers { display: flex; gap: 5px; padding: 7px; }
+      .armor-tiers[hidden] { display: none; }
+      .armor-tier { flex: 1; min-width: 0; padding: 7px 3px; border: 1px solid #b88cff; background: rgba(27, 27, 27, 0.48); color: #fff; font: inherit; font-size: 9px; cursor: pointer; }
+
+      .bar-row {
+        margin-bottom: 7px;
+      }
+
+      .bar-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        color: var(--green-soft);
+        font-size: 12px;
+      }
+
+      .bar {
+        height: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(127, 255, 212, 0.42);
+        background: rgba(9, 9, 9, 0.8);
+      }
+
+      .fill {
+        width: 0;
+        height: 100%;
+        transition: width 0.18s ease;
+      }
+
+      .readout-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .readout {
+        padding: 7px 9px;
+        border: 1px solid rgba(127, 255, 212, 0.2);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.16);
+      }
+
+      .readout span {
+        display: block;
+        color: var(--green-soft);
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+
+      .readout strong {
+        display: block;
+        margin-top: 4px;
+        overflow: hidden;
+        color: #fff;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 14px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .weapon-display {
+        position: relative;
+        min-height: 118px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 1px solid rgba(127, 255, 212, 0.22);
+        border-radius: 7px;
+        background:
+          radial-gradient(circle, rgba(127, 255, 212, 0.11), transparent 64%),
+          rgba(6, 6, 6, 0.48);
+      }
+
+      .scope-ring {
+        position: absolute;
+        width: 108px;
+        aspect-ratio: 1;
+        border: 2px dashed rgba(127, 255, 212, 0.42);
+        border-radius: 50%;
+        animation: spin 30s linear infinite;
+      }
+
+      .scope-ring.inner {
+        width: 82px;
+        border-style: dotted;
+        animation: spin 16s linear infinite reverse;
+      }
+
+      .weapon-core {
+        position: relative;
+        z-index: 1;
+        width: 76px;
+        height: 76px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(127, 255, 212, 0.55);
+        border-radius: 50%;
+        color: #fff;
+        background: rgba(22, 22, 22, 0.5);
+        box-shadow:
+          0 0 34px rgba(127, 255, 212, 0.2),
+          inset 0 0 22px rgba(127, 255, 212, 0.18);
+        text-align: center;
+      }
+
+      .weapon-core strong {
+        color: var(--green-soft);
+        font-family: "Orbitron", sans-serif;
+        font-size: 20px;
+      }
+
+      .weapon-core span {
+        color: var(--green-soft);
+        font-size: 8px;
+        letter-spacing: 0.2px;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .notification-wrap {
+        display: grid;
+        gap: 8px;
+        min-height: 0;
+      }
+
+      .note {
+        height: 72px;
+        min-height: 72px;
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 9px;
+        align-items: start;
+        overflow: hidden;
+        padding: 10px;
+        border: 1px solid rgba(127, 255, 212, 0.16);
+        border-radius: 0;
+        color: var(--mint);
+        background: var(--panel-deep);
+        line-height: 1.35;
+      }
+
+      .note-icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 0;
+        color: #272727;
+        background: #7fffd4;
+        font-family: "Share Tech Mono", "Consolas", monospace;
+        font-size: 17px;
+        box-shadow: none;
+      }
+
+      .note-title {
+        margin-bottom: 4px;
+        color: var(--green);
+        font-family: "Share Tech Mono", "Consolas", monospace;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .note-message {
+        display: -webkit-box;
+        overflow: hidden;
+        color: var(--mint);
+        font-size: 13px;
+        line-height: 1.35;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+      }
+
+      .buy-btn {
+        min-height: 36px;
+        border: 1px solid rgba(127, 255, 212, 0.45);
+        border-radius: 0;
+        color: var(--mint);
+        background: rgba(15, 15, 15, 0.7);
+        font-size: 12px;
+        cursor: pointer;
+        transition:
+          filter 0.14s ease,
+          transform 0.14s ease,
+          box-shadow 0.14s ease,
+          background-color 0.14s ease;
+      }
+
+      .buy-btn.purchase-click {
+        animation: purchase-click 0.18s ease;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes purchase-click {
+        0% {
+          transform: scale(1);
+        }
+        45% {
+          transform: translateY(0.5px) scale(0.98);
+          box-shadow:
+            0 0 5px rgba(127, 255, 212, 0.18),
+            inset 0 3px 8px rgba(0, 0, 0, 0.72);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* HUD COLORS AND SURFACES */
+      :root {
+        --green: #7fffd4;
+        --green-soft: #7fffd4;
+        --mint: #7fffd4;
+        --panel: transparent;
+        --panel-deep: rgba(22, 22, 22, 0.48);
+        --line: rgba(127, 255, 212, 0.16);
+      }
+
+      .shop-ui, .garden-ui {
+        border-color: rgba(127, 255, 212, 0.18);
+        border-radius: 1px;
+        background: linear-gradient(135deg, rgba(45, 45, 45, 0.56), rgba(18, 18, 18, 0.46));
+        box-shadow: inset 0 1px rgba(127, 255, 212, 0.12);
+      }
+      .shop-ui::before, .garden-ui::before { display: none; }
+      .topbar { background: rgba(127, 255, 212, 0.035); border-bottom-color: var(--line); }
+      h1, .data-header, .note-title, .strain-symbol, .core-text strong,
+      .weapon-core strong, .close-btn, .note-icon {
+        font-family: "Share Tech Mono", "Consolas", monospace;
+        text-shadow: none;
+      }
+      h1 { letter-spacing: 0.4px; }
+      .panel, .metric, .weapon-scope, .garden-scope {
+        border-color: transparent;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+      }
+      .data-header, .weapon-header { border-bottom-color: transparent; }
+      .metric-label, .eyebrow, .bar-meta, .readout span { color: #7fffd4; }
+      .readout {
+        border-color: transparent;
+        border-radius: 0;
+        background: rgba(127, 255, 212, 0.045);
+      }
+      .bar { border: 0; background: rgba(127, 255, 212, 0.12); }
+      .weapon-tile, .strain-tile { background: rgba(27, 27, 27, 0.48); }
+      .weapon-tile:hover, .strain-tile:hover { background: rgba(127, 255, 212, 0.14); }
+      .weapon-tile.selected, .strain-tile.selected {
+        background: rgba(127, 255, 212, 0.24);
+        box-shadow: inset 0 -2px #7fffd4;
+      }
+      .weapon-tile.armour-tile:hover, .armor-tier:hover { background: rgba(184, 140, 255, 0.14); }
+      .weapon-tile.armour-tile.selected, .armor-tier.selected {
+        background: linear-gradient(to bottom, rgba(184, 140, 255, 0.08), rgba(184, 140, 255, 0.24));
+        box-shadow: inset 0 -2px #b88cff;
+      }
+      .category-btn, .strain-check, .close-btn, .buy-btn, .action-btn,
+      .note, .note-icon, .weapon-display, .health-scope { border-radius: 0; }
+      .category-btn { background: rgba(27, 27, 27, 0.4); }
+      .category-btn.selected, .category-btn:hover { box-shadow: none; }
+      .note { border-color: rgba(127, 255, 212, 0.16); background: var(--panel-deep); }
+      .note-icon { color: #272727; background: #7fffd4; border: 0; box-shadow: none; }
+      .weapon-display, .health-scope {
+        border-color: transparent;
+        background: rgba(127, 255, 212, 0.035);
+      }
+      .scope-ring { opacity: 0.25; }
+      .weapon-core, .plant-core { box-shadow: none; }
+      .close-btn { border-color: var(--line); background: transparent; }
+      .close-btn:hover { color: #ffe66d; background: rgba(255, 230, 109, 0.12); box-shadow: none; }
+      .buy-btn, .action-btn {
+        color: #7fffd4;
+        border-color: rgba(127, 255, 212, 0.48);
+        background: rgba(127, 255, 212, 0.13);
+        box-shadow: none;
+      }
+      .buy-btn:hover, .action-btn:hover {
+        background: rgba(127, 255, 212, 0.25);
+        box-shadow: none;
+        filter: none;
+      }
+      .buy-btn.selected, .action-btn.cart-selected {
+        color: #262626;
+        background: #7fffd4;
+        box-shadow: none;
+      }
+      button:focus-visible { outline: 1px solid #ffe66d; outline-offset: 2px; }
+
+      /* ITEM weapon-display */
+      .weapon-display.preview-card {
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        align-items: stretch;
+        justify-content: stretch;
+        --preview-accent: #b88cff;
+      }
+      .preview-main {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 34% minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+      }
+      .preview-art {
+        width: 100%;
+        height: 74px;
+        object-fit: contain;
+        opacity: 0.85;
+        filter: grayscale(0.65) sepia(0.45) hue-rotate(95deg) saturate(0.65) brightness(1.12);
+      }
+      .preview-art[hidden] { display: none; }
+      .preview-art.fire-art { filter: saturate(1.2) brightness(1.1); }
+      .preview-art.grey-art { filter: grayscale(1) brightness(1.12); }
+      .preview-art.optics-art { filter: saturate(0.8) brightness(1.05); }
+      .preview-art.armour-art { filter: none; }
+      .preview-detail[hidden] { display: none; }
+      .preview-placeholder { text-align: center; font-size: 28px; color: var(--green-soft); opacity: 0.45; }
+      .preview-placeholder[hidden] { display: none; }
+      .preview-copy { min-width: 0; }
+      .preview-label { color: var(--green-soft); font-size: 9px; letter-spacing: 0.5px; }
+      .preview-name {
+        color: var(--preview-accent);
+        font-size: 16px;
+        line-height: 1.05;
+        margin: 3px 0;
+        overflow-wrap: break-word;
+      }
+      .preview-detail { color: var(--mint); font-size: 10px; line-height: 1.3; }
+      .preview-value { margin-top: 5px; color: var(--preview-accent); font-size: 12px; }
+      .preview-status {
+        min-width: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 9px;
+        border-top: 1px solid var(--line);
+        background: rgba(22, 22, 22, 0.35);
+        color: var(--green-soft);
+        font-size: 9px;
+        line-height: 1.25;
+      }
+      .preview-status span { min-width: 0; overflow-wrap: break-word; }
+      .preview-status strong { color: var(--preview-accent); font-weight: normal; text-align: right; flex-shrink: 0; }
+      .perk-progress { position: absolute; bottom: 0; left: 0; height: 2px; width: 0; background: var(--preview-accent); }
+      .note.insufficient-funds {
+        animation: insufficient-funds-pulse 1400ms ease-in-out;
+      }
+
+      @keyframes insufficient-funds-pulse {
+        0%, 100% {
+          border-color: rgba(127, 255, 212, 0.16);
+          background: var(--panel-deep);
+          box-shadow: none;
+        }
+        35% {
+          border-color: rgba(238, 20, 38, 0.38);
+          background: rgba(37, 37, 37, 0.94);
+          box-shadow: inset 0 0 16px rgba(238, 20, 38, 0.05);
+        }
+      }
+
+      /* SMALL SCREENS */
+      .panel, .main-panel, .side-panel, .weapon-scope, .garden-scope {
+        min-height: 0;
+      }
+      .side-panel { overflow-y: auto; }
+      .side-panel::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
+
+      @media (max-height: 700px) {
+        .content { padding: 8px 8px 12px; gap: 8px; }
+        .main-panel, .side-panel { padding: 8px; }
+        .side-panel { gap: 6px; }
+        .data-header { margin-bottom: 6px; padding-bottom: 3px; }
+        .bar-row { margin-bottom: 5px; }
+        .bar { height: 8px; }
+        .readout { padding: 5px 7px; }
+        .readout-grid { gap: 5px; }
+        .weapon-display, .health-scope { min-height: 90px; }
+        .preview-main { padding: 6px 8px; gap: 6px; }
+        .preview-art { height: 54px; }
+        .notification-wrap { gap: 6px; }
+        .note { padding: 7px; }
+        .status-row { gap: 6px; }
+        .metric { min-height: 60px; padding: 8px; }
+      }
+
+      @media (max-height: 600px) {
+        .bar-meta { font-size: 11px; margin-bottom: 2px; }
+        .bar-row { margin-bottom: 3px; }
+        .data-header { font-size: 12px; margin-bottom: 4px; }
+        .readout { padding: 3px 6px; }
+        .readout strong { font-size: 12px; }
+        .weapon-display, .health-scope { min-height: 70px; }
+        .preview-art { height: 40px; }
+        .side-panel { gap: 4px; }
+      }
+
+      @media (max-width: 850px) {
+        .weapon-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .weapon-header, .strain-header { flex-wrap: wrap; gap: 6px; }
+        .category-tabs, .strain-legend { flex-wrap: wrap; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shop-ui">
+      <header class="topbar" onmousedown="startDrag(event)">
+        <div>
+          <div class="eyebrow" id="zone">Pirate in Men's Pants</div>
+          <h1 id="title">Weapon Shop System</h1>
+        </div>
+        <button
+          class="close-btn"
+          type="button"
+          tabindex="-1"
+          onmousedown="event.stopPropagation()"
+          onclick="closeShop()"
+        >
+          X
+        </button>
+      </header>
+
+      <section class="content">
+        <div class="panel main-panel">
+          <div class="status-row">
+            <div class="metric">
+              <div class="metric-label">ID</div>
+              <div class="metric-value" id="weapon-id">--</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Price</div>
+              <div class="metric-value" id="price">--</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Stock</div>
+              <div class="metric-value" id="stock">AVAILABLE</div>
+            </div>
+          </div>
+
+          <div class="weapon-scope">
+            <div class="weapon-header">
+              <div class="data-header">Weapons Available</div>
+              <div class="category-tabs" id="category-tabs"></div>
+            </div>
+            <div class="weapon-grid" id="weapon-grid"></div>
+          </div>
+        </div>
+
+        <aside class="panel side-panel">
+          <div>
+            <div class="data-header">Weapon Stats</div>
+            <div class="bar-row">
+              <div class="bar-meta">
+                <span>Stealth</span><strong id="stealth-text">0%</strong>
+              </div>
+              <div class="bar"><div class="fill" id="stealth-fill"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-meta">
+                <span>Ballistics</span><strong id="ballistics-text">0%</strong>
+              </div>
+              <div class="bar">
+                <div class="fill" id="ballistics-fill"></div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-meta">
+                <span>Heavy</span><strong id="heavy-text">0%</strong>
+              </div>
+              <div class="bar"><div class="fill" id="heavy-fill"></div></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="data-header">Combat Readout</div>
+            <div class="readout-grid">
+              <div class="readout">
+                <span>Damage</span><strong id="damage">--</strong>
+              </div>
+              <div class="readout">
+                <span>Range</span><strong id="range">--</strong>
+              </div>
+              <div class="readout">
+                <span>Ammo</span><strong id="capacity">--</strong>
+              </div>
+              <div class="readout">
+                <span>Handling</span><strong id="handling">--</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="weapon-display preview-card" id="weapon-preview">
+            <div class="preview-main">
+              <img class="preview-art" id="preview-weapon-image" alt="" hidden />
+              <div class="preview-placeholder" id="preview-weapon-placeholder">--</div>
+              <div class="preview-copy">
+                <div class="preview-label">SELECTED ITEM</div>
+                <div class="preview-name" id="preview-weapon-name">SELECT AN ITEM</div>
+                <div class="preview-detail" id="preview-weapon-detail">--</div>
+                <div class="preview-value" id="preview-weapon-owned">--</div>
+              </div>
+            </div>
+            <div class="preview-status">
+              <span id="preview-weapon-slot">CURRENT SLOT: --</span>
+              <strong id="preview-weapon-action">--</strong>
+            </div>
+            <div class="armor-tiers" id="armor-tiers" hidden>
+              <button class="armor-tier" type="button" tabindex="-1" data-tier="soft" onclick="selectArmorTier('soft')">SOFT VEST</button>
+              <button class="armor-tier" type="button" tabindex="-1" data-tier="reinforced" onclick="selectArmorTier('reinforced')">REINFORCED VEST</button>
+              <button class="armor-tier" type="button" tabindex="-1" data-tier="hard" onclick="selectArmorTier('hard')">HARD PLATE</button>
+            </div>
+          </div>
+
+          <div class="notification-wrap">
+            <div class="note">
+              <div class="note-icon">!</div>
+              <div>
+                <div class="note-title">DESCRIPTION</div>
+                <div class="note-message" id="note">Select a weapon.</div>
+              </div>
+            </div>
+            <button
+              class="buy-btn"
+              type="button"
+              tabindex="-1"
+              onclick="buyWeapon(this)"
+            >
+              BUY SELECTED WEAPON
+            </button>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      const colors = {
+        stealth: "#b88cff",
+        ballistics: "#ffe66d",
+        heavy: "#7fffd4",
+      };
+
+      const categoryLabels = {
+        stealth: "Stealth",
+        ballistics: "Ballistics",
+        heavy: "Heavy",
+      };
+
+      let shopData = { weapons: [], stock: "AVAILABLE" };
+      let selectedCategory = "stealth";
+      let selectedWeapon = null;
+      let selectedArmorTier = "soft";
+
+      function selectArmorTier(tier) {
+        if (!selectedWeapon || selectedWeapon.id !== "armour" || !shopData.armorTiers[tier]) return;
+        selectedArmorTier = tier;
+        displayWeapon(selectedWeapon);
+        triggerAction(`armorTier:${tier}`);
+      }
+
+      function renderArmorTiers() {
+        const armor = selectedWeapon && selectedWeapon.id === "armour";
+        document.getElementById("armor-tiers").hidden = !armor;
+        document.querySelectorAll(".armor-tier").forEach((button) => {
+          button.classList.toggle("selected", button.dataset.tier === selectedArmorTier);
+        });
+        document.querySelector(".buy-btn").textContent = armor ? "BUY SELECTED ARMOUR" : "BUY SELECTED WEAPON";
+      }
+
+      function setText(id, value) {
+        document.getElementById(id).textContent = value;
+        if (id === "note") {
+          const box = document.getElementById(id).closest(".note");
+          box.classList.remove("insufficient-funds");
+          if (value === "SORRY, INSUFFICIENT FUNDS." || value === "YO, GET SOME MONEY DAWG!") {
+            void box.offsetWidth;
+            box.classList.add("insufficient-funds");
+          }
+        }
+      }
+
+      function clamp(value) {
+        return Math.max(0, Math.min(100, Number(value) || 0));
+      }
+
+      function setBar(name, value) {
+        const percent = clamp(value);
+        document.getElementById(`${name}-fill`).style.width = `${percent}%`;
+        document.getElementById(`${name}-fill`).style.backgroundColor =
+          colors[name];
+        setText(`${name}-text`, `${Math.round(percent)}%`);
+      }
+
+
+      const weaponImages = {"1": "brassknuckle.png", "2": "golfclub.png", "3": "nitestick.png", "4": "knifecur.png", "5": "bat.png", "6": "shovel.png", "7": "poolcue.png", "8": "katana.png", "9": "chnsaw.png", "10": "gun_dildo1.png", "12": "gun_vibe1.png", "14": "flowera.png", "15": "gun_cane.png", "16": "grenade.png", "17": "teargas.png", "18": "molotov.png", "22": "colt45.png", "23": "Silenced.png", "24": "desert_eagle.png", "25": "chromegun.png", "26": "sawnoff.png", "27": "shotgspa.png", "28": "micro_uzi.png", "29": "mp5lng.png", "30": "ak47.png", "31": "m4.png", "32": "tec9.png", "33": "cuntgun.png", "34": "sniper.png", "35": "rocketla.png", "36": "heatseek.png", "37": "flame.png", "38": "minigun.png", "39": "satchel.png", "42": "fireextinguisher.png", "40": "40.svg", "41": "41.svg", "44": "44.svg", "46": "46.svg", "jetpack": "jetpack.svg", "45": "45.svg"};
+      Object.assign(weaponImages, {armour: "armour.svg", 1: "brassknuckle.svg", 14: "leaf.svg", 17: "teargas.svg", 18: "molotov.svg", 22: "colt45.svg", 23: "silenced.svg", 28: "micro_uzi.svg", 29: "mp5.svg", 32: "tec9.svg"});
+      const itemReadouts = {armour: "100% BODY ARMOR", knife: "ONE BLADE", katana: "ONE BLADE", night_vision: "ONE PAIR", thermal: "ONE PAIR", flowers: "ONE BOUQUET", jetpack: "ONE PACK", brass_knuckles: "1", baseball_bat: "1", golf_club: "1", pool_cue: "1", nightstick: "1", shovel: "1", cane: "1"};
+      let previewInventory = [];
+
+      function renderWeaponPreview() {
+        renderArmorTiers();
+        const weapon = selectedWeapon;
+        const image = document.getElementById("preview-weapon-image");
+        const placeholder = document.getElementById("preview-weapon-placeholder");
+        const file = weapon && weaponImages[weapon.weapon == null ? weapon.id : weapon.weapon];
+        image.classList.toggle("armour-art", !!weapon && weapon.id === "armour");
+        document.getElementById("preview-weapon-detail").hidden = !!weapon && weapon.id === "armour";
+        image.classList.toggle("fire-art", !!weapon && weapon.weapon === 37);
+        image.classList.toggle("optics-art", !!weapon && (weapon.weapon === 44 || weapon.weapon === 45));
+        image.hidden = !file;
+        placeholder.hidden = !!file;
+        placeholder.textContent = weapon ? weapon.symbol : "--";
+        if (file && image.getAttribute("src") !== `images/${file}`) image.src = `images/${file}`;
+        image.onerror = () => { image.hidden = true; placeholder.hidden = false; };
+        document.getElementById("weapon-preview").style.setProperty("--preview-accent", weapon ? colors[weapon.category] : "#b88cff");
+        setText("preview-weapon-name", weapon ? weapon.name.toUpperCase() : "SELECT AN ITEM");
+        if (!weapon) {
+          setText("preview-weapon-detail", "--");
+          setText("preview-weapon-owned", "--");
+          setText("preview-weapon-slot", "CURRENT SLOT: --");
+          setText("preview-weapon-action", "--");
+          return;
+        }
+        if (weapon.id === "armour") {
+          const tier = shopData.armorTiers[selectedArmorTier];
+          setText("preview-weapon-name", tier.name);
+          setText("preview-weapon-detail", "");
+          const equipped = shopData.armorTiers[shopData.armorTier];
+          setText("preview-weapon-owned", equipped ? `EQUIPPED: ${equipped.name}` : "STANDARD ARMOUR");
+          setText("preview-weapon-slot", `ARMOUR: ${Math.round(shopData.armor || 0)} / 100`);
+          setText("preview-weapon-action", "REPLACES AND REFILLS");
+          return;
+        }
+        const current = previewInventory.find((item) => item.slot === weapon.slot);
+        const owned = current && current.weapon === weapon.weapon;
+        const currentItem = current && shopData.weapons.find((item) => item.weapon === current.weapon);
+        const gearLabels = {44: "NIGHT VISION", 45: "HEAT VISION", 46: "PARACHUTE", 40: "REMOTE DETONATOR"};
+        const detail = gearLabels[weapon.weapon] || (weapon.capacity !== "N/A" ? `${weapon.ammo} AMMO INCLUDED` : "MELEE WEAPON");
+        setText("preview-weapon-detail", weapon.weapon == null ? "FLIGHT GEAR" : detail);
+        setText("preview-weapon-owned", weapon.available === false ? "UNAVAILABLE" : owned ? "OWNED" : "NOT OWNED");
+        setText("preview-weapon-slot", current ? `CURRENT: ${String(currentItem ? currentItem.name : current.name || "OTHER ITEM").toUpperCase()}` : "CURRENT SLOT: EMPTY");
+        setText("preview-weapon-action", weapon.available === false ? "--" : owned ? "ALREADY EQUIPPED" : current ? "REPLACES ON BUY" : "SLOT FREE");
+        if (owned && weapon.capacity !== "N/A" && !gearLabels[weapon.weapon]) {
+          setText("preview-weapon-slot", `AMMO OWNED: ${current.ammo}`);
+          setText("preview-weapon-action", "ADDS AMMO");
+        }
+        if (weapon.weapon == null) setText("preview-weapon-slot", "CURRENT SLOT: --");
+      }
+
+      window.updateShopInventory = function (inventory) {
+        previewInventory = Array.isArray(inventory) ? inventory : [];
+        renderWeaponPreview();
+      };
+
+      function displayWeapon(weapon) {
+        selectedWeapon = weapon;
+        setText("weapon-id", weapon.weapon == null ? "N/A" : weapon.weapon);
+        const tier = weapon.id === "armour" && shopData.armorTiers[selectedArmorTier];
+        setText("price", `$${tier ? tier.price : weapon.price}`);
+        setText(
+          "stock",
+          weapon.available === false ? "UNAVAILABLE" : "AVAILABLE",
+        );
+        renderWeaponPreview();
+        setText("damage", weapon.damage);
+        setText("range", weapon.range);
+        setText("capacity", itemReadouts[weapon.id] || weapon.capacity);
+        setText("handling", tier ? tier.durability + " DURABILITY" : weapon.handling);
+        setText("note", weapon.description);
+        setBar("stealth", weapon.stealth);
+        setBar("ballistics", weapon.ballistics);
+        setBar("heavy", weapon.heavy);
+      }
+
+      function renderCategories() {
+        const tabs = document.getElementById("category-tabs");
+        tabs.innerHTML = "";
+
+        Object.keys(categoryLabels).forEach((category) => {
+          const button = document.createElement("button");
+          button.className = "category-btn";
+          button.tabIndex = -1;
+          button.style.setProperty("--category-color", colors[category]);
+          button.textContent = categoryLabels[category];
+          if (category === selectedCategory) button.classList.add("selected");
+          button.onclick = () => {
+            selectedCategory = category;
+            selectedWeapon = null;
+            renderWeaponPreview();
+            renderCategories();
+            renderWeapons();
+          };
+          tabs.appendChild(button);
+        });
+      }
+
+      function renderWeapons() {
+        const grid = document.getElementById("weapon-grid");
+        grid.innerHTML = "";
+
+        shopData.weapons
+          .filter((weapon) => weapon.category === selectedCategory)
+          .forEach((weapon) => {
+            const button = document.createElement("button");
+            button.className = "weapon-tile";
+            if (weapon.id === "armour") button.classList.add("armour-tile");
+            button.tabIndex = -1;
+            button.style.setProperty("--weapon-color", colors[weapon.category]);
+            button.title = weapon.name;
+            if (selectedWeapon && selectedWeapon.id === weapon.id)
+              button.classList.add("selected");
+
+            const name = document.createElement("span");
+            name.className = "weapon-name";
+            name.textContent = weapon.name;
+            button.append(name);
+
+            button.onclick = () => {
+              if (weapon.id === "armour") selectedArmorTier = "soft";
+              displayWeapon(weapon);
+              renderWeapons();
+              triggerAction(`select:${weapon.id}`);
+            };
+            grid.appendChild(button);
+          });
+      }
+
+      window.updateBootyShop = function updateBootyShop(payload) {
+        shopData = Object.assign({}, shopData, payload || {});
+
+        if (shopData.resetSelection) {
+          selectedWeapon = null;
+          setText("weapon-id", "--");
+          setText("price", "--");
+          setText("stock", (shopData.stock || "AVAILABLE").toUpperCase());
+        }
+
+        setText("title", shopData.title || "Weapon Shop System");
+        setText("zone", shopData.zone || "Pirate in Men's Pants");
+        setText(
+          "stock",
+          selectedWeapon && selectedWeapon.available === false
+            ? "UNAVAILABLE"
+            : (shopData.stock || "AVAILABLE").toUpperCase(),
+        );
+        setText("note", shopData.note || "SELECT A WEAPON.");
+        if (selectedWeapon) {
+          selectedWeapon = shopData.weapons.find((weapon) => weapon.id === selectedWeapon.id) || null;
+        }
+        renderWeaponPreview();
+        renderCategories();
+        renderWeapons();
+      };
+
+      function buyWeapon(button) {
+        button.classList.remove("purchase-click");
+        void button.offsetWidth;
+        button.classList.add("purchase-click");
+
+        if (!selectedWeapon) {
+          setText("note", "SELECT A WEAPON.");
+          return;
+        }
+        if (selectedWeapon.available === false) {
+          setText(
+            "note",
+            `${selectedWeapon.name.toUpperCase()} IS CURRENTLY UNAVAILABLE.`,
+          );
+          return;
+        }
+        triggerAction("buy");
+      }
+
+      function closeShop() {
+        if (window.mta) mta.triggerEvent("bootyShop:closeFromBrowser");
+      }
+
+      function triggerAction(name) {
+        if (window.mta) mta.triggerEvent("bootyShop:actionFromBrowser", name);
+      }
+
+      function startDrag(event) {
+        if (event.button === 0 && window.mta)
+          mta.triggerEvent("bootyShop:startDrag");
+      }
+
+      document.addEventListener("mouseup", () => {
+        if (window.mta) mta.triggerEvent("bootyShop:stopDrag");
+      });
+
+      document.addEventListener(
+        "keydown",
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+        },
+        true,
+      );
+
+      document.addEventListener("copy", (event) => {
+        event.preventDefault();
+      });
+
+      window.updateBootyShop(shopData);
+    </script>
+  </body>
+</html>

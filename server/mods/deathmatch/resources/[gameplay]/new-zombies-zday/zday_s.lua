@@ -175,8 +175,8 @@ local function damageZombie(attacker,weapon,bodypart,loss)
 	if not client or attacker ~= client or isPassive(client) then return end
 	if type(loss) ~= "number" or loss ~= loss or loss <= 0 or loss == math.huge then return end
     local boosted=false
-    local shop=getResourceFromName("weed-ui")
-    if purpleMelee[weapon] and shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(client) then
+    local shop=getResourceFromName("pirate-perks")
+    if purpleMelee[weapon] and shop and getResourceState(shop)=="running" and exports["pirate-perks"]:isKratomProtected(client) then
         if getElementParent(source)~=getResourceDynamicElementRoot(getThisResource()) or isPedDead(source)
             or getPedWeapon(client)~=weapon or isPedInVehicle(client)
             or getElementDimension(source)~=getElementDimension(client)
@@ -275,8 +275,8 @@ local function murderPlayer(zombie)
 	if now < (knifeAttempts[client] or 0) then return end
 	knifeAttempts[client] = now + 3500
 	if math.random(1,100) <= 35 then
-		local shop=getResourceFromName("weed-ui")
-		if shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(client) then
+		local shop=getResourceFromName("pirate-perks")
+		if shop and getResourceState(shop)=="running" and exports["pirate-perks"]:isKratomProtected(client) then
 			setElementHealth(client,math.max(1,getElementHealth(client)))
 			return
 		end

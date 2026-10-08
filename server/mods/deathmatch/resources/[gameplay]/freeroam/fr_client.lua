@@ -2518,7 +2518,7 @@ local function updatePerkDisplay()
 end
 
 local function requestPerkClock()
-    local weed = getResourceFromName("weed-ui")
+    local weed = getResourceFromName("pirate-perks")
     if weed and getResourceState(weed) == "running" then
         triggerServerEvent("weedGarden:requestPerkClock", getResourceRootElement(weed))
         triggerServerEvent("kratom:requestPerkClock", getResourceRootElement(weed))
@@ -2527,7 +2527,7 @@ end
 
 addEvent("weedGarden:perkClock", true)
 addEventHandler("weedGarden:perkClock", root, function(preview)
-    local weed = getResourceFromName("weed-ui")
+    local weed = getResourceFromName("pirate-perks")
     if not weed or source ~= getResourceRootElement(weed) or type(preview) ~= "table" then return end
     local remaining = preview.remaining
     if type(remaining) ~= "number" or remaining ~= remaining or remaining < 0 or remaining == math.huge then return end
@@ -2537,7 +2537,7 @@ end)
 
 addEvent("kratom:perkClock",true)
 addEventHandler("kratom:perkClock",root,function(preview)
-    local weed=getResourceFromName("weed-ui")
+    local weed=getResourceFromName("pirate-perks")
     if not weed or source~=getResourceRootElement(weed) or type(preview)~="table" then return end
     local remaining=preview.remaining
     if type(remaining)~="number" or remaining~=remaining or remaining<0 or remaining==math.huge then return end
@@ -2546,7 +2546,7 @@ addEventHandler("kratom:perkClock",root,function(preview)
 end)
 
 addEventHandler("onClientResourceStart", root, function(startedResource)
-    if startedResource == getThisResource() or getResourceName(startedResource) == "weed-ui" then
+    if startedResource == getThisResource() or getResourceName(startedResource) == "pirate-perks" then
         setTimer(requestPerkClock, 100, 1)
     end
 end)

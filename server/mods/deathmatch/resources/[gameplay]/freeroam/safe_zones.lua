@@ -2,7 +2,7 @@
 local function updateSafeZones()
     local markers = getElementsByType("marker")
     local circles = {}
-    for _, name in ipairs({"play", "pirate-map"}) do
+    for _, name in ipairs({"pirate-core", "pirate-world", "pirate-map"}) do
         local resource = getResourceFromName(name)
         if resource and getResourceState(resource) == "running" then
             for _, circle in ipairs(getElementsByType("colshape", getResourceRootElement(resource))) do

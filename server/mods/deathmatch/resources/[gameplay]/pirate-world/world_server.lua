@@ -1,0 +1,144 @@
+-- ==========================================
+-- PLAY WORLD SETTINGS
+-- ==========================================
+local DEFAULT_WORLD_SETTINGS = {
+    gameType = "Custom",
+    mapName = "Las Venturas Freeroam",
+    time = {0, 0},
+    minuteDuration = 999999999,
+    weather = 11,
+    cloudsEnabled = true,
+    gravity = 0.008,
+    explosionsEnabled = true
+}
+
+local safeZoneCols = {}
+local weatherTimer
+local lastWeather
+local initialized = false
+
+local function setWorldWeather(weather)
+    setWeather(weather)
+    setElementData(root, "play:outdoorWeather", weather)
+end
+
+local function announceWeather(weather)
+    if weather == 9 and lastWeather ~= 9 then
+        outputChatBox("☠ It's getting spooky outside, be careful!", root, 238, 20, 38)
+    end
+    lastWeather = weather
+end
+
+local function getWorldSetting(settingName)
+    if playWorldSettings and playWorldSettings[settingName] ~= nil then
+        return playWorldSettings[settingName]
+    end
+
+    return DEFAULT_WORLD_SETTINGS[settingName]
+end
+
+local function isPositionInPlaySafeZone(posX, posY, posZ)
+    for i = 1, #safeZoneCols do
+        local colShape = safeZoneCols[i]
+
+        if isElement(colShape) and isInsideColShape(colShape, posX, posY, posZ) then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function isElementInPlaySafeZone(element)
+    if not isElement(element) then
+        return false
+    end
+
+    return isPositionInPlaySafeZone(getElementPosition(element))
+end
+
+local function initPlaySafeZones()
+    if not playSafeZones then
+        return false
+    end
+
+    for i = 1, #playSafeZones do
+        local zone = playSafeZones[i]
+        local colShape = createColSphere(zone.x, zone.y, zone.z, zone.radius)
+
+        if colShape then
+            setElementData(colShape, "play.safeZone.name", zone.name or "Safe Zone")
+            safeZoneCols[#safeZoneCols + 1] = colShape
+        end
+    end
+
+    return true
+end
+
+local function onPlaySafeZonePlayerDamage()
+    if isElementInPlaySafeZone(source) then
+        cancelEvent()
+    end
+end
+
+local function onPlaySafeZoneExplosion(posX, posY, posZ)
+    if not getWorldSetting("explosionsEnabled") then
+        cancelEvent()
+        return
+    end
+
+    if isPositionInPlaySafeZone(posX, posY, posZ) then
+        cancelEvent()
+    end
+end
+
+function initPlayWorld()
+    local time = getWorldSetting("time")
+
+    setGameType(getWorldSetting("gameType"))
+    setMapName(getWorldSetting("mapName"))
+    resetMapInfo()
+
+    setMinuteDuration(getWorldSetting("minuteDuration"))
+    setTime(time[1], time[2])
+    setWorldWeather(getWorldSetting("weather"))
+    if isTimer(weatherTimer) then
+        killTimer(weatherTimer)
+    end
+    local cycle = getWorldSetting("weatherCycle")
+    if cycle and #cycle > 0 then
+        local index = 1
+        setWorldWeather(cycle[index])
+        announceWeather(cycle[index])
+        local intervals = getWorldSetting("weatherIntervals") or {}
+        local function scheduleWeather()
+            weatherTimer = setTimer(function()
+                index = index % #cycle + 1
+                setWorldWeather(cycle[index])
+                announceWeather(cycle[index])
+                setTime(time[1], time[2])
+                scheduleWeather()
+            end, intervals[cycle[index]] or getWorldSetting("weatherInterval"), 1)
+        end
+        scheduleWeather()
+    end
+    setCloudsEnabled(getWorldSetting("cloudsEnabled"))
+    setGravity(getWorldSetting("gravity"))
+
+    initPlaySafeZones()
+    addEventHandler("onPlayerDamage", root, onPlaySafeZonePlayerDamage)
+    addEventHandler("onExplosion", root, onPlaySafeZoneExplosion)
+end
+
+function arePlayExplosionsEnabled()
+    return getWorldSetting("explosionsEnabled")
+end
+
+function initializeWorld(settings, safeZones, spawns)
+    if initialized then return true end
+    playWorldSettings, playSafeZones, vehicleSpawns = settings, safeZones, spawns
+    initialized = true
+    initPlayWorld()
+    createVehicles()
+    return true
+end

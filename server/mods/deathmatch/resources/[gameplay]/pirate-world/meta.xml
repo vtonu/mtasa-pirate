@@ -1,0 +1,24 @@
+<meta>
+    <min_mta_version server="1.5.8-9.20957" />
+    <info name="pirate-world" type="script" />
+    <include resource="pirate-map" />
+    <script src="map_links_shared.lua" type="shared" />
+    <script src="world_server.lua" type="server" />
+    <script src="spawn_vehicles_server.lua" type="server" />
+    <script src="vehicle_speed_client.lua" type="client" />
+    <script src="walkthrough.lua" type="client" />
+    <script src="interiors_client.lua" type="client" />
+    <script src="arrow_client.lua" type="client" />
+    <script src="interiors_server.lua" type="server" />
+    <script src="hospitals_server.lua" type="server" />
+    <script src="ammu_counters_server.lua" type="server" />
+    <script src="special_shops_server.lua" type="server" />
+    <script src="autobahn_server.lua" type="server" />
+    <script src="autobahn_client.lua" type="client" />
+    <script src="high_roller_peds_server.lua" type="server" />
+    <script src="vehicles_server.lua" type="server" />
+    <file src="autobahn_flag.fx" />
+    <file src="autobahn_flag.svg" />
+    <export function="initializeWorld" type="server" />
+    <export function="destroyPlayerVehicles" type="server" />
+</meta>

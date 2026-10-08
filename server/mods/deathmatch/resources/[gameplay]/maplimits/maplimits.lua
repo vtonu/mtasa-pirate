@@ -114,14 +114,14 @@ function stuff( player, flag )
 		if newFlag and ( not isPedDead( player ) ) then
 			if ( getElementInterior (player) == 0 ) then --dont trigger on interiors
 				local playerHP = getElementHealth( player )
-				local shop=getResourceFromName("weed-ui")
-                if shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(player) then
-                    exports["weed-ui"]:drainKratomReserve(player,1)
+				local shop=getResourceFromName("pirate-perks")
+                if shop and getResourceState(shop)=="running" and exports["pirate-perks"]:isKratomProtected(player) then
+                    exports["pirate-perks"]:drainKratomReserve(player,1)
                 elseif ( playerHP > 10 ) then
 					setElementHealth( player, playerHP - 1 )
 				else
-					local shop=getResourceFromName("weed-ui")
-					if shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(player) then
+					local shop=getResourceFromName("pirate-perks")
+					if shop and getResourceState(shop)=="running" and exports["pirate-perks"]:isKratomProtected(player) then
 						setElementHealth(player,1)
 					else killPed( player ) end
 				end
