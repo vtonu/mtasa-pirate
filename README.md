@@ -1,38 +1,27 @@
-# Project Details (mtasa-pirate v1.3.10)
+# mtasa-pirate v1.3.11
 
 <img width="1920" height="1080" alt="mta-screen_2026-10-07_23-57-28" src="https://github.com/user-attachments/assets/3ccfa318-edf0-4ab2-9a9f-8f15f5533539" />
 
-MTA:SA freeroam server for custom gameplay, content creation, and playing with friends. Now live and in open beta.
+MTA:SA freeroam. Live in open beta.
 
-## Features
+## Play
 
-- Six grouped resources for core, UI, perks, weapons, world, and missions.
-- Cargo loading progress, Autobahn cars with a custom flag, and 50% cash drops on death.
-- Bank robberies with cash bags, bounties, blinking stars, and payout progress.
-- WHITE, GREEN, and PURPLE kratom with night vision, zombie highlights, and combat perks.
-- Fog of War Garden with strain prices, rotating stock, and Indica, Sativa, and Hybrid perks lasting 5, 10, 20, or 30 minutes, with matching health-bar colors.
-- Casino, lounge, garage, Ammu-Nation, and CJ's house interiors with shared access and return to your entrance.
-- Passive mode with a shield beside player names, vehicle options, weapon drops, and a Money / Team / K/D / Z/D scoreboard.
-- Built-in reports with saved admin inbox, gameplay details, and spam cooldown.
-- Discord join/quit logs and server alerts.
-- Pirate map in Las Venturas with late-night weather and storm infected.
-- Loco Skull vehicle missions, the Airyard route, and Rustler bombing.
-- Booty Desk weapon shop with item previews and live inventory info.
-- More Ammu-Nation locations, improved interior markers, map editor updates, and weed gravity fixes for aircraft.
-- Hospital blips and respawns, armor shop levels, and more Ammu-Nation clerks and markers.
+- Explore Las Venturas. Visit shops, casinos, and clubs.
+- Rob banks. Hunt bounties. Run deliveries.
+- Fight zombies. Use weed and Kratom perks.
+- Buy weapons, armor, and sports cars.
 
 ## Controls
 
-| Key   | Action                                                                                                                            |
-| ----- | --------------------------------------------------------------------------------------------------------------------------------- |
-| F1    | Player, vehicle, and passive options                                                                                              |
-| H     | Open the Garden, Kratom, or Booty Desk shop, enter/exit interiors, start Airyard at the ship capsule, or equip a parachute at the loot box |
-| Space | Respawn when prompted                                                                                                             |
+- F1 — Player, vehicle, and passive options.
+- H — Shops, doors, and mission prompts.
+- Space — Respawn when prompted.
+- Vehicle fire — Rustler bombs.
+- /report — Questions, feedback, and player reports.
 
-Rustler bombs use the vehicle fire control.
+## Setup
 
-Use `/report` to submit questions, suggestions, or cheats/rulebreak reports.
+GTA San Andreas + MTA:SA 1.6+.
 
-## Requirements
-
-GTA San Andreas + MTA:SA 1.6+. Custom resources are in `server/mods/deathmatch/resources/`; startup config is `server/mods/deathmatch/mtaserver.conf`.
+Resources: `server/mods/deathmatch/resources/`
+Config: `server/mods/deathmatch/mtaserver.conf`
