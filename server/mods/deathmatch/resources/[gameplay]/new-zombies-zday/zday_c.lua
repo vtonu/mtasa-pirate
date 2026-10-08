@@ -99,6 +99,8 @@ local function isZombieChasingMe(zombieToCheck,removeIt)
 end
 
 local function onDamage(attacker,weapon,bodypart,loss)
+    if isElement(attacker) and getElementType(attacker)=="player" and getElementData(attacker,"kratom:perk")=="purple"
+        and type(weapon)=="number" and weapon>=0 and weapon<=15 then cancelEvent() end
 
 	if type(loss) ~= "number" or loss ~= loss or loss <= 0 or loss == math.huge then return end
 	if attacker and isElement(attacker) and attacker == localPlayer then
@@ -205,6 +207,13 @@ local function resetZombieAnimation(zombie)
 
 end
 
+addEvent("Zday:kratomImpact",true)
+addEventHandler("Zday:kratomImpact",resourceRoot,function(zombie,vx,vy,alive)
+    if not isElement(zombie) or not isElementStreamedIn(zombie) then return end
+    setElementVelocity(zombie,vx,vy,0.07)
+    if alive and not isPedDead(zombie) then setPedAnimation(zombie,"ped","KO_skid_back",900,false,false,false,true) end
+end)
+
 local function trackMe()
 	
 	local zombies = getElementsByType("ped",resourceRoot,true)
@@ -220,7 +229,11 @@ local function trackMe()
 		local variant = tonumber(getElementData(zombie, "zday.variant")) or 0
 		local zombieTarget = data and data.target
 		if not data or zombieTarget == nil then requestZombieTargets() end
-		if isZombieWeather() and isElement(zombieTarget) and not isPassive(zombieTarget)
+		if getElementData(zombie,"kratom:knocked") then
+            setPedControlState(zombie,"forwards",false)
+            setPedControlState(zombie,"sprint",false)
+            setPedControlState(zombie,"fire",false)
+        elseif isZombieWeather() and isElement(zombieTarget) and not isPassive(zombieTarget)
 			and getElementInterior(zombieTarget) == 0 and getElementInterior(zombie) == 0
 			and getElementDimension(zombieTarget) == getElementDimension(zombie)
 			and not isPedDead(zombieTarget) and not isPedDead(zombie) then

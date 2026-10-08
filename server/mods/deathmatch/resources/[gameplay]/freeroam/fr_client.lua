@@ -2488,9 +2488,15 @@ local function updateModeDisplay(state)
 end
 
 local perkDeadline = 0
+local kratomDeadline = 0
 
 local function updatePerkDisplay()
     local perk = perkDisplay[getElementData(localPlayer, "weed.perk")]
+    local deadline=perkDeadline
+    if getElementData(localPlayer,"kratom:perk") then
+        perk={text="Kratom",color={127,255,0}}
+        deadline=kratomDeadline
+    end
     local perkLabel = getControl(wndMain, "perk")
 
     if not perkLabel or not isElement(perkLabel) then
@@ -2499,8 +2505,8 @@ local function updatePerkDisplay()
 
     if perk then
         local text = perk.text
-        if perkDeadline > 0 then
-            local seconds = math.max(0, math.ceil((perkDeadline - getTickCount()) / 1000))
+        if deadline > 0 then
+            local seconds = math.max(0, math.ceil((deadline - getTickCount()) / 1000))
             text = string.format("%s (%02d:%02d)", text, math.floor(seconds / 60), seconds % 60)
         end
         guiSetText(perkLabel, text)
@@ -2515,6 +2521,7 @@ local function requestPerkClock()
     local weed = getResourceFromName("weed-ui")
     if weed and getResourceState(weed) == "running" then
         triggerServerEvent("weedGarden:requestPerkClock", getResourceRootElement(weed))
+        triggerServerEvent("kratom:requestPerkClock", getResourceRootElement(weed))
     end
 end
 
@@ -2525,6 +2532,16 @@ addEventHandler("weedGarden:perkClock", root, function(preview)
     local remaining = preview.remaining
     if type(remaining) ~= "number" or remaining ~= remaining or remaining < 0 or remaining == math.huge then return end
     perkDeadline = remaining > 0 and getTickCount() + remaining or 0
+    updatePerkDisplay()
+end)
+
+addEvent("kratom:perkClock",true)
+addEventHandler("kratom:perkClock",root,function(preview)
+    local weed=getResourceFromName("weed-ui")
+    if not weed or source~=getResourceRootElement(weed) or type(preview)~="table" then return end
+    local remaining=preview.remaining
+    if type(remaining)~="number" or remaining~=remaining or remaining<0 or remaining==math.huge then return end
+    kratomDeadline=remaining>0 and getTickCount()+remaining or 0
     updatePerkDisplay()
 end)
 
@@ -2996,6 +3013,9 @@ end)
 addEventHandler("onClientElementDataChange", localPlayer, function(dataName)
     if dataName == "freeroam.passive" then
         syncPassiveMode()
+    elseif dataName == "kratom:perk" then
+        if not getElementData(localPlayer,"kratom:perk") then kratomDeadline=0 end
+        updatePerkDisplay()
     elseif dataName == "weed.perk" then
         if not getElementData(localPlayer, "weed.perk") then perkDeadline = 0 end
         updatePerkDisplay()

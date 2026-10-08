@@ -146,22 +146,65 @@ local function delayDestroyZombie()
 
 end
 
+local purpleHits={}
+local purpleMelee={[0]=40,[1]=50,[2]=120,[3]=120,[4]=55,[5]=120,[6]=120,[7]=120,[8]=120,[9]=120,[10]=120,[11]=120,[12]=120,[13]=120,[14]=120,[15]=120}
+
+local function purpleImpact(zombie,attacker,alive)
+    local x,y,z=getElementPosition(zombie)
+    local ax,ay=getElementPosition(attacker)
+    local dx,dy=x-ax,y-ay
+    local length=math.sqrt(dx*dx+dy*dy)
+    if length<0.01 then dx,dy,length=0,1,1 end
+    local vx,vy=dx/length*0.13,dy/length*0.13
+    setElementVelocity(zombie,vx,vy,0.07)
+    if alive then
+        setElementData(zombie,"kratom:knocked",true)
+        setPedAnimation(zombie,"ped","KO_skid_back",900,false,false,false,true)
+        setTimer(function()
+            if isElement(zombie) then
+                setElementData(zombie,"kratom:knocked",false)
+                if not isPedDead(zombie) then setPedAnimation(zombie,false) end
+            end
+        end,900,1)
+    end
+    triggerClientEvent(root,"Zday:kratomImpact",resourceRoot,zombie,vx,vy,alive)
+end
+
 local function damageZombie(attacker,weapon,bodypart,loss)
 
 	if not client or attacker ~= client or isPassive(client) then return end
 	if type(loss) ~= "number" or loss ~= loss or loss <= 0 or loss == math.huge then return end
+    local boosted=false
+    local shop=getResourceFromName("weed-ui")
+    if purpleMelee[weapon] and shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(client) then
+        if getElementParent(source)~=getResourceDynamicElementRoot(getThisResource()) or isPedDead(source)
+            or getPedWeapon(client)~=weapon or isPedInVehicle(client)
+            or getElementDimension(source)~=getElementDimension(client)
+            or getElementInterior(source)~=getElementInterior(client) then return end
+        local x,y,z=getElementPosition(source)
+        local ax,ay,az=getElementPosition(client)
+        if getDistanceBetweenPoints3D(x,y,z,ax,ay,az)>3.5 then return end
+        local now=getTickCount()
+        if now<(purpleHits[source] or 0) then return end
+        purpleHits[source]=now+250
+        loss=purpleMelee[weapon]
+        boosted=true
+    end
 	if (source.health - loss) <= 0 then
 		killPed(source,attacker,weapon,bodypart)
 	else
 		source.health = source.health - loss
 	end
 
-	if bodypart == 9 then
+	if bodypart == 9 and not boosted then
 		setPedHeadless(source,true)
 		if isPedDead(source)==false then killPed(source,attacker,weapon,bodypart) end
 	end
+    if boosted then purpleImpact(source,client,not isPedDead(source)) end
 
 end
+
+addEventHandler("onElementDestroy",resourceRoot,function() purpleHits[source]=nil end)
 
 local function bankLimit()
 	local cap

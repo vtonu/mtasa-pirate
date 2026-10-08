@@ -5,6 +5,8 @@ local perkColors = {
     hybrid = {127, 255, 212}
 }
 
+local kratomColors={white={232,238,240},green={127,255,0},purple={184,140,255}}
+
 local screenW, screenH = guiGetScreenSize()
 local passiveShield
 
@@ -40,7 +42,7 @@ local function renderNameTags()
                     local health = getElementHealth(player) or 100
 
                     local halfWidth = nametagconfig.width / 2
-                    local barWidth = nametagconfig.width * (health / 100)
+                    local barWidth = nametagconfig.width * math.max(0,math.min(health / 100,1))
 
                     -- Name
                     dxDrawText(name, sx - 50, sy - 20, sx + 50, sy, tocolor(unpack(nametagconfig.colors.name)), 1,
@@ -76,7 +78,7 @@ local function renderNameTags()
                     end
 
                     -- Health Bar
-                    local fullColor = perkColors[getElementData(player, "weed.perk")]
+                    local fullColor = kratomColors[getElementData(player,"kratom:perk")] or perkColors[getElementData(player, "weed.perk")]
                     local lowColor = nametagconfig.colors.healthLow
                     local healthFraction = math.max(0, math.min(health / 100, 1))
                     if fullColor then

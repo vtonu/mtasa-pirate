@@ -212,6 +212,7 @@ addEventHandler(SUPERMAN_USE_ELEMENT_DATA and "onClientElementDataChange" or "on
 -- handleSupermanJump: combo to start flight without any command
 
 function handleSupermanJump()
+    if not canUseSuperman(localPlayer) then return false end
 	local playerFlying = isPlayerFlying(localPlayer)
 
 	if (playerFlying) then
@@ -230,6 +231,7 @@ function handleSupermanJump()
 end
 
 function handleSupermanCommand()
+    if not canUseSuperman(localPlayer) then return false end
 	local playerInVehicle = isPedInVehicle(localPlayer)
 	local playerFlying = isPlayerFlying(localPlayer)
 
@@ -243,6 +245,7 @@ function handleSupermanCommand()
 end
 
 function startSupermanFlight()
+    if not canUseSuperman(localPlayer) then return false end
 	local playerFlying = isPlayerFlying(localPlayer)
 
 	setSupermanData(localPlayer, SUPERMAN_TAKE_OFF_DATA_KEY, false)
@@ -262,6 +265,13 @@ end
 local jump, oldJump = false, false
 
 function onClientRenderSupermanProcessControls()
+    if not canUseSuperman(localPlayer) then
+        if isPlayerFlying(localPlayer) or getSupermanData(localPlayer,SUPERMAN_TAKE_OFF_DATA_KEY) then
+            restorePlayerFromSuperman(localPlayer)
+            setSupermanData(localPlayer,SUPERMAN_TAKE_OFF_DATA_KEY,false)
+        end
+        return
+    end
 	local playerFlying = isPlayerFlying(localPlayer)
 
 	if (not playerFlying) then

@@ -167,7 +167,7 @@ addEventHandler("onClientRender",root,function()
             hiddenWanted=true
         end
         if previousWanted then
-            local blink=type(escape)=="table" and escape.remaining<=3000 and math.floor(getTickCount()/400)%2==0
+            local blink=type(escape)=="table" and math.floor(getTickCount()/400)%2==0
             local size=math.max(18,math.min(36,h*0.042))
             local rowWidth=w*0.17
             local gap=(rowWidth-size*6)/5

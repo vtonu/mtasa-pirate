@@ -2,9 +2,9 @@
 local shops,active,requests={},{},{}
 local packages={cart={price=2000,duration=300000}}
 local varieties={
-    {name="WHITE",symbol="W",type="white",description="SLOW MOVEMENT / DOUBLE HYBRID JUMP / WHITE NIGHT VISION.",white=100,green=0,purple=0},
+    {name="WHITE",symbol="W",type="white",description="SLOW MOVEMENT / DOUBLE HYBRID JUMP / WHITE NIGHT VISION / RED ZOMBIE SILHOUETTES.",white=100,green=0,purple=0},
     {name="GREEN",symbol="G",type="green",description="GREEN NIGHT VISION / ZOMBIE SILHOUETTES: 35 METERS, 3 SECONDS EVERY 15 SECONDS.",white=0,green=100,purple=0},
-    {name="PURPLE",symbol="P",type="purple",description="FATAL DAMAGE GUARD / HEADSHOT AND NECK-STAB GUARD FOR 5 MINUTES.",white=0,green=0,purple=100}
+    {name="PURPLE",symbol="P",type="purple",description="10,000 HEALTH RESERVE / PURPLE IMPACT: POWER PUNCHES, MELEE AND KNOCKDOWN / FATAL HIT GUARDS / 5 MINUTES.",white=0,green=0,purple=100}
 }
 local byName={}
 for _,variety in ipairs(varieties) do
@@ -50,6 +50,19 @@ function isKratomProtected(player)
     return perk and perk.type=="purple" and perk.expires>getTickCount() and not isPedDead(player) or false
 end
 
+function drainKratomReserve(player,loss)
+    if not isKratomProtected(player) or type(loss)~="number" or loss~=loss or loss<=0 or loss==math.huge then return false end
+    local perk=active[player]
+    perk.reserve=math.max(100,(perk.reserve or 10000)-math.min(loss,1000))
+    setElementHealth(player,perk.reserve/100)
+    return true
+end
+
+addEvent("kratom:requestPerkClock",true)
+addEventHandler("kratom:requestPerkClock",resourceRoot,function()
+    if source==resourceRoot and client then triggerClientEvent(client,"kratom:perkClock",resourceRoot,preview(client)) end
+end)
+
 local function clearPerk(player,note)
     local perk=active[player]
     if not perk then return end
@@ -68,7 +81,9 @@ local function equip(player,variety,package)
     local perk={type=variety.type,duration=package.duration,expires=getTickCount()+package.duration,nextPulse=0,baseGravity=getElementData(player,"weed.perk") and 0.008 or getPedGravity(player)}
     active[player]=perk
     if perk.type=="white" then setPedGravity(player,isPedInVehicle(player) and 0.008 or 0.0015) end
+    if perk.type=="purple" then perk.reserve=10000 setElementHealth(player,100) end
     setElementData(player,"kratom:perk",perk.type)
+    triggerClientEvent(player,"kratom:perkClock",resourceRoot,preview(player))
     perk.timer=setTimer(function()
         if active[player]==perk then clearPerk(player,"KRATOM PERK ENDED.") end
     end,package.duration,1)
@@ -116,7 +131,17 @@ end)
 addEvent("kratom:fatalHit",true)
 addEventHandler("kratom:fatalHit",resourceRoot,function()
     if source~=resourceRoot or not client or not isKratomProtected(client) then return end
-    setElementHealth(client,1)
+    drainKratomReserve(client,100)
+end)
+
+addEvent("kratom:damageHit",true)
+addEventHandler("kratom:damageHit",resourceRoot,function(loss)
+    if source~=resourceRoot or not client or not isKratomProtected(client) then return end
+    local perk=active[client]
+    local now=getTickCount()
+    if now<(perk.nextDamage or 0) then return end
+    perk.nextDamage=now+200
+    drainKratomReserve(client,loss)
 end)
 
 -- DENY CLIENT CHANGES TO THE PERK FLAG
@@ -132,23 +157,26 @@ setTimer(function()
     for player,perk in pairs(active) do
         if not isElement(player) then active[player]=nil
         elseif isPedDead(player) or now>=perk.expires then clearPerk(player)
-        elseif perk.type=="white" then
-            local gravity=isPedInVehicle(player) and 0.008 or 0.0015
-            if getPedGravity(player)~=gravity then setPedGravity(player,gravity) end
-        elseif perk.type=="green" and now>=perk.nextPulse then
-            perk.nextPulse=now+15000
-            local zombies=getResourceFromName("new-zombies-zday")
-            local targets={}
-            if zombies and getResourceState(zombies)=="running" then
-                local x,y,z=getElementPosition(player)
-                for _,ped in ipairs(getElementsByType("ped",getResourceDynamicElementRoot(zombies))) do
-                    if not isPedDead(ped) and getElementInterior(ped)==getElementInterior(player) and getElementDimension(ped)==getElementDimension(player) then
-                        local px,py,pz=getElementPosition(ped)
-                        if getDistanceBetweenPoints3D(x,y,z,px,py,pz)<=35 then targets[#targets+1]=ped end
+        else
+            if perk.type=="white" then
+                local gravity=isPedInVehicle(player) and 0.008 or 0.0015
+                if getPedGravity(player)~=gravity then setPedGravity(player,gravity) end
+            end
+            if (perk.type=="green" or perk.type=="white") and now>=perk.nextPulse then
+                perk.nextPulse=now+15000
+                local zombies=getResourceFromName("new-zombies-zday")
+                local targets={}
+                if zombies and getResourceState(zombies)=="running" then
+                    local x,y,z=getElementPosition(player)
+                    for _,ped in ipairs(getElementsByType("ped",getResourceDynamicElementRoot(zombies))) do
+                        if not isPedDead(ped) and getElementInterior(ped)==getElementInterior(player) and getElementDimension(ped)==getElementDimension(player) then
+                            local px,py,pz=getElementPosition(ped)
+                            if getDistanceBetweenPoints3D(x,y,z,px,py,pz)<=35 then targets[#targets+1]=ped end
+                        end
                     end
                 end
+                triggerClientEvent(player,"kratom:reveal",resourceRoot,targets)
             end
-            triggerClientEvent(player,"kratom:reveal",resourceRoot,targets)
         end
     end
     for player in pairs(shops) do

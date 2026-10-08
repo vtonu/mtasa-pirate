@@ -1260,7 +1260,7 @@
         note: "SELECT A VARIETY.",
         actions: [],
         buySizes: [],
-        strains: [{"name":"WHITE","symbol":"W","type":"white","description":"SLOW MOVEMENT / DOUBLE HYBRID JUMP / WHITE NIGHT VISION.","white":100,"green":0,"purple":0,"prices":{"cart":2000}},{"name":"GREEN","symbol":"G","type":"green","description":"GREEN NIGHT VISION / REVEAL ZOMBIE SILHOUETTES FOR 3 SECONDS EVERY 15 SECONDS.","white":0,"green":100,"purple":0,"prices":{"cart":2000}},{"name":"PURPLE","symbol":"P","type":"purple","description":"FATAL DAMAGE GUARD / HEADSHOT AND NECK-STAB GUARD FOR 5 MINUTES.","white":0,"green":0,"purple":100,"prices":{"cart":2000}}],
+        strains: [{"name":"WHITE","symbol":"W","type":"white","description":"SLOW MOVEMENT / DOUBLE HYBRID JUMP / WHITE NIGHT VISION.","white":100,"green":0,"purple":0,"prices":{"cart":2000}},{"name":"GREEN","symbol":"G","type":"green","description":"GREEN NIGHT VISION / REVEAL ZOMBIE SILHOUETTES FOR 3 SECONDS EVERY 15 SECONDS.","white":0,"green":100,"purple":0,"prices":{"cart":2000}},{"name":"PURPLE","symbol":"P","type":"purple","description":"10,000 HEALTH RESERVE / PURPLE IMPACT: POWER PUNCHES, MELEE AND KNOCKDOWN / FATAL HIT GUARDS / 5 MINUTES.","white":0,"green":0,"purple":100,"prices":{"cart":2000}}],
       };
 
       const strainColors = {white:'#e8eef0',green:'#7fff00',purple:'#b88cff'};
@@ -1268,7 +1268,7 @@
       const strainStats = {
  white:{gravity:'SLOW',speed:'WHITE / GRAY',healthRegen:'2X HYBRID JUMP',armorRegen:'5 MIN'},
  green:{gravity:'NORMAL',speed:'NIGHT VISION',healthRegen:'ZOMBIE SCAN',armorRegen:'5 MIN'},
- purple:{gravity:'NORMAL',speed:'STANDARD',healthRegen:'FATAL GUARD',armorRegen:'5 MIN'}
+ purple:{gravity:'NORMAL',speed:'STANDARD',healthRegen:'PURPLE IMPACT',armorRegen:'5 MIN'}
 };
 
       let selectedStrainValue = null;
@@ -1291,7 +1291,7 @@
 
       let packageDurations = {cart:300000};
       let activePreview = { type: false, duration: 0, endsAt: 0 };
-      const perkEffects = {white:'DOUBLE JUMP / WHITE NIGHT VISION',green:'GREEN NIGHT VISION / ZOMBIE SCAN',purple:'FATAL DAMAGE / EXECUTION GUARD'};
+      const perkEffects = {white:'DOUBLE JUMP / RED ZOMBIE SCAN',green:'GREEN SILHOUETTES / NIGHT VISION',purple:'POWER MELEE / 10,000 RESERVE'};
 
       function renderPerkPreview() {
         const type =
@@ -1534,7 +1534,7 @@
 
         if (data.resetSelection || displayedStrains.length === 0) {
           displayedStrains =
-            shuffleStrains(sourceStrains).map(applyStrainCatalog);
+            sourceStrains.slice().sort((a,b)=>["white","green","purple"].indexOf(a.type)-["white","green","purple"].indexOf(b.type)).map(applyStrainCatalog);
         }
         displayedStrains = displayedStrains.map(applyStrainCatalog);
         if (selectedStrain) selectedStrain = applyStrainCatalog(selectedStrain);

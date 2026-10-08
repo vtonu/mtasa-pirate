@@ -26,6 +26,7 @@ local function canElementDataBeChanged(clientElement, sourceElement, dataKey, ne
 	end
 
 	local supermanDataKey = SUPERMAN_ALLOWED_DATA_KEYS[dataKey]
+    if supermanDataKey and newValue==true and not canUseSuperman(clientElement) then return false end
 
 	if (not supermanDataKey) then
 		return true
@@ -38,6 +39,7 @@ local function canElementDataBeChanged(clientElement, sourceElement, dataKey, ne
 end
 
 local function onServerSupermanSetData(dataKey, dataValue)
+    if not client or source~=client or (dataValue==true and not canUseSuperman(client)) then return false end
 	if (not client) then
 		return false
 	end
@@ -105,3 +107,25 @@ function getSupermanReceivers()
 
 	return supermanListeners
 end
+-- SERVER OWNS ADMIN ACCESS, INCLUDING LOGIN AND ACL CHANGES
+local function syncSupermanAccess(player)
+    if not isElement(player) or getElementType(player)~="player" then return end
+    local allowed=canUseSuperman(player)
+    if getElementData(player,"superman:allowed")~=allowed then setElementData(player,"superman:allowed",allowed) end
+    if not allowed then
+        setSupermanData(player,SUPERMAN_FLY_DATA_KEY,false)
+        setSupermanData(player,SUPERMAN_TAKE_OFF_DATA_KEY,false)
+    end
+end
+addEventHandler("onElementDataChange",root,function(key)
+    if client and key=="superman:allowed" then syncSupermanAccess(source) end
+end)
+addEventHandler("onPlayerLogin",root,function() syncSupermanAccess(source) end)
+addEventHandler("onPlayerLogout",root,function() setTimer(syncSupermanAccess,50,1,source) end)
+addEventHandler("onPlayerJoin",root,function() syncSupermanAccess(source) end)
+addEventHandler("onResourceStart",resourceRoot,function()
+    for _,player in ipairs(getElementsByType("player")) do syncSupermanAccess(player) end
+end)
+setTimer(function()
+    for _,player in ipairs(getElementsByType("player")) do syncSupermanAccess(player) end
+end,2000,0)

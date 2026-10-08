@@ -1,6 +1,14 @@
 local isServer = (not triggerServerEvent)
 local supermansData = {}
 
+function canUseSuperman(player)
+    if not isElement(player) or getElementType(player)~="player" then return false end
+    if not isServer then return getElementData(player,"superman:allowed")==true end
+    local account=getPlayerAccount(player)
+    local group=aclGetGroup("Admin")
+    return account and not isGuestAccount(account) and group and isObjectInACLGroup("user."..getAccountName(account),group) or false
+end
+
 SUPERMAN_USE_ELEMENT_DATA = false -- decides whether script will use built-in MTA data system (setElementData) or custom one, shipped with superman resource
 
 -- in general element data is bad, and shouldn't be used, hence it should be set to false, unless you want to have backwards compatibility
@@ -53,6 +61,7 @@ function getSupermanData(playerElement, dataKey)
 end
 
 function setSupermanData(playerElement, dataKey, dataValue)
+    if dataValue==true and not canUseSuperman(playerElement) then return false end
 	local validElement = isElement(playerElement)
 
 	if (not validElement) then

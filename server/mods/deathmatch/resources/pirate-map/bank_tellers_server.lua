@@ -35,7 +35,7 @@ end
 local guns = {[22]=true,[23]=true,[24]=true,[25]=true,[26]=true,[27]=true,[28]=true,
     [29]=true,[30]=true,[31]=true,[32]=true,[33]=true,[34]=true}
 local payouts = {2500,5000,10000,20000,40000,80000}
-local holdDelay, releaseDelay, payoutDelay, starDelay = 3000,5000,5000,45000
+local holdDelay, releaseDelay, payoutDelay, starDelay = 3000,5000,5000,40500
 local cooldownDelay, resetDelay, decayDelay = 300000,1800000,10000
 
 local function near(player, element, radius, visitor)

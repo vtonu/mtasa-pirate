@@ -10,6 +10,7 @@
     <file src="images/kratom-leaf.svg" />
     <file src="kratom_white.fx" />
     <file src="kratom_zombie.fx" />
+    <export function="drainKratomReserve" type="server" />
     <export function="isKratomProtected" type="server" />
     <export function="openGardenUI" type="server" />
     <export function="updateGardenUI" type="server" />

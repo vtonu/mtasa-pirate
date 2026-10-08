@@ -2,8 +2,8 @@
 local revealed={}
 local previousVision
 local whiteShader,screenSource,greenShader
-local nextFatalReport=0
 local nextWhiteAttempt=0
+local pendingDamage=0
 
 local function removeReveal(ped)
     if isElement(ped) and isElement(greenShader) then engineRemoveShaderFromWorldTexture(greenShader,"*",ped) end
@@ -24,12 +24,14 @@ end
 
 local function updateVision()
     local perk=getElementData(localPlayer,"kratom:perk")
-    if isPedDead(localPlayer) or (perk~="white" and perk~="green") then
+    if isPedDead(localPlayer) or (perk~="white" and perk~="green" and perk~="purple") then
         if previousVision then clearVision() end
         return
     end
     if not previousVision then previousVision=getCameraGoggleEffect() end
-    if getCameraGoggleEffect()~="nightvision" then setCameraGoggleEffect("nightvision") end
+    -- KEEP COLOR SIGNALS IN THE SCREEN SOURCE; OUR SHADER PROVIDES NIGHT OPTICS
+    local mode=(isElement(whiteShader) or perk=="purple") and "normal" or "nightvision"
+    if getCameraGoggleEffect()~=mode then setCameraGoggleEffect(mode,false) end
     if not isElement(whiteShader) and getTickCount()>=nextWhiteAttempt then
         nextWhiteAttempt=getTickCount()+10000
         local w,h=guiGetScreenSize()
@@ -44,7 +46,12 @@ local function updateVision()
         end
     end
     if isElement(whiteShader) then
-        if perk=="green" then
+        dxSetShaderValue(whiteShader,"visionGamma",perk=="purple" and 1 or 0.6)
+        dxSetShaderValue(whiteShader,"visionStrength",perk=="purple" and 0.18 or 1)
+        if perk=="purple" then
+            dxSetShaderValue(whiteShader,"visionTint",0.85,0.65,1)
+            dxSetShaderValue(whiteShader,"visionBrightness",1)
+        elseif perk=="green" then
             dxSetShaderValue(whiteShader,"visionTint",0.68,0.9,0.8)
             dxSetShaderValue(whiteShader,"visionBrightness",1.05)
         else
@@ -57,8 +64,13 @@ end
 addEvent("kratom:reveal",true)
 addEventHandler("kratom:reveal",resourceRoot,function(targets)
     clearReveal()
-    if getElementData(localPlayer,"kratom:perk")~="green" or type(targets)~="table" then return end
+    local perk=getElementData(localPlayer,"kratom:perk")
+    if (perk~="green" and perk~="white") or type(targets)~="table" then return end
     if not isElement(greenShader) then greenShader=dxCreateShader("kratom_zombie.fx",0,0,true,"ped") end
+    if isElement(greenShader) then
+        if perk=="white" then dxSetShaderValue(greenShader,"zombieColor",1,0.05,0.1)
+        else dxSetShaderValue(greenShader,"zombieColor",0.05,1,0.1) end
+    end
     local untilTick=getTickCount()+3000
     for _,ped in ipairs(targets) do
         if isElement(ped) then
@@ -77,23 +89,28 @@ addEventHandler("onClientRender",root,function()
     end
     local now=getTickCount()
     for ped,data in pairs(revealed) do
-        if now>=data.expires or not isElement(ped) or isPedDead(ped) or getElementData(localPlayer,"kratom:perk")~="green"
+        if now>=data.expires or not isElement(ped) or isPedDead(ped) or (getElementData(localPlayer,"kratom:perk")~="green" and getElementData(localPlayer,"kratom:perk")~="white")
             or getElementInterior(ped)~=getElementInterior(localPlayer) or getElementDimension(ped)~=getElementDimension(localPlayer) then removeReveal(ped)
         elseif not data.shaded and isElementStreamedIn(ped) then
             local x,y,z=getElementPosition(ped)
             local sx,sy=getScreenFromWorldPosition(x,y,z+1.1)
-            if sx then dxDrawText("Z",sx-5,sy-16,sx+5,sy-5,tocolor(184,140,255,235),1,"default-bold","center","center") end
+            if sx then dxDrawText("Z",sx-5,sy-16,sx+5,sy-5,getElementData(localPlayer,"kratom:perk")=="white" and tocolor(255,40,50,235) or tocolor(80,255,110,235),1,"default-bold","center","center") end
         end
     end
 end,false,"high")
 
 addEventHandler("onClientPlayerDamage",localPlayer,function(_,_,bodypart,loss)
     if wasEventCancelled() or getElementData(localPlayer,"kratom:perk")~="purple" then return end
-    if bodypart~=9 and (not loss or loss<getElementHealth(localPlayer)) then return end
     cancelEvent()
-    if getTickCount()>=nextFatalReport then
-        nextFatalReport=getTickCount()+250
-        triggerServerEvent("kratom:fatalHit",resourceRoot)
+    if type(loss)=="number" and loss==loss and loss>0 and loss<math.huge then
+        local armor=getPedArmor(localPlayer)
+        if bodypart~=9 and armor>0 then
+            local drain=({soft=1,reinforced=0.5,hard=0.25})[getElementData(localPlayer,"booty:armorTier")] or 1
+            local absorbed=math.min(loss,armor/drain)
+            setPedArmor(localPlayer,math.max(0,armor-absorbed*drain))
+            loss=loss-absorbed
+        end
+        pendingDamage=math.min(1000,pendingDamage+loss)
     end
 end,false,"low")
 
@@ -110,8 +127,15 @@ addEventHandler("onClientPlayerHeliKilled",localPlayer,function()
 end)
 
 addEventHandler("onClientElementDataChange",localPlayer,function(key)
-    if key=="kratom:perk" then clearReveal() updateVision() end
+    if key=="kratom:perk" then pendingDamage=0 clearReveal() updateVision() end
 end)
+
+setTimer(function()
+    if pendingDamage>0 and getElementData(localPlayer,"kratom:perk")=="purple" then
+        triggerServerEvent("kratom:damageHit",resourceRoot,pendingDamage)
+    end
+    pendingDamage=0
+end,250,0)
 
 addEventHandler("onClientPreRender",root,function()
     if getElementData(localPlayer,"kratom:perk")~="white" or isPedDead(localPlayer) or isPedInVehicle(localPlayer)

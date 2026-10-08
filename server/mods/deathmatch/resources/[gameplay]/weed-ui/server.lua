@@ -714,6 +714,7 @@ addEventHandler("onPlayerDamage", root, function(attacker, weapon, bodypart, los
         return
     end
 
+    if isKratomProtected and isKratomProtected(source) then return end
     local damageMultiplier = 1
     local activePerk = getElementData(source, "weed.perk")
 

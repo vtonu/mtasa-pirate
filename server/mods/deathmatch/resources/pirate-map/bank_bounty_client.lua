@@ -1,5 +1,6 @@
 -- BOUNTY BANNER; OTHER MISSION PROMPTS STAY TEXT ONLY
 local panel=svgCreate(500,52,[[<svg xmlns="http://www.w3.org/2000/svg" width="500" height="52"><rect x="1" y="1" width="498" height="50" rx="5" fill="#131313" fill-opacity=".35" stroke="#7fffd4" stroke-opacity=".22"/></svg>]])
+local alertPanel=svgCreate(500,52,[[<svg xmlns="http://www.w3.org/2000/svg" width="500" height="52"><rect x="1" y="1" width="498" height="50" rx="5" fill="#dc4848" fill-opacity=".22" stroke="#ff7777" stroke-opacity=".3"/></svg>]])
 local claimed,claimUntil
 local completed,completeUntil
 local fullRobbery
@@ -44,9 +45,13 @@ addEventHandler("onClientRender",root,function()
     local left,top=w*0.78,h*0.23+starSize+math.max(8,h*0.008)
     if getPlayerWantedLevel(localPlayer)==0 then top=h*0.23+math.max(8,h*0.008) end
     if panel then dxDrawImage(left,top,width,height,panel) end
+    if alertPanel and type(own)=="table" and not (completed and getTickCount()<completeUntil) then
+        local pulse=18+math.floor((math.sin(getTickCount()/900)+1)*18)
+        dxDrawImage(left,top,width,height,alertPanel,0,0,0,tocolor(255,255,255,pulse))
+    end
     local inset=width*0.04
     local text="★ "..title.." ★ "..detail.." ★"
-    local scale=math.min(1,(width-inset-12)/dxGetTextWidth(text,1,"default-bold"))
-    dxDrawText(text,left+inset,top,left+width-8,top+height,
-        tocolor(127,255,212,235),scale,"default-bold","left","center")
+    local scale=math.min(1,(width-inset*2)/dxGetTextWidth(text,1,"default-bold"))
+    dxDrawText(text,left+inset,top,left+width-inset,top+height,
+        tocolor(127,255,212,235),scale,"default-bold","center","center")
 end)

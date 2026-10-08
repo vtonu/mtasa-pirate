@@ -114,7 +114,10 @@ function stuff( player, flag )
 		if newFlag and ( not isPedDead( player ) ) then
 			if ( getElementInterior (player) == 0 ) then --dont trigger on interiors
 				local playerHP = getElementHealth( player )
-				if ( playerHP > 10 ) then
+				local shop=getResourceFromName("weed-ui")
+                if shop and getResourceState(shop)=="running" and exports["weed-ui"]:isKratomProtected(player) then
+                    exports["weed-ui"]:drainKratomReserve(player,1)
+                elseif ( playerHP > 10 ) then
 					setElementHealth( player, playerHP - 1 )
 				else
 					local shop=getResourceFromName("weed-ui")
