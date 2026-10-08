@@ -1,0 +1,16 @@
+/server/mods/deathmatch/solace-mtaserver.conf
+/server/mods/deathmatch/acl.xml
+/server/mods/deathmatch/banlist.xml
+/server/mods/deathmatch/settings.xml
+/server/mods/deathmatch/resources/[[]gameplay]/discord-joinquit/config.lua
+
+# SERVER DATA
+/server/mods/deathmatch/**/logs/
+/server/mods/deathmatch/**/backups/
+/server/mods/deathmatch/**/*.log
+/server/mods/deathmatch/**/*.db
+/server/mods/deathmatch/**/*.db-*
+/server/mods/deathmatch/**/*.sqlite
+/server/mods/deathmatch/**/*.sqlite-*
+/server/mods/deathmatch/**/*.sqlite3
+/server/mods/deathmatch/**/*.sqlite3-*
