@@ -15,7 +15,7 @@ end
 local function nearShop(player)
     if not isElement(player) or isPedDead(player) or isPedInVehicle(player) then return false end
     local x,y,z=getElementPosition(player)
-    for _,id in ipairs({"specialShopWeedGarden","specialShopRedCounty","specialShopNorthLV","specialShopAngelPine","specialShopLSHospital"}) do
+    for _,id in ipairs({"specialShopWeedGarden","specialShopRedCounty","specialShopNorthLV","specialShopAngelPine","specialShopLSHospital","specialShopBlueberry"}) do
         local marker=getElementByID(id)
         if isElement(marker) and getElementData(marker,"specialShop:catalog")=="kratom"
             and getElementInterior(marker)==getElementInterior(player)

@@ -202,7 +202,7 @@ local function setupPed(teller,ped)
     setElementData(ped,"bank:requiresKill",teller.requiresKill)
     setElementData(ped,"bank:killable",false)
     setElementData(ped,"bank:robber",teller.session and teller.session.player or false)
-    setElementData(teller.marker,"bank:teller",ped)
+    if isElement(teller.marker) then setElementData(teller.marker,"bank:teller",ped) end
 end
 
 local function restorePed(teller)
@@ -219,7 +219,7 @@ local function restorePed(teller)
     setElementID(ped,s.id)
     setupPed(teller,ped)
     teller.deadUntil=nil
-    setElementData(teller.marker,"bank:dead",false)
+    if isElement(teller.marker) then setElementData(teller.marker,"bank:dead",false) end
     if teller.session then
         setElementData(ped,"bank:killable",teller.session.maxed==true)
         publish(teller.session)
@@ -251,7 +251,7 @@ addEventHandler("onResourceStart",resourceRoot,function()
         if isElement(ped) and isElement(marker) then
             local x,y,z=getElementPosition(ped)
             local _,_,rotation=getElementRotation(ped,"ZYX")
-            local teller={marker=marker,requiresKill=index==2,spawn={id=layout[1],model=getElementModel(ped),
+            local teller={marker=marker,markerID=layout[2],requiresKill=index==2,spawn={id=layout[1],model=getElementModel(ped),
                 x=x,y=y,z=z,rotation=rotation,interior=getElementInterior(ped),
                 dimension=getElementDimension(ped),health=getElementHealth(ped),armor=getPedArmor(ped)}}
             tellers[#tellers+1]=teller
@@ -296,7 +296,7 @@ addEventHandler("onPedWasted",root,function(_,killer)
         teller.deadUntil=now+resetDelay
         bank.cooldown=teller.deadUntil
     end
-    setElementData(teller.marker,"bank:dead",true)
+    if isElement(teller.marker) then setElementData(teller.marker,"bank:dead",true) end
 end)
 
 -- ONLY THE ROBBER'S FINAL HEADSHOT CAN FINISH THE OPEN COUNTER
@@ -318,7 +318,15 @@ setTimer(function()
     local now,players=getTickCount(),getElementsByType("player")
     if bank.safeOpened and not bank.session and now>=bank.cooldown then updateSafe(false) end
     for _,teller in ipairs(tellers) do
-        if teller.deadUntil and now>=teller.deadUntil then restorePed(teller) end
+        if not isElement(teller.marker) then
+            teller.marker=getElementByID(teller.markerID)
+            if isElement(teller.marker) then
+                setElementData(teller.marker,"bank:robberyMarker",true)
+                setElementData(teller.marker,"bank:teller",isElement(teller.ped) and teller.ped or false)
+                setElementData(teller.marker,"bank:dead",teller.deadUntil~=nil)
+            end
+        end
+        if isElement(teller.marker) and teller.deadUntil and now>=teller.deadUntil then restorePed(teller) end
         if isElement(teller.ped) and not isPedDead(teller.ped) and not teller.deadUntil then
             local threatened,visitor=false,false
             for _,player in ipairs(players) do
@@ -407,10 +415,10 @@ setTimer(function()
     local alarm=bank.session and bank.session.started==true or false
     if getElementData(resourceRoot,"bank:alarm")~=alarm then setElementData(resourceRoot,"bank:alarm",alarm) end
     for _,teller in ipairs(tellers) do
-        if getElementData(teller.marker,"bank:cooldown")~=remaining then
+        if isElement(teller.marker) and getElementData(teller.marker,"bank:cooldown")~=remaining then
             setElementData(teller.marker,"bank:cooldown",remaining)
         end
-        if getElementData(teller.marker,"bank:robber")~=robber then
+        if isElement(teller.marker) and getElementData(teller.marker,"bank:robber")~=robber then
             setElementData(teller.marker,"bank:robber",robber)
         end
     end

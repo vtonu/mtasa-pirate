@@ -2,7 +2,8 @@
 addEventHandler("onResourceStart", resourceRoot, function()
     for _, shop in ipairs({
         {"specialShopAngelPine", -2203.56470, -2312.25146, 30.61813},
-        {"specialShopLSHospital", 1181.31555, -1292.03101, 14.21022}
+        {"specialShopLSHospital", 1181.31555, -1292.03101, 14.21022},
+        {"specialShopBlueberry", 202.01428, -63.92336, 1.57812}
     }) do
         local marker = createMarker(shop[2], shop[3], shop[4] - 1,
             "cylinder", 0.8, 127, 255, 0, 180)
